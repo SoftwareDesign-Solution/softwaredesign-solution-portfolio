@@ -1,1 +1,48 @@
 @import "tailwindcss";
+
+
+@theme {
+  /* Primary — Buttons, Links, Fokus-Ringe, aktive Zustände (Termin-Auswahl-Radio), Preis-Summary-Kicker */
+  --color-primary-50:  #eff4f9;  /* helle Flächen-Hintergründe, z.B. ausgewählte Termin-Karte */
+  --color-primary-100: #dce8f2;  /* Badges/Chips auf hellem Grund */
+  --color-primary-200: #b9d1e4;  /* dezente Border-Akzente, Hover auf hellen Flächen */
+  --color-primary-300: #96bad7;  /* selten direkt genutzt, Zwischenstufe für Gradients */
+  --color-primary-400: #6ea0c7;  /* Icons/Akzente auf dunklem Grund */
+  --color-primary-500: #4484b7;  /* sekundäre Buttons, Links im Fließtext */
+  --color-primary-600: #2871ac;  /* Hover-Zustand für primary-700-Elemente */
+  --color-primary-700: #1565a5;  /* Hauptfarbe: primäre Buttons (Submit), aktive Border (Termin-Radio, Fokus-Ring) */
+  --color-primary-800: #11528a;  /* Hover/Active-State für primäre Buttons */
+  --color-primary-900: #0d406e;  /* Text auf hellem primary-Hintergrund, dunkle Akzente */
+  --color-primary-950: #093055;  /* sehr dunkle Flächen, z.B. dunkler Footer/Header-Bereich */
+
+  /* Neutrale Farben — Seiten-/Karten-Hintergründe, Text, Rahmen */
+  --color-surface: #f2f2f2;      /* Seiten-Hintergrund, Zusammenfassungs-Box (PriceSummary), Teilnehmer-Zeilen */
+  --color-foreground: #2b2b2b;   /* Haupt-Textfarbe, Überschriften, Modal-Titel */
+  --color-muted: #7a7a7a;        /* Sekundärtext, Hinweistexte, Platzhalter, Meta-Infos */
+  --color-border: #e5e5e5;       /* Karten-/Input-/Trennlinien-Rahmen (bisher hart "neutral-200") */
+  --color-border-strong: #d0d0d0;/* Fokus-Umrandungen, betonte Trennlinien */
+
+  /* Fehler / destruktive Aktionen — Formular-Validierung, Fehler-Modal, "Ausgebucht"-Status */
+  --color-error-50:  #fdecec;    /* Fehler-Banner-Hintergrund (z.B. Server-Fehler über dem Formular) */
+  --color-error-500: #e0473f;    /* Icons/Punkte (z.B. "Ausgebucht"-Indikator), Akzentfarbe */
+  --color-error-600: #c8362e;    /* Fehlertext unter Formularfeldern, Fehler-Kicker im ActionStatusModal */
+  --color-error-700: #a92920;    /* Hover auf destruktiven Buttons */
+
+  /* Erfolg / verfügbar — "Verfügbar"-Status, erfolgreiche Buchung/Anfrage, Rabatt-Anzeige */
+  --color-success-50:  #e9f6ee;  /* Erfolgs-Banner-Hintergrund */
+  --color-success-500: #2f9e5b;  /* Icons/Punkte (z.B. "Verfügbar"-Indikator) */
+  --color-success-600: #24824a;  /* Erfolgs-Kicker-Text im ActionStatusModal, Rabatt-Betrag in PriceSummary */
+  --color-success-700: #1b653a;  /* Hover-Zustand, falls Erfolgsfarbe auch für Buttons genutzt wird */
+
+  /* Warnung / Restplätze — termin_status = "restplaetze", knappe Verfügbarkeit */
+  --color-warning-50:  #faf1e0;  /* Termin-Zeilen-Hintergrund bei Restplätzen */
+  --color-warning-500: #c68a2e;  /* Icons/Punkte */
+  --color-warning-600: #9c6c1f;  /* Text auf hellem Grund (z.B. "Restplätze"-Label) */
+  --color-warning-700: #7d5619;  /* Hover-Zustand */
+}
+
+body {
+  width: 1440px;
+  max-width: 100%;
+  margin: 0 auto;
+}
