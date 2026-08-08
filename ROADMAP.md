@@ -95,7 +95,7 @@ feat: DesignSystemPage als früher Token-Showcase ergänzt
 - [x] `src/lib/db.ts` – Neon Postgres Verbindung (`@neondatabase/serverless`, `sql` Tagged Template zentral exportiert)
 - [x] Migration-Files in `database/migrations/` (Tabellen: `trainer`, `workshop`, `termin`, `buchung`, `angebotsanfrage`, `kontaktanfrage`, `workshop_benachrichtigung`; ENUM-Typen `termin_status`, `anrede`; `pgcrypto`-Extension für `gen_random_uuid()`)
 - [x] Seed-Files in `database/seeds/` für Testdaten
-- [ ] Types: `Workshop`, `Trainer`, `Termin` (Formular-bezogene Typen wie `BookingFormValues` folgen erst in Phase 6 per `z.infer` aus den Zod-Schemas)
+- [x] Types: `Workshop`, `Trainer`, `Termin` (Formular-bezogene Typen wie `BookingFormValues` folgen erst in Phase 6 per `z.infer` aus den Zod-Schemas)
 - [ ] Server Actions (eine Funktion pro Datei, `src/app/actions/`): `get-workshops.ts`, `get-workshop.ts` — nutzen `sql` aus `src/lib/db.ts` (noch keine Repository/Service-Trennung)
 - [ ] Utils: `format-date.ts`, `format-number.ts` (`src/utils/`)
 - [ ] `src/app/notifications/[id]/confirm/page.tsx` reserviert für Double-Opt-In-Bestätigung (Server Component, liest `?token=` aus `searchParams`, keine separate API-Route nötig)
