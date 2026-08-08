@@ -74,11 +74,11 @@ Jeder Schritt = ein bewusster Meilenstein → nach Fertigstellung committen & pu
   - nextjs-turnstile
   ```
 
-- [ ] `@/*` Path-Alias in `tsconfig.json`
-- [ ] Tailwind CSS Design-Tokens: eigene Farbpalette als Custom Colors in der Tailwind-Konfiguration hinterlegt
-- [ ] `DesignSystemPage` (`src/app/design-system/page.tsx`) als früher Token-Showcase (Farben, Typografie) – Orientierungshilfe, während die eigene Farbpalette noch nicht final feststeht
-- [ ] `.gitignore` geprüft (`node_modules/`, `.env*.local`, `.next/`)
-- [ ] `.env.example` mit Platzhaltern (Neon, Resend, Turnstile: `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`)
+- [x] `@/*` Path-Alias in `tsconfig.json`
+- [x] Tailwind CSS Design-Tokens: eigene Farbpalette als Custom Colors in der Tailwind-Konfiguration hinterlegt
+- [x] `DesignSystemPage` (`src/app/design-system/page.tsx`) als früher Token-Showcase (Farben, Typografie) – Orientierungshilfe, während die eigene Farbpalette noch nicht final feststeht
+- [x] `.gitignore` geprüft (`node_modules/`, `.env*.local`, `.next/`)
+- [x] `.env.example` mit Platzhaltern (Neon, Resend, Turnstile: `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`)
 
 **Commit:**
 
@@ -92,7 +92,7 @@ feat: DesignSystemPage als früher Token-Showcase ergänzt
 
 ## Phase 1 – Datenmodell & Server Actions (Reads)
 
-- [ ] `src/lib/db.ts` – Neon Postgres Verbindung (`@neondatabase/serverless`, `sql` Tagged Template zentral exportiert)
+- [x] `src/lib/db.ts` – Neon Postgres Verbindung (`@neondatabase/serverless`, `sql` Tagged Template zentral exportiert)
 - [ ] Migration-Files in `database/migrations/` (Tabellen: `trainer`, `workshop`, `termin`, `buchung`, `angebotsanfrage`, `kontaktanfrage`, `workshop_benachrichtigung`; ENUM-Typen `termin_status`, `anrede`; `pgcrypto`-Extension für `gen_random_uuid()`)
 - [ ] Seed-Files in `database/seeds/` für Testdaten
 - [ ] Types: `Workshop`, `Trainer`, `Termin` (Formular-bezogene Typen wie `BookingFormValues` folgen erst in Phase 6 per `z.infer` aus den Zod-Schemas)
