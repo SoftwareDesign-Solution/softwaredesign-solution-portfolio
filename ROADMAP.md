@@ -93,8 +93,8 @@ feat: DesignSystemPage als früher Token-Showcase ergänzt
 ## Phase 1 – Datenmodell & Server Actions (Reads)
 
 - [x] `src/lib/db.ts` – Neon Postgres Verbindung (`@neondatabase/serverless`, `sql` Tagged Template zentral exportiert)
-- [ ] Migration-Files in `database/migrations/` (Tabellen: `trainer`, `workshop`, `termin`, `buchung`, `angebotsanfrage`, `kontaktanfrage`, `workshop_benachrichtigung`; ENUM-Typen `termin_status`, `anrede`; `pgcrypto`-Extension für `gen_random_uuid()`)
-- [ ] Seed-Files in `database/seeds/` für Testdaten
+- [x] Migration-Files in `database/migrations/` (Tabellen: `trainer`, `workshop`, `termin`, `buchung`, `angebotsanfrage`, `kontaktanfrage`, `workshop_benachrichtigung`; ENUM-Typen `termin_status`, `anrede`; `pgcrypto`-Extension für `gen_random_uuid()`)
+- [x] Seed-Files in `database/seeds/` für Testdaten
 - [ ] Types: `Workshop`, `Trainer`, `Termin` (Formular-bezogene Typen wie `BookingFormValues` folgen erst in Phase 6 per `z.infer` aus den Zod-Schemas)
 - [ ] Server Actions (eine Funktion pro Datei, `src/app/actions/`): `get-workshops.ts`, `get-workshop.ts` — nutzen `sql` aus `src/lib/db.ts` (noch keine Repository/Service-Trennung)
 - [ ] Utils: `format-date.ts`, `format-number.ts` (`src/utils/`)
