@@ -58,7 +58,7 @@ Jeder Schritt = ein bewusster Meilenstein → nach Fertigstellung committen & pu
 │   ├── types/
 │   └── utils/
 │       ├── format-date.ts
-│       ├── format-number.ts
+│       ├── format-price.ts
 │       └── format-termin-status.ts
 ├── .env.example
 └── package.json
@@ -97,7 +97,7 @@ feat: DesignSystemPage als früher Token-Showcase ergänzt
 - [x] Seed-Files in `database/seeds/` für Testdaten
 - [x] Types: `Workshop`, `Trainer`, `Termin` (Formular-bezogene Typen wie `BookingFormValues` folgen erst in Phase 6 per `z.infer` aus den Zod-Schemas)
 - [x] Server Actions (eine Funktion pro Datei, `src/app/actions/`): `get-workshops.ts`, `get-workshop.ts` — nutzen `sql` aus `src/lib/db.ts` (noch keine Repository/Service-Trennung)
-- [ ] Utils: `format-date.ts`, `format-number.ts` (`src/utils/`)
+- [x] Utils: `format-date.ts`, `format-price.ts` (`src/utils/`)
 - [ ] `src/app/notifications/[id]/confirm/page.tsx` reserviert für Double-Opt-In-Bestätigung (Server Component, liest `?token=` aus `searchParams`, keine separate API-Route nötig)
 
 **Commits:**
@@ -108,7 +108,7 @@ feat: Neon Postgres migration- und seed-files für trainer/workshop/termin/buchu
 feat: Workshop-, Trainer- und Termin-Types ergänzt
 feat: get-workshops.ts Server Action ergänzt
 feat: get-workshop.ts Server Action ergänzt
-feat: format-date und format-number Utilities ergänzt
+feat: format-date und format-price Utilities ergänzt
 ```
 
 ---
@@ -400,7 +400,7 @@ feat: Seed-Datei vuejs-advanced.sql ergänzt
 **Ergänzende Unit-Tests:**
 
 - [ ] Zod-Schemas (Validierungs-Grenzfälle je Formular)
-- [ ] `format-date.ts`, `format-number.ts`, `format-termin-status.ts`
+- [ ] `format-date.ts`, `format-price.ts`, `format-termin-status.ts`
 - [ ] Preisberechnung (`Preis × Teilnehmerzahl`)
 
 **Commits:**
@@ -417,7 +417,7 @@ test: E2E-Test Notification-Signup inkl. Double-Opt-In
 test: E2E-Test ActionStatusModal
 test: E2E-Test Rechtsseiten
 test: Unit-Tests für Zod-Schemas
-test: Unit-Tests für format-date, format-number, format-termin-status
+test: Unit-Tests für format-date, format-price, format-termin-status
 test: Unit-Test für Preisberechnung
 ```
 
@@ -538,7 +538,7 @@ feat: Stories für WorkshopCard
 | 2026-07-31 | 1.0 | *Manuel Kübler* | Erstversion der Roadmap auf Basis der bestehenden README: Grundgerüst Phasen 0–9 (Setup, Datenmodell, Layout, Workshop-Übersicht, Modal-Basis, Formulare, E-Mail-Versand, Referenzen, Deployment) |
 | 2026-08-01 | 1.1 | *Manuel Kübler* | Fehlende Seiten ergänzt: Impressum/Datenschutz/AGB, Startseite, WorkshopList/WorkshopCard, Header/Footer, WorkshopDetailPage mit WorkshopDetails/WorkshopSidebar, Modal-Basis vor den Formularen vorgezogen |
 | 2026-08-02 | 1.2 | *Manuel Kübler* | `src/`-Verzeichnisstruktur korrigiert (Migrations/Seeds in `database/` statt `src/`) |
-| 2026-08-02 | 1.3 | *Manuel Kübler* | `utils/` von `services/` abgegrenzt (`format-date.ts`, `format-number.ts`) |
+| 2026-08-02 | 1.3 | *Manuel Kübler* | `utils/` von `services/` abgegrenzt (`format-date.ts`, `format-price.ts`) |
 | 2026-08-02 | 1.4 | *Manuel Kübler* | Server Actions auf One-Function-per-File umgestellt; Double-Opt-In-Bestätigung als separate Route reserviert |
 | 2026-08-02 | 1.5 | *Manuel Kübler* | Workshop-Verwaltung direkt in Neon geklärt (keine Create/Update/Delete-Actions); Booking, Quote-Request, Notification-Signup als DB-Schreibpfade festgelegt |
 | 2026-08-02 | 1.6 | *Manuel Kübler* | Repository/Service-Trennung zu Projektbeginn bewusst weggelassen; Phase 7.5 als späterer Refactoring-Schritt ergänzt |
