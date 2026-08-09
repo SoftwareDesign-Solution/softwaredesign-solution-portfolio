@@ -125,6 +125,7 @@ feat: format-date und format-price Utilities ergänzt
 - [x] `Footer` Komponente unter `src/app/_components/` (inkl. Links zu Impressum, Datenschutz, AGB)
 - [x] Root Layout (`src/app/layout.tsx`) mit Header/Footer eingebunden
 - [x] Startseite (`src/app/page.tsx`) in Sections unterteilt, jede Section eine eigene Komponente unter `src/app/_components/sections/` (nur für die Startseite relevant, daher lokal statt in `src/components/`; eigenes Unterverzeichnis zur Abgrenzung von Header/Footer/Navigation)
+- [x] `BackToTopButton` Komponente unter `src/app/_components/` (global sichtbar, im Root Layout eingebunden)
 
 **Commits:**
 
@@ -134,6 +135,7 @@ feat: HamburgerButton- und MobileMenu-Komponente für mobile Navigation
 feat: Footer-Komponente mit Rechtstext-Links
 feat: Root Layout mit Header/Footer verknüpft
 feat: Startseiten-Sections als Komponenten unter src/app/_components/sections angelegt
+feat: BackToTopButton-Komponente ergänzt
 ```
 
 ---
