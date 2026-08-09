@@ -25,7 +25,8 @@ Jeder Schritt = ein bewusster Meilenstein → nach Fertigstellung committen & pu
 │           └── ... (weitere Workshops)
 ├── src/
 │   ├── app/
-│   │   ├── _components/            # Header, Footer, DesktopNavbar, MobileMenu, HamburgerButton + Startseiten-Sections (nur Root-Ebene: layout.tsx & page.tsx)
+│   │   ├── _components/            # Header, Footer, DesktopNavbar, MobileMenu, HamburgerButton
+│   │   │   └── sections/            # Startseiten-Sections, inkl. WorkshopList, WorkshopCard
 │   │   ├── actions/                 # Server Actions, eine Funktion pro Datei
 │   │   ├── notifications/
 │   │   │   └── [id]/
@@ -122,8 +123,8 @@ feat: format-date und format-price Utilities ergänzt
 - [x] `HamburgerButton` Komponente unter `src/app/_components/` (Toggle für `MobileMenu`)
 - [x] `MobileMenu` Komponente unter `src/app/_components/` (mobile Navigation, nutzt `HamburgerButton`)
 - [x] `Footer` Komponente unter `src/app/_components/` (inkl. Links zu Impressum, Datenschutz, AGB)
-- [ ] Root Layout (`src/app/layout.tsx`) mit Header/Footer eingebunden
-- [ ] Startseite (`src/app/page.tsx`) in Sections unterteilt, jede Section eine eigene Komponente unter `src/app/_components/` (nur für die Startseite relevant, daher lokal statt in `src/components/`)
+- [x] Root Layout (`src/app/layout.tsx`) mit Header/Footer eingebunden
+- [x] Startseite (`src/app/page.tsx`) in Sections unterteilt, jede Section eine eigene Komponente unter `src/app/_components/sections/` (nur für die Startseite relevant, daher lokal statt in `src/components/`; eigenes Unterverzeichnis zur Abgrenzung von Header/Footer/Navigation)
 
 **Commits:**
 
@@ -132,7 +133,7 @@ feat: Header- und DesktopNavbar-Komponente mit Hauptnavigation
 feat: HamburgerButton- und MobileMenu-Komponente für mobile Navigation
 feat: Footer-Komponente mit Rechtstext-Links
 feat: Root Layout mit Header/Footer verknüpft
-feat: Startseiten-Sections als Komponenten unter src/app/_components angelegt
+feat: Startseiten-Sections als Komponenten unter src/app/_components/sections angelegt
 ```
 
 ---
@@ -156,8 +157,8 @@ docs: Impressum-, Datenschutz- und AGB-Seiten hinzugefügt
 
 *(Workshops selbst werden nicht über die App verwaltet, sondern direkt in Neon gepflegt – hier geht es nur um Lesen & Anzeigen.)*
 
-- [ ] `WorkshopCard` Komponente unter `src/app/_components/` (einzelne Workshop-Kachel, aktuell nur auf Startseite verwendet)
-- [ ] `WorkshopList` Komponente unter `src/app/_components/` (Server Component, rendert Cards, aktuell nur auf Startseite verwendet)
+- [ ] `WorkshopCard` Komponente unter `src/app/_components/sections` (einzelne Workshop-Kachel, aktuell nur auf Startseite verwendet)
+- [ ] `WorkshopList` Komponente unter `src/app/_components/sections` (Server Component, rendert Cards, aktuell nur auf Startseite verwendet)
 - [ ] Einbindung von `WorkshopList` auf der Startseite
 - [ ] `WorkshopDetailPage` (`src/app/workshops/[slug]/page.tsx`, `params` async awaiten)
 - [ ] `WorkshopDetails` Komponente unter `src/app/workshops/[slug]/_components/` (Haupt-Content der Detailseite, nur dort verwendet)
@@ -567,6 +568,8 @@ feat: Stories für WorkshopCard
 | 2026-08-08 | 2.1 | *Manuel Kübler* | Versionierungsschema (Major.Minor) für diese Änderungshistorie definiert |
 | 2026-08-08 | 2.2 | *Manuel Kübler* | Conventional-Commits-Typen `test` und `style` ergänzt; Phase-11-Test-Commits von `feat` auf `test` umgestellt |
 | 2026-08-08 | 2.3 | *Manuel Kübler* | `style` als reine Code-Formatierung präzisiert (nicht CSS/Tailwind); Klassifizierung für visuelle Änderungen (`feat`/`fix`/`refactor`) ergänzt |
+| 2026-08-08 | 2.4 | *Manuel Kübler* | Startseiten-Sections in eigenes `src/app/_components/sections/`-Unterverzeichnis verschoben |
+| 2026-08-08 | 2.5 | *Manuel Kübler* | `WorkshopList`/`WorkshopCard` konsequent ebenfalls nach `_components/sections/` verschoben, da `WorkshopList` selbst eine Startseiten-Section ist |
 
 **Versionierung – Major.Minor (kein SemVer-Patch-Level, da kein "Breaking Change"-Konzept für eine Roadmap sinnvoll ist):**
 

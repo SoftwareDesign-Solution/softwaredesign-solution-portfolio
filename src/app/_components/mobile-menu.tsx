@@ -50,7 +50,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
 
                         {/* Kontakt */}
                         <Link 
-                            href="/anfrage" 
+                            href="/#kontakt" 
                             className="dt-nav-link inline-block cursor-pointer text-foreground no-underline transition-colors duration-150 hover:text-gray-600 hover:text-bold"
                             onClick={onClose}
                         >

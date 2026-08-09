@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Footer from "./_components/footer";
 import Header from "./_components/header";
+import { BackToTopButton } from "./_components/back-to-top-button";
 
 
 export const metadata: Metadata = {

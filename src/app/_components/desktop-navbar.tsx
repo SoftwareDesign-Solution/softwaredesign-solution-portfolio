@@ -15,12 +15,12 @@ export default function DesktopNavbar() {
             </Link>
 
             {/* Workshops */}
-            <Link href="/workshops" className="dt-nav-link inline-block cursor-pointer text-foreground no-underline transition-colors duration-150 hover:text-gray-600 hover:text-bold">
+            <Link href="/#workshops" className="dt-nav-link inline-block cursor-pointer text-foreground no-underline transition-colors duration-150 hover:text-gray-600 hover:text-bold">
                 Workshops
             </Link>
 
             {/* Kontakt */}
-            <Link href="/anfrage" className="dt-nav-link inline-block cursor-pointer text-foreground no-underline transition-colors duration-150 hover:text-gray-600 hover:text-bold">
+            <Link href="/#kontakt" className="dt-nav-link inline-block cursor-pointer text-foreground no-underline transition-colors duration-150 hover:text-gray-600 hover:text-bold">
                 Kontakt
             </Link>
 
