@@ -117,8 +117,8 @@ feat: format-date und format-price Utilities ergänzt
 
 *(Header, Footer und Navigation werden nur im Root Layout verwendet – analog zu den Startseiten-Sections daher lokal unter `src/app/_components/`, nicht in `src/components/`. Ausnahme: falls einzelne Bausteine wie `HamburgerButton` später auch anderswo gebraucht werden, wandern sie nach `src/components/`.)*
 
-- [ ] `Header` Komponente unter `src/app/_components/` (bindet `DesktopNavbar` ein)
-- [ ] `DesktopNavbar` Komponente unter `src/app/_components/` (Navigation: Über mich, Schwerpunkte, Leistungen, Workshops, Kontakt)
+- [x] `Header` Komponente unter `src/app/_components/` (bindet `DesktopNavbar` ein)
+- [x] `DesktopNavbar` Komponente unter `src/app/_components/` (Navigation: Über mich, Schwerpunkte, Leistungen, Workshops, Kontakt)
 - [ ] `HamburgerButton` Komponente unter `src/app/_components/` (Toggle für `MobileMenu`)
 - [ ] `MobileMenu` Komponente unter `src/app/_components/` (mobile Navigation, nutzt `HamburgerButton`)
 - [ ] `Footer` Komponente unter `src/app/_components/` (inkl. Links zu Impressum, Datenschutz, AGB)
