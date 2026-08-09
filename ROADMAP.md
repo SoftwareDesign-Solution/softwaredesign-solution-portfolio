@@ -119,9 +119,9 @@ feat: format-date und format-price Utilities ergänzt
 
 - [x] `Header` Komponente unter `src/app/_components/` (bindet `DesktopNavbar` ein)
 - [x] `DesktopNavbar` Komponente unter `src/app/_components/` (Navigation: Über mich, Schwerpunkte, Leistungen, Workshops, Kontakt)
-- [ ] `HamburgerButton` Komponente unter `src/app/_components/` (Toggle für `MobileMenu`)
-- [ ] `MobileMenu` Komponente unter `src/app/_components/` (mobile Navigation, nutzt `HamburgerButton`)
-- [ ] `Footer` Komponente unter `src/app/_components/` (inkl. Links zu Impressum, Datenschutz, AGB)
+- [x] `HamburgerButton` Komponente unter `src/app/_components/` (Toggle für `MobileMenu`)
+- [x] `MobileMenu` Komponente unter `src/app/_components/` (mobile Navigation, nutzt `HamburgerButton`)
+- [x] `Footer` Komponente unter `src/app/_components/` (inkl. Links zu Impressum, Datenschutz, AGB)
 - [ ] Root Layout (`src/app/layout.tsx`) mit Header/Footer eingebunden
 - [ ] Startseite (`src/app/page.tsx`) in Sections unterteilt, jede Section eine eigene Komponente unter `src/app/_components/` (nur für die Startseite relevant, daher lokal statt in `src/components/`)
 
