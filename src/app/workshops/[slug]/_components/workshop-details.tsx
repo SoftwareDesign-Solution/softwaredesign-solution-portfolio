@@ -60,22 +60,30 @@ export default function WorkshopDetails(workshop: Workshop) {
                     <div className="bg-surface rounded-lg p-5">
                         <h3 className="text-lg font-bold mb-4 text-foreground">Zielgruppe</h3>
                         <ul className="m-0 p-0 list-none">
-                            <li className="flex gap-2 text-sm p-0 pt-2 pb-2 text-foreground">
-                                <span className="text-sm font-bold text-success-600">✓</span>
-                                Softwareentwickler:innen
-                            </li>
+
+                            {workshop.zielgruppe!.map((ziel, index) => (
+                                <li key={index} className="flex gap-2 text-sm p-0 pt-2 pb-2 text-foreground">
+                                    <span className="text-sm font-bold text-success-600">✓</span>
+                                    {ziel}
+                                </li>
+                            ))}
+
                         </ul>
                     </div>
 
                     <div className="bg-surface rounded-lg p-5">
                         <h3 className="text-lg font-bold mb-4 text-foreground">Voraussetzungen</h3>
                         <ul className="m-0 p-0 list-none">
-                            <li className="flex gap-2 text-sm p-0 pt-2 pb-2 text-foreground">
-                                <span className="text-sm font-bold text-success-600">✓</span>
-                                Sicher in einer beliebigen Programmiersprache
-                            </li>
-                    </ul>
-                </div>
+                            
+                            {workshop.voraussetzungen!.map((voraussetzung, index) => (
+                                <li key={index} className="flex gap-2 text-sm p-0 pt-2 pb-2 text-foreground">
+                                    <span className="text-sm font-bold text-success-600">✓</span>
+                                    {voraussetzung}
+                                </li>
+                            ))}
+                            
+                        </ul>
+                    </div>
                 </div>
 
             </section>
