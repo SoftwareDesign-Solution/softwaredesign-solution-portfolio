@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getWorkshop } from "@/app/actions/get-workshop";
 import WorkshopHeader from "./_components/workshop-header";
 import WorkshopDetails from "./_components/workshop-details";
+import WorkshopSidebar from "./_components/workshop-sidebar";
 
 interface WorkshopDetailsPageProps {
     params: Promise<{
@@ -31,6 +32,9 @@ export default async function WorkshopDetailsPage({ params }: WorkshopDetailsPag
 
                     {/* Workshop Details */}
                     <WorkshopDetails {...workshop} />
+
+                    {/* Workshop Sidebar */}
+                    <WorkshopSidebar {...workshop} />
 
                 </div>
                 
