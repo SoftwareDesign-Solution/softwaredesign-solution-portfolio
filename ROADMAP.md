@@ -142,15 +142,17 @@ feat: BackToTopButton-Komponente ergänzt
 
 ## Phase 3 – Rechtliches
 
-- [ ] `src/app/impressum/page.tsx`
+- [x] `src/app/impressum/page.tsx`
 - [ ] `src/app/datenschutz/page.tsx`
 - [ ] `src/app/agb/page.tsx`
-- [ ] Verlinkung im Footer / Contact-Block
+- [x] Verlinkung im Footer / Contact-Block
 
 **Commit:**
 
 ```text
-docs: Impressum-, Datenschutz- und AGB-Seiten hinzugefügt
+docs: Impressum-Seite hinzugefügt
+docs: Datenschutz-Seite hinzugefügt
+docs: AGB-Seite hinzugefügt
 ```
 
 ---
@@ -572,6 +574,7 @@ feat: Stories für WorkshopCard
 | 2026-08-08 | 2.3 | *Manuel Kübler* | `style` als reine Code-Formatierung präzisiert (nicht CSS/Tailwind); Klassifizierung für visuelle Änderungen (`feat`/`fix`/`refactor`) ergänzt |
 | 2026-08-08 | 2.4 | *Manuel Kübler* | Startseiten-Sections in eigenes `src/app/_components/sections/`-Unterverzeichnis verschoben |
 | 2026-08-08 | 2.5 | *Manuel Kübler* | `WorkshopList`/`WorkshopCard` konsequent ebenfalls nach `_components/sections/` verschoben, da `WorkshopList` selbst eine Startseiten-Section ist |
+| 2026-08-09 | 2.6 | *Manuel Kübler* | `BackToTopButton`-Komponente in Phase 2 ergänzt (`src/app/_components/`, global im Root Layout) |
 
 **Versionierung – Major.Minor (kein SemVer-Patch-Level, da kein "Breaking Change"-Konzept für eine Roadmap sinnvoll ist):**
 
