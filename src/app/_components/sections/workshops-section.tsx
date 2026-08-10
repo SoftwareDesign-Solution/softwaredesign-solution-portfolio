@@ -1,5 +1,6 @@
 import Link from "next/link";
 import SectionHeader from "../section-header";
+import WorkshopList from "./workshop-list";
 
 export default function WorkshopsSection() {
     return (
@@ -16,7 +17,7 @@ export default function WorkshopsSection() {
                     Wissen, Praxisbezug, Remote
             </SectionHeader>
 
-            <span>Platzhalter für die Workshop-Liste. Die Workshops werden in der WorkshopList-Komponente angezeigt.</span>
+            <WorkshopList />
             
         </section>
     )
