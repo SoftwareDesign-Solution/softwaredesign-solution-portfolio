@@ -1,5 +1,6 @@
 import { Agenda } from "./agenda";
 import { Termin } from "./termin";
+import { Trainer } from "./trainer";
 
 export type Workshop = {
     id: string;
@@ -12,6 +13,7 @@ export type Workshop = {
     sprache?: string;
     preis?: number;
     trainer_id?: string;
+    trainer?: Trainer;
     zielgruppe?: string[];
     voraussetzungen?: string[];
     lernziele?: string[];
