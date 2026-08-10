@@ -178,8 +178,8 @@ feat: Error Boundary (error.tsx, global-error.tsx) ergänzt
 - [x] `WorkshopDetailPage` (`src/app/workshops/[slug]/page.tsx`, `params` async awaiten)
 - [x] `WorkshopHeader` Komponente unter `src/app/workshops/[slug]/_components/` (Header der Detailseite, nur dort verwendet)
 - [x] `WorkshopDetails` Komponente unter `src/app/workshops/[slug]/_components/` (Haupt-Content der Detailseite, nur dort verwendet)
-- [ ] `WorkshopSidebar` Komponente unter `src/app/workshops/[slug]/_components/` (z. B. Booking-CTA, Termine, Trainer-Info, nur dort verwendet)
-- [ ] `format-termin-status.ts` unter `src/utils/` — vier Status:
+- [x] `WorkshopSidebar` Komponente unter `src/app/workshops/[slug]/_components/` (z. B. Booking-CTA, Termine, Trainer-Info, nur dort verwendet)
+- [x] `format-termin-status.ts` unter `src/utils/` — vier Status:
   
   | Status | Label | Hinweis |
   | --- | --- | --- |
