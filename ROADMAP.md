@@ -146,6 +146,12 @@ feat: BackToTopButton-Komponente ergänzt
 - [x] `src/app/datenschutz/page.tsx`
 - [x] `src/app/agb/page.tsx`
 - [x] Verlinkung im Footer / Contact-Block
+- [x] `src/app/not-found.tsx` – generische 404-Seite (falsche/kaputte URLs)
+- [x] `src/app/workshops/[slug]/not-found.tsx` – Workshop nicht gefunden, greift z. B. bei
+      `notFound()` in `WorkshopDetailPage`; lädt gezielt zur Themen-Anfrage über `/anfrage` ein
+      statt der generischen 404-Meldung
+- [x] `src/app/error.tsx` – Error Boundary für Laufzeitfehler (Client Component)
+- [x] `src/app/global-error.tsx` – Root-Error-Boundary (fängt Fehler im Root Layout selbst ab)
 
 **Commit:**
 
@@ -153,6 +159,9 @@ feat: BackToTopButton-Komponente ergänzt
 docs: Impressum-Seite hinzugefügt
 docs: Datenschutz-Seite hinzugefügt
 docs: AGB-Seite hinzugefügt
+feat: 404-Seite (not-found.tsx) ergänzt
+feat: add workshop-specific not-found page
+feat: Error Boundary (error.tsx, global-error.tsx) ergänzt
 ```
 
 ---
@@ -575,6 +584,7 @@ feat: Stories für WorkshopCard
 | 2026-08-08 | 2.4 | *Manuel Kübler* | Startseiten-Sections in eigenes `src/app/_components/sections/`-Unterverzeichnis verschoben |
 | 2026-08-08 | 2.5 | *Manuel Kübler* | `WorkshopList`/`WorkshopCard` konsequent ebenfalls nach `_components/sections/` verschoben, da `WorkshopList` selbst eine Startseiten-Section ist |
 | 2026-08-09 | 2.6 | *Manuel Kübler* | `BackToTopButton`-Komponente in Phase 2 ergänzt (`src/app/_components/`, global im Root Layout) |
+| 2026-08-09 | 2.7 | *Manuel Kübler* | Phase 3 um Error-Pages erweitert (`not-found.tsx`, `error.tsx`, `global-error.tsx`), Phase umbenannt in „Rechtliches & Error-Pages" |
 
 **Versionierung – Major.Minor (kein SemVer-Patch-Level, da kein "Breaking Change"-Konzept für eine Roadmap sinnvoll ist):**
 

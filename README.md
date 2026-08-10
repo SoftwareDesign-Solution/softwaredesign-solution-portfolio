@@ -86,6 +86,9 @@ Neben der Präsentation meiner Dienstleistungen und Referenzen dient die Plattfo
     │   │       └── _components/   # WorkshopDetails, WorkshopSidebar
     │   ├── globals.css
     │   ├── layout.tsx
+    │   ├── not-found.tsx           # 404-Seite
+    │   ├── error.tsx               # Error Boundary
+    │   ├── global-error.tsx        # Root-Error-Boundary
     │   └── page.tsx
     ├── components/
     │   ├── modals/                 # Modal, ActionStatusModal, *Modal-Wrapper
