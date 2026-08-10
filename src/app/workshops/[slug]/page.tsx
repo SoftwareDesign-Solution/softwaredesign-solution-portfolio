@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getWorkshop } from "@/app/actions/get-workshop";
+import WorkshopHeader from "./_components/workshop-header";
 
 interface WorkshopDetailsPageProps {
     params: Promise<{
@@ -22,7 +23,8 @@ export default async function WorkshopDetailsPage({ params }: WorkshopDetailsPag
         return (
             <article>
                 
-                <pre className="text-xs text-muted mb-5">{JSON.stringify(workshop, null, 2)}</pre>
+                {/* Workshop Header */}
+                <WorkshopHeader {...workshop} />
                 
             </article>
         );
