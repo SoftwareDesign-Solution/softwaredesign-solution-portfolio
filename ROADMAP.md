@@ -143,8 +143,8 @@ feat: BackToTopButton-Komponente ergänzt
 ## Phase 3 – Rechtliches
 
 - [x] `src/app/impressum/page.tsx`
-- [ ] `src/app/datenschutz/page.tsx`
-- [ ] `src/app/agb/page.tsx`
+- [x] `src/app/datenschutz/page.tsx`
+- [x] `src/app/agb/page.tsx`
 - [x] Verlinkung im Footer / Contact-Block
 
 **Commit:**
