@@ -1,3 +1,4 @@
+import TerminRow from "@/components/termin-row";
 import { Termin } from "@/types/termin";
 import { Workshop } from "@/types/workshop";
 import { formatDateRange } from "@/utils/format-date-range";
@@ -78,15 +79,7 @@ export default function WorkshopCard({ workshop, index, counter }: WorkshopCardP
                     
                     {visibleTermine.length > 0 ? (
                         visibleTermine.map((termin) => (
-                            <div
-                                key={termin.id}
-                                className="flex justify-between items-center text-xs py-2.5 px-3 bg-surface rounded-md"
-                            >
-                                <span className="text-xs font-normal text-foreground">
-                                    {formatDateRange(termin.datumVon, termin.datumBis)}
-                                </span>
-                                <span className="text-xs font-medium text-muted">{termin.status}</span>
-                            </div>
+                            <TerminRow key={termin.id} termin={termin} />
                         ))
                     ) : (
                         <div className="flex justify-between items-center py-2 px-3 bg-surface rounded-md">

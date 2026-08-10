@@ -1,6 +1,7 @@
 import { Workshop } from "@/types/workshop";
 import { formatPrice } from "@/utils/format-price";
 import ActionButton from "./action-button";
+import TerminRow from "@/components/termin-row";
 
 
 export default function WorkshopSidebar(workshop: Workshop) {
@@ -28,6 +29,19 @@ export default function WorkshopSidebar(workshop: Workshop) {
             </div>
 
             {/* Termine Liste */}
+            <div className="flex flex-col gap-2 mb-5">
+
+                {workshop.termine && workshop.termine.length > 0 ? (
+                    workshop.termine.map((termin, index) => (
+                        <TerminRow key={index} termin={termin} />
+                    ))
+                ) : (
+                    <div className="text-[13px] text-muted py-2.5 px-3 bg-surface rounded-md">
+                        Aktuell keine Termine geplant.
+                    </div>
+                )}
+
+            </div>
 
             {/* Platz reservieren */}
             <ActionButton variant="solid">

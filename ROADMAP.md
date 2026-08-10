@@ -190,6 +190,8 @@ feat: Error Boundary (error.tsx, global-error.tsx) ergänzt
 
   wiederverwendbar, u. a. in Phase 6 im Booking-Formular für die Termin-Auswahl (`DateStep`)
 
+- [x] `TerminRow` Komponente zur zentralen Darstellung von Terminen in `src/app/_components/workshop-card.tsx` & `src/app/workshops/[slug]/_components/workshop-sidebar.tsx` eingebunden
+
 **Commits:**
 
 ```text
@@ -201,6 +203,7 @@ feat: WorkshopHeader-Komponente
 feat: WorkshopDetails-Komponente
 feat: WorkshopSidebar-Komponente
 feat: format-termin-status.ts Utility ergänzt
+feat: TerminRow auf Design-System-Farben umgestellt
 ```
 
 ---
