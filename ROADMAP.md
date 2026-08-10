@@ -60,7 +60,8 @@ Jeder Schritt = ein bewusster Meilenstein → nach Fertigstellung committen & pu
 │   └── utils/
 │       ├── format-date.ts
 │       ├── format-price.ts
-│       └── format-termin-status.ts
+│       ├── format-termin-status.ts
+│       └── format-date-range.ts
 ├── .env.example
 └── package.json
 ```
@@ -170,10 +171,12 @@ feat: Error Boundary (error.tsx, global-error.tsx) ergänzt
 
 *(Workshops selbst werden nicht über die App verwaltet, sondern direkt in Neon gepflegt – hier geht es nur um Lesen & Anzeigen.)*
 
-- [ ] `WorkshopCard` Komponente unter `src/app/_components/sections` (einzelne Workshop-Kachel, aktuell nur auf Startseite verwendet)
-- [ ] `WorkshopList` Komponente unter `src/app/_components/sections` (Server Component, rendert Cards, aktuell nur auf Startseite verwendet)
-- [ ] Einbindung von `WorkshopList` auf der Startseite
-- [ ] `WorkshopDetailPage` (`src/app/workshops/[slug]/page.tsx`, `params` async awaiten)
+- [x] `format-date-range.ts` unter `src/utils/` (formatiert einen Datumsbereich, z. B. für `WorkshopCard` – Anzeige des Termin-Zeitraums)
+- [x] `WorkshopCard` Komponente unter `src/app/_components/sections` (einzelne Workshop-Kachel, aktuell nur auf Startseite verwendet)
+- [x] `WorkshopList` Komponente unter `src/app/_components/sections` (Server Component, rendert Cards, aktuell nur auf Startseite verwendet)
+- [x] Einbindung von `WorkshopList` auf der Startseite
+- [x] `WorkshopDetailPage` (`src/app/workshops/[slug]/page.tsx`, `params` async awaiten)
+- [ ] `WorkshopHeader` Komponente unter `src/app/workshops/[slug]/_components/` (Header der Detailseite, nur dort verwendet)
 - [ ] `WorkshopDetails` Komponente unter `src/app/workshops/[slug]/_components/` (Haupt-Content der Detailseite, nur dort verwendet)
 - [ ] `WorkshopSidebar` Komponente unter `src/app/workshops/[slug]/_components/` (z. B. Booking-CTA, Termine, Trainer-Info, nur dort verwendet)
 - [ ] `format-termin-status.ts` unter `src/utils/` — vier Status:
@@ -190,9 +193,11 @@ feat: Error Boundary (error.tsx, global-error.tsx) ergänzt
 **Commits:**
 
 ```text
+feat: formatDateRange Utility für WorkshopCard ergänzt
 feat: WorkshopCard-Komponente
 feat: WorkshopList als Server Component, Einbindung auf Startseite
 feat: WorkshopDetailPage mit async params
+feat: WorkshopHeader-Komponente
 feat: WorkshopDetails-Komponente
 feat: WorkshopSidebar-Komponente
 feat: format-termin-status.ts Utility ergänzt
@@ -585,6 +590,7 @@ feat: Stories für WorkshopCard
 | 2026-08-08 | 2.5 | *Manuel Kübler* | `WorkshopList`/`WorkshopCard` konsequent ebenfalls nach `_components/sections/` verschoben, da `WorkshopList` selbst eine Startseiten-Section ist |
 | 2026-08-09 | 2.6 | *Manuel Kübler* | `BackToTopButton`-Komponente in Phase 2 ergänzt (`src/app/_components/`, global im Root Layout) |
 | 2026-08-09 | 2.7 | *Manuel Kübler* | Phase 3 um Error-Pages erweitert (`not-found.tsx`, `error.tsx`, `global-error.tsx`), Phase umbenannt in „Rechtliches & Error-Pages" |
+| 2026-08-09 | 2.8 | *Manuel Kübler* | `format-date-range.ts` als neue Utility für `WorkshopCard` in Phase 4 ergänzt |
 
 **Versionierung – Major.Minor (kein SemVer-Patch-Level, da kein "Breaking Change"-Konzept für eine Roadmap sinnvoll ist):**
 
