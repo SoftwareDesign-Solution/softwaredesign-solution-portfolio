@@ -13,7 +13,7 @@ interface ModalContextValue {
 
 const ModalContext = createContext<ModalContextValue | null>(null);
 
-export function ModalProvider({ children }: { children: ReactNode }) {
+export default function ModalProvider({ children }: { children: ReactNode }) {
     
     const [activeModal, setActiveModal] = useState<ModalType>(null);
     const [activeWorkshop, setActiveWorkshop] = useState<Workshop | null>(null);
