@@ -3,7 +3,7 @@ import { Termin } from "./termin";
 import { Trainer } from "./trainer";
 
 export type Workshop = {
-    id: string;
+    id: number;
     slug: string;
     titel: string;
     kurzbeschreibung?: string;
@@ -12,7 +12,7 @@ export type Workshop = {
     format?: string;
     sprache?: string;
     preis?: number;
-    trainer_id?: string;
+    trainer_id?: number;
     trainer?: Trainer;
     zielgruppe?: string[];
     voraussetzungen?: string[];
