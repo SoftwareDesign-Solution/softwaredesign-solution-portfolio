@@ -1,537 +1,902 @@
-import SectionHeading from "../shared/section-heading";
-import Link from "next/link";
+"use client";
 
+import { useEffect, useState } from "react";
+import { Controller, FormProvider, SubmitHandler, useFieldArray, useForm, useWatch } from "react-hook-form";
+import Link from "next/link";
+import { BookingData, bookingFormSchema, type BookingFormData } from "@/schemas/forms/booking.schema";
+import { formatDateRange } from "@/utils/format-date-range";
+import SectionHeading from "../shared/section-heading";
+import { Workshop } from "@/types/workshop";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { formatPrice } from "@/utils/format-price";
 
 export default function BookingForm() {
 
+    const workshop: Workshop = {
+        id: 1,
+        slug: "beispiel-workshop",
+        titel: "Beispiel Workshop",
+        preis: 100,
+        active: true,
+        dauer: "2 Tage",
+        termine: [
+            {
+                id: 1,
+                workshop_id: 1,
+                datumVon: "2024-07-01",
+                datumBis: "2024-07-04",
+                format: "Online",
+                status: "verfuegbar",
+                active: true,
+            },
+            {
+                id: 2,
+                workshop_id: 1,
+                datumVon: "2024-07-07",
+                datumBis: "2024-07-10",
+                format: "Online",
+                status: "verfuegbar",
+                active: true,
+            }
+        ]
+    };
+
+    const methods = useForm<BookingFormData>({
+        resolver: zodResolver(bookingFormSchema),
+        defaultValues: {
+            termin: null,
+            teilnehmerzahl: 1,
+            adresse: {
+                firma: "",
+                strasse: "",
+                plz: "",
+                ort: "",
+            },
+            webseite: "",
+            contactPerson: {
+                anrede: "Keine Angabe",
+                vorname: "",
+                nachname: "",
+                email: "",
+                telefon: "",
+            },
+            teilnehmer: [
+                {
+                    vorname: "",
+                    nachname: "",
+                    email: "",
+                },
+            ],
+            abweichendeRechnungsadresse: false,
+            /*
+            rechnungsadresse: {
+                firma: "",
+                strasse: "",
+                plz: "",
+                ort: "",
+            },
+            */
+            gutscheinCode: "",
+            notizen: "",
+            consent: false,
+        },
+    });
+
+    const { control, formState, handleSubmit, register } = methods;
+
+    const [formData, setFormData] = useState<BookingData | null>(null);
+
+
+    // 01 - Termin
+    const selectedDate = useWatch({
+        control,
+        name: "termin",
+    });
+
+
+    // 02 - Teilnehmeranzahl
+    const participantCount = useWatch({
+        control,
+        name: "teilnehmerzahl",
+    });
+
+    const stepParticipants = (delta: number) => {
+        const current = Math.min(Math.max(Number(participantCount) || 1, 1), 20);
+        const next = Math.min(Math.max(current + delta, 1), 20);
+        methods.setValue("teilnehmerzahl", next, { shouldValidate: true });
+    };
+
+
+    // 05 - Teilnehmer:innen
+    const { fields, append, remove } = useFieldArray({ control, name: "teilnehmer" });
+
+    useEffect(() => {
+        
+        const count = Math.min(Math.max(Number(participantCount) || 1, 1), 20);
+        
+        if (count > fields.length) {
+            
+            const toAdd = count - fields.length;
+
+            for (let i = 0; i < toAdd; i++) {
+                append({ vorname: "", nachname: "", email: "" });
+            }
+
+        } else if (count < fields.length) {
+            
+            for (let i = fields.length - 1; i >= count; i--) {
+                remove(i);
+            }
+        
+        }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [participantCount]);
+
+
+    // 06 - Rechnungsadresse
+    const altBillingAddress = useWatch({
+        control,
+        name: "abweichendeRechnungsadresse",
+    });
+
+    // Zusammenfassung
+    const participantCountLabel = Math.min(Math.max(Number(participantCount) || 1, 1), 20);
+    const selectedDateLabel = selectedDate ? formatDateRange(selectedDate.datumVon, selectedDate.datumBis) : "Kein Termin ausgewählt";
+    const subtotal = Number(workshop.preis) * participantCountLabel;
+    const vat = Math.round(subtotal * 0.19);
+    const total = subtotal + vat;
+
+    const consent = useWatch({
+        control,
+        name: "consent",
+    });
+
+    const onSubmit: SubmitHandler<BookingFormData> = (data) => {
+        //console.log(methods.formState.errors);
+        //console.log("Booking submitted:", { workshop: 'Test', ...data });
+        //alert("Booking submitted: " + JSON.stringify({ workshop: 'Test', ...data }, null, 2));
+
+        setFormData({
+            workshop: {
+                id: workshop.id,
+                titel: workshop.titel
+            },
+            ...data,
+            summary: {
+                preis: Number(workshop.preis),
+                teilnehmerzahl: participantCountLabel,
+                zwischensumme: subtotal,
+                umsatzsteuer: vat,
+                gesamtbetrag: total
+            }
+        });
+  };
+
     return (
         <>
-            <form>
+            <FormProvider {...methods}>
+                <form onSubmit={handleSubmit(onSubmit)}>
 
-                <div className="px-9 pb-9 pt-7">
+                    <div className="px-9 pb-9 pt-7">
 
-                    {/* BEGIN 01 Termin -> appointment-selection.tsx*/}
-                    <section className="mb-8">
+                        {/* BEGIN 01 Termin -> appointment-selection.tsx*/}
+                        <section className="mb-8">
 
-                        <SectionHeading num="01" title="Termin" />
+                            <SectionHeading num="01" title="Termin" />
 
-                        <div className="grid gap-2.5">
+                            <Controller 
+                                name="termin"
+                                control={control}
+                                render={({ field }) => (
 
-                            <label
-                                className="grid w-full cursor-pointer grid-cols-[24px_1fr_auto] items-center gap-3.5 rounded-lg border-[1.5px] border-primary-700 bg-primary-50 px-4 py-3.5"
-                            >
-                                <span className="relative h-4.5 w-4.5 rounded-full border-2 border-primary-700 bg-white">
-                                    <span className="absolute inset-0.75 rounded-full bg-primary-700" />
-                                </span>
-                                <div>
-                                    <div className="text-[15px] font-semibold text-foreground">[Datum von - bis]</div>
-                                    <div className="text-[12.5px] text-muted">[Format]</div>
-                                </div>
-                                <div className="flex items-center gap-1.5 text-[12.5px] font-medium text-success-600">
-                                    <span className="h-1.75 w-1.75 rounded-full bg-success-500" />
-                                        [Status]
-                                </div>
-                                <input type="radio" className="sr-only" readOnly checked />
-                            </label>
+                                    <div className="grid gap-2.5">
 
-                            <label
-                                className="grid w-full cursor-pointer grid-cols-[24px_1fr_auto] items-center gap-3.5 rounded-lg border-[1.5px] border-primary-700 bg-primary-50 px-4 py-3.5"
-                            >
-                                <span className="relative h-4.5 w-4.5 rounded-full border-2 border-primary-700 bg-white">
-                                    <span className="absolute inset-0.75 rounded-full bg-primary-700" />
-                                </span>
-                                <div>
-                                    <div className="text-[15px] font-semibold text-foreground">[Datum von - bis]</div>
-                                    <div className="text-[12.5px] text-muted">[Format]</div>
-                                </div>
-                                <div className="flex items-center gap-1.5 text-[12.5px] font-medium text-success-600">
-                                    <span className="h-1.75 w-1.75 rounded-full bg-success-500" />
-                                        [Status]
-                                </div>
-                                <input type="radio" className="sr-only" readOnly />
-                            </label>
-                            
-                        </div>
+                                        {workshop.termine!.map((termin) => {
 
-                        <p className="mt-2 text-[12.5px] text-error-600">[errorMessage]</p>
-                        
-                    </section>
-                    {/* END 01 Termin -> appointment-selection.tsx*/}
-                    
+                                            const checked = field.value?.id === termin.id;
+                                            const disabled = !termin.active || termin.status === "ausgebucht";
 
-                    {/* BEGIN 02 Teilnehmeranzahl -> participant-counter.tsx*/}
-                    <section className="mb-8">
+                                            return (
+                                                <label
+                                                    key={termin.id}
+                                                    className="grid w-full cursor-pointer grid-cols-[24px_1fr_auto] items-center gap-3.5 rounded-lg border-[1.5px] border-primary-700 bg-primary-50 px-4 py-3.5"
+                                                >
+                                                    
+                                                    <span className="relative h-4.5 w-4.5 rounded-full border-2 border-primary-700 bg-white">
+                                                        {checked && (
+                                                            <span className="absolute inset-0.75 rounded-full bg-primary-700" />
+                                                        )}
+                                                    </span>
+                                                    
+                                                    <div>
+                                                        <div className="text-[15px] font-semibold text-foreground">
+                                                            {formatDateRange(
+                                                                termin.datumVon, 
+                                                                termin.datumBis
+                                                            )}
+                                                        </div>
+                                                        <div className="text-[12.5px] text-muted">{termin.format}</div>
+                                                    </div>
+                                                    
+                                                    <div className="flex items-center gap-1.5 text-[12.5px] font-medium text-success-600">
+                                                        <span className="h-1.75 w-1.75 rounded-full bg-success-500" />
+                                                            {termin.status}
+                                                    </div>
+                                                    
+                                                    <input 
+                                                        type="radio" 
+                                                        name={field.name}
+                                                        className="sr-only" 
+                                                        readOnly 
+                                                        checked={checked}
+                                                        disabled={disabled}
+                                                        onBlur={field.onBlur}
+                                                        onChange={() => 
+                                                            field.onChange({
+                                                                id: termin.id,
+                                                                datumVon: termin.datumVon,
+                                                                datumBis: termin.datumBis
+                                                            })
+                                                        }
+                                                    />
 
-                        <SectionHeading num="02" title="Teilnehmeranzahl" />
+                                                </label>
+                                            )
+                                        })}
+                                        
+                                    </div>
 
-                        <div className="flex flex-wrap items-center gap-3.5">
-
-                            <button
-                                type="button"
-                                className="flex h-9 w-9 items-center justify-center rounded-md border border-border-strong text-lg font-semibold text-neutral-700 transition bg-surface hover:bg-neutral-100"
-                            >
-                                -
-                            </button>
-
-                            {/* TextField.tsx */}
-                            <input 
-                                type="number"
-                                min={1}
-                                max={20}
-                                step="any"
-                                className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100 w-20! text-center" 
+                                )}
                             />
+
+                            {formState.errors.termin && (
+                                <p className="mt-2 text-[12.5px] text-error-600">
+                                    {formState.errors.termin.message}
+                                </p>
+                            )}
                             
-                            <button
-                                type="button"
-                                className="flex h-9 w-9 items-center justify-center rounded-md border border-border-strong text-lg font-semibold text-neutral-700 transition bg-surface hover:bg-neutral-100"
-                            >
-                                +
-                            </button>
+                        </section>
+                        {/* END 01 Termin -> appointment-selection.tsx*/}
+                        
 
-                            <span className="basis-full ml-2 text-[13px] text-muted md:ml-2 md:basis-auto">
-                                Max. 20 · für größere Gruppen Inhouse anfragen
-                            </span>
+                        {/* BEGIN 02 Teilnehmeranzahl -> participant-counter.tsx*/}
+                        <section className="mb-8">
 
-                        </div>
-                    </section>
-                    {/* END 02 Teilnehmeranzahl -> participant-counter.tsx*/}
+                            <SectionHeading num="02" title="Teilnehmeranzahl" />
 
+                            <div className="flex flex-wrap items-center gap-3.5">
 
-                    {/* BEGIN 03 Firma & Adresse -> company-address.tsx -> address-field.tsx*/}
-                    <section className="mb-8">
-
-                        <SectionHeading num="03" title="Firma & Adresse" />
-
-                        {/* BEGIN address-fields.tsx */}
-                        <div className="mt-4 grid grid-cols-3 gap-x-3.5">
-
-                            <div className="col-span-3 mb-4">
-
-                                {/* Label.tsx */}
-                                <label className="mb-1.5 block text-[13px] font-medium text-foreground">Firmenname (Rechnung)</label>
-
-                                {/* TextField.tsx */}
-                                <input className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100" />
-                                
-                                {/* ErrorMessage.tsx */}
-                                <p className="mt-2 text-[12.5px] text-error-600">[errorMessage]</p>
-
-                            </div>
-
-                            <div className="col-span-3 mb-4">
-
-                                {/* Label.tsx */}
-                                <label className="mb-1.5 block text-[13px] font-medium text-foreground">Straße (inkl. Hausnummer)</label>
-
-                                {/* TextField.tsx */}
-                                <input className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100" />
-
-                                {/* ErrorMessage.tsx */}
-                                <p className="mt-2 text-[12.5px] text-error-600">[errorMessage]</p>
-
-                            </div>
-
-                            <div className="col-span-1 mb-4">
-
-                                {/* Label.tsx */}
-                                <label className="mb-1.5 block text-[13px] font-medium text-foreground">PLZ</label>
-
-                                {/* TextField.tsx */}
-                                <input className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100" />
-
-                                {/* ErrorMessage.tsx */}
-                                <p className="mt-2 text-[12.5px] text-error-600">[errorMessage]</p>
-
-                            </div>
-
-                            <div className="col-span-2 mb-4">
-                                
-                                {/* Label.tsx */}
-                                <label className="mb-1.5 block text-[13px] font-medium text-foreground">Ort</label>
-
-                                {/* TextField.tsx */}
-                                <input className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100" />
-
-                                {/* ErrorMessage.tsx */}
-                                <p className="mt-2 text-[12.5px] text-error-600">[errorMessage]</p>
-                                
-                            </div>
-
-                        </div>
-                        {/* END address-fields.tsx */}
-
-                        <div className="mb-4">
-
-                            {/* Label.tsx */}
-                            <label className="mb-1.5 block text-[13px] font-medium text-foreground">Webseite (optional)</label>
-
-                            {/* TextField.tsx */}
-                            <input className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100" />
-
-                        </div>
-
-                    </section>
-                    {/* END 03 Firma & Adresse -> company-address.tsx -> address-field.tsx*/}
-
-
-                    {/* BEGIN 04 Ansprechperson -> contact-person.tsx */}
-                    <section className="mb-8">
-
-                        <SectionHeading num="04" title="Ansprechpartner" />
-
-                        <div className="grid grid-cols-12 gap-x-3.5">
-
-                            <div className="col-span-6 md:col-span-3 mb-4">
-
-                                {/* Label.tsx */}
-                                <label className="mb-1.5 block text-[13px] font-medium text-foreground">Anrede</label>
-
-                                {/* SelectField.tsx */}
-                                <select
-                                    className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100"
+                                <button
+                                    type="button"
+                                    onClick={() => stepParticipants(-1)}
+                                    className="flex h-9 w-9 items-center justify-center rounded-md border border-border-strong text-lg font-semibold text-neutral-700 transition bg-surface hover:bg-neutral-100"
                                 >
-                                    <option value="Frau">Frau</option>
-                                    <option value="Herr">Herr</option>
-                                    <option value="Divers">Divers</option>
-                                    <option value="Keine Angabe">Keine Angabe</option>
-                                </select>
-
-                                {/* ErrorMessage.tsx */}
-                                <p className="mt-2 text-[12.5px] text-error-600">[errorMessage]</p>
-
-                            </div>
-
-                            <div className="col-span-12 md:col-span-4 mb-4">
-
-                                {/* Label.tsx */}
-                                <label className="mb-1.5 block text-[13px] font-medium text-foreground">Vorname</label>
+                                    -
+                                </button>
 
                                 {/* TextField.tsx */}
                                 <input 
-                                    className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100"
+                                    type="number"
+                                    min={1}
+                                    max={20}
+                                    step="any"
+                                    className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100 w-20! text-center" 
+                                    {...register("teilnehmerzahl", { required: true, min: 1, max: 20, valueAsNumber: true })}
                                 />
                                 
-                                {/* ErrorMessage.tsx */}
-                                <p className="mt-2 text-[12.5px] text-error-600">[errorMessage]</p>
+                                <button
+                                    type="button"
+                                    onClick={() => stepParticipants(1)}
+                                    className="flex h-9 w-9 items-center justify-center rounded-md border border-border-strong text-lg font-semibold text-neutral-700 transition bg-surface hover:bg-neutral-100"
+                                >
+                                    +
+                                </button>
+
+                                <span className="basis-full ml-2 text-[13px] text-muted md:ml-2 md:basis-auto">
+                                    Max. 20 · für größere Gruppen Inhouse anfragen
+                                </span>
 
                             </div>
 
-                            <div className="col-span-12 md:col-span-5 mb-4">
+                            {formState.errors.teilnehmerzahl && (
+                                <p className="mt-2 text-[12.5px] text-error-600">
+                                    {formState.errors.teilnehmerzahl.message}
+                                </p>
+                            )}
 
-                                {/* Label.tsx */}
-                                <label className="mb-1.5 block text-[13px] font-medium text-foreground">Nachname</label>
+                        </section>
+                        {/* END 02 Teilnehmeranzahl -> participant-counter.tsx*/}
 
-                                {/* TextField.tsx */}
-                                <input 
-                                    className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100"
-                                />
-                                
-                                {/* ErrorMessage.tsx */}
-                                <p className="mt-2 text-[12.5px] text-error-600">[errorMessage]</p>
 
-                            </div>
+                        {/* BEGIN 03 Firma & Adresse -> company-address.tsx -> address-field.tsx*/}
+                        <section className="mb-8">
 
-                            <div className="col-span-12 md:col-span-7 mb-4">
+                            <SectionHeading num="03" title="Firma & Adresse" />
 
-                                {/* Label.tsx */}
-                                <label className="mb-1.5 block text-[13px] font-medium text-foreground">E-Mail</label>
+                            {/* BEGIN address-fields.tsx */}
+                            <div className="mt-4 grid grid-cols-3 gap-x-3.5">
 
-                                {/* TextField.tsx */}
-                                <input 
-                                    type="email"
-                                    className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100"
-                                />
-                                
-                                {/* ErrorMessage.tsx */}
-                                <p className="mt-2 text-[12.5px] text-error-600">[errorMessage]</p>
+                                <div className="col-span-3 mb-4">
 
-                            </div>
+                                    {/* Label.tsx */}
+                                    <label className="mb-1.5 block text-[13px] font-medium text-foreground">Firmenname (Rechnung)</label>
 
-                            <div className="col-span-12 md:col-span-5 mb-4">
+                                    {/* TextField.tsx */}
+                                    <input 
+                                        className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100" 
+                                        {...register("adresse.firma", { required: "Bitte geben Sie den Firmennamen an." })}
+                                    />
+                                    
+                                    {/* ErrorMessage.tsx */}
+                                    {formState.errors.adresse?.firma && (
+                                        <p className="mt-2 text-[12.5px] text-error-600">
+                                            {formState.errors.adresse.firma.message}
+                                        </p>
+                                    )}
 
-                                {/* Label.tsx */}
-                                <label className="mb-1.5 block text-[13px] font-medium text-foreground">Telefon</label>
-
-                                {/* TextField.tsx */}
-                                <input 
-                                    className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100"
-                                />
-                                
-                                {/* ErrorMessage.tsx */}
-                                <p className="mt-2 text-[12.5px] text-error-600">[errorMessage]</p>
-
-                            </div>
-
-                        </div>
-                        
-                    </section>
-                    {/* END 04 Ansprechperson -> contact-person.tsx */}
-                    
-
-                    {/* BEGIN 05 Teilnehmer:innen -> participants.tsx */}
-                    <section className="mb-8">
-
-                        <SectionHeading num="05" title="Teilnehmer:innen" subtitle="2 Teilnehmer" />
-
-                        <div className="flex flex-col gap-3">
-
-                            <div
-                                className="grid grid-cols-1 md:grid-cols-[36px_1fr_1fr_1.4fr] items-center gap-2.5 rounded-lg bg-surface px-3.5 py-3"
-                            >
-
-                                <div className="font-mono text-[12px] tracking-wide text-neutral-500">
-                                    {String(1).padStart(2, "0")}
                                 </div>
 
-                                {/* Vorname */}
+                                <div className="col-span-3 mb-4">
+
+                                    {/* Label.tsx */}
+                                    <label className="mb-1.5 block text-[13px] font-medium text-foreground">Straße (inkl. Hausnummer)</label>
+
+                                    {/* TextField.tsx */}
+                                    <input 
+                                        className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100" 
+                                        {...register("adresse.strasse", { required: "Bitte geben Sie die Straße an." })}
+                                    />
+
+                                    {/* ErrorMessage.tsx */}
+                                    {formState.errors.adresse?.strasse && (
+                                        <p className="mt-2 text-[12.5px] text-error-600">
+                                            {formState.errors.adresse.strasse.message}
+                                        </p>
+                                    )}
+
+                                </div>
+
+                                <div className="col-span-1 mb-4">
+
+                                    {/* Label.tsx */}
+                                    <label className="mb-1.5 block text-[13px] font-medium text-foreground">PLZ</label>
+
+                                    {/* TextField.tsx */}
+                                    <input 
+                                        className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100" 
+                                        {...register("adresse.plz", { required: "Bitte geben Sie die PLZ an." })}
+                                    />
+
+                                    {/* ErrorMessage.tsx */}
+                                    {formState.errors.adresse?.plz && (
+                                        <p className="mt-2 text-[12.5px] text-error-600">
+                                            {formState.errors.adresse.plz.message}
+                                        </p>
+                                    )}
+
+                                </div>
+
+                                <div className="col-span-2 mb-4">
+                                    
+                                    {/* Label.tsx */}
+                                    <label className="mb-1.5 block text-[13px] font-medium text-foreground">Ort</label>
+
+                                    {/* TextField.tsx */}
+                                    <input 
+                                        className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100" 
+                                        {...register("adresse.ort", { required: "Bitte geben Sie den Ort an." })}
+                                    />
+
+                                    {/* ErrorMessage.tsx */}
+                                    {formState.errors.adresse?.ort && (
+                                        <p className="mt-2 text-[12.5px] text-error-600">
+                                            {formState.errors.adresse.ort.message}
+                                        </p>
+                                    )}
+                                    
+                                </div>
+
+                            </div>
+                            {/* END address-fields.tsx */}
+
+                            <div className="mb-4">
+
+                                {/* Label.tsx */}
+                                <label className="mb-1.5 block text-[13px] font-medium text-foreground">Webseite (optional)</label>
+
                                 {/* TextField.tsx */}
                                 <input 
-                                    placeholder="Vorname"
-                                    className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100"
-                                />
-
-                                {/* Nachname */}
-                                {/* TextField.tsx */}
-                                <input 
-                                    placeholder="Nachname"
-                                    className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100"
-                                />
-
-                                {/* E-Mail */}
-                                {/* TextField.tsx */}
-                                <input 
-                                    placeholder="E-Mail"
-                                    className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100"
+                                    className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100" 
+                                    {...register("webseite")}
                                 />
 
                             </div>
 
-                        </div>
+                        </section>
+                        {/* END 03 Firma & Adresse -> company-address.tsx -> address-field.tsx*/}
 
-                    </section>
-                    {/* END 05 Teilnehmer:innen -> participants.tsx */}
 
-                    
-                    {/* BEGIN 06 Rechnungsadresse -> billing-address.tsx -> address-fields.tsx */}
-                    <section className="mb-8">
+                        {/* BEGIN 04 Ansprechperson -> contact-person.tsx */}
+                        <section className="mb-8">
 
-                        <SectionHeading num="06" title="Rechnungsadresse" />
+                            <SectionHeading num="04" title="Ansprechpartner" />
 
-                        <label className="flex cursor-pointer items-start gap-2.5 text-[14px] leading-[1.55] text-foreground">
-                            <input type="checkbox" className="mt-0.5 h-4 w-4 accent-primary-700" />
-                            <span>Abweichende Rechnungsadresse verwenden</span>
-                        </label>
-                        
-                        {/* BEGIN address-fields.tsx */}
-                        <div className="mt-4 grid grid-cols-3 gap-x-3.5">
+                            <div className="grid grid-cols-12 gap-x-3.5">
 
-                            <div className="col-span-3 mb-4">
+                                <div className="col-span-6 md:col-span-3 mb-4">
 
-                                {/* Label.tsx */}
-                                <label className="mb-1.5 block text-[13px] font-medium text-foreground">Firmenname (Rechnung)</label>
+                                    {/* Label.tsx */}
+                                    <label className="mb-1.5 block text-[13px] font-medium text-foreground">Anrede</label>
 
-                                {/* TextField.tsx */}
-                                <input className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100" />
-                                
-                                {/* ErrorMessage.tsx */}
-                                <p className="mt-2 text-[12.5px] text-error-600">[errorMessage]</p>
-
-                            </div>
-
-                            <div className="col-span-3 mb-4">
-
-                                {/* Label.tsx */}
-                                <label className="mb-1.5 block text-[13px] font-medium text-foreground">Straße (inkl. Hausnummer)</label>
-
-                                {/* TextField.tsx */}
-                                <input className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100" />
-
-                                {/* ErrorMessage.tsx */}
-                                <p className="mt-2 text-[12.5px] text-error-600">[errorMessage]</p>
-
-                            </div>
-
-                            <div className="col-span-1 mb-4">
-
-                                {/* Label.tsx */}
-                                <label className="mb-1.5 block text-[13px] font-medium text-foreground">PLZ</label>
-
-                                {/* TextField.tsx */}
-                                <input className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100" />
-
-                                {/* ErrorMessage.tsx */}
-                                <p className="mt-2 text-[12.5px] text-error-600">[errorMessage]</p>
-
-                            </div>
-
-                            <div className="col-span-2 mb-4">
-                                
-                                {/* Label.tsx */}
-                                <label className="mb-1.5 block text-[13px] font-medium text-foreground">Ort</label>
-
-                                {/* TextField.tsx */}
-                                <input className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100" />
-
-                                {/* ErrorMessage.tsx */}
-                                <p className="mt-2 text-[12.5px] text-error-600">[errorMessage]</p>
-                                
-                            </div>
-
-                        </div>
-                        {/* END address-fields.tsx */}
-
-                    </section>
-
-                    {/* END 06 Rechnungsadresse -> billing-address.tsx -> address-fields.tsx */}
-                    
-
-                    {/* BEGIN 07 Weiteres -> extras-section.tsx */}
-                    <section className="mb-8">
-
-                        <SectionHeading num="07" title="Weiteres" />
-
-                        <div className="grid grid-cols-12 gap-x-3.5">
-
-                            <div className="col-span-12 mb-4">
-
-                                {/* Gutschein-Code Eingabefeld */}
-                                {/* Label.tsx */}
-                                <label className="mb-1.5 block text-[13px] font-medium text-foreground">Gutscheincode (optional)</label>
-
-                                <div className="flex items-stretch gap-2.5">
-
-                                    {/* TextField.tsx placeholder="" */}
-                                    {/* flex-1, damit das Input-Feld die gesamte verfügbare Breite einnimmt */}
-                                    <input placeholder="z.B. CODE2026" className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100" />
-
-                                    {/* Einlösen */}
-                                    <button
-                                        type="button"
-                                        className="rounded-md bg-neutral-800 px-4.5 text-[13.5px] font-semibold text-white transition hover:bg-neutral-700"
+                                    {/* SelectField.tsx */}
+                                    <select
+                                        className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100"
+                                        {...register("contactPerson.anrede", { required: "Bitte wählen Sie eine Anrede aus." })}
                                     >
-                                        Einlösen
-                                    </button>
+                                        <option value="Frau">Frau</option>
+                                        <option value="Herr">Herr</option>
+                                        <option value="Divers">Divers</option>
+                                        <option value="Keine Angabe">Keine Angabe</option>
+                                    </select>
+
+                                    {/* ErrorMessage.tsx */}
+                                    {formState.errors.contactPerson?.anrede && (
+                                        <p className="mt-2 text-[12.5px] text-error-600">
+                                            {formState.errors.contactPerson.anrede.message}
+                                        </p>
+                                    )}
+
+                                </div>
+
+                                <div className="col-span-12 md:col-span-4 mb-4">
+
+                                    {/* Label.tsx */}
+                                    <label className="mb-1.5 block text-[13px] font-medium text-foreground">Vorname</label>
+
+                                    {/* TextField.tsx */}
+                                    <input 
+                                        className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100"
+                                        {...register("contactPerson.vorname", { required: "Bitte geben Sie den Vornamen an." })}
+                                    />
+                                    
+                                    {/* ErrorMessage.tsx */}
+                                    {formState.errors.contactPerson?.vorname && (
+                                        <p className="mt-2 text-[12.5px] text-error-600">
+                                            {formState.errors.contactPerson.vorname.message}
+                                        </p>
+                                    )}
+
+                                </div>
+
+                                <div className="col-span-12 md:col-span-5 mb-4">
+
+                                    {/* Label.tsx */}
+                                    <label className="mb-1.5 block text-[13px] font-medium text-foreground">Nachname</label>
+
+                                    {/* TextField.tsx */}
+                                    <input 
+                                        className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100"
+                                        {...register("contactPerson.nachname", { required: "Bitte geben Sie den Nachnamen an." })}
+                                    />
+                                    
+                                    {/* ErrorMessage.tsx */}
+                                    {formState.errors.contactPerson?.nachname && (
+                                        <p className="mt-2 text-[12.5px] text-error-600">
+                                            {formState.errors.contactPerson.nachname.message}
+                                        </p>
+                                    )}
+
+                                </div>
+
+                                <div className="col-span-12 md:col-span-7 mb-4">
+
+                                    {/* Label.tsx */}
+                                    <label className="mb-1.5 block text-[13px] font-medium text-foreground">E-Mail</label>
+
+                                    {/* TextField.tsx */}
+                                    <input 
+                                        type="email"
+                                        className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100"
+                                        {...register("contactPerson.email", { required: "Bitte geben Sie die E-Mail-Adresse an." })} 
+                                    />
+                                    
+                                    {/* ErrorMessage.tsx */}
+                                    {formState.errors.contactPerson?.email && (
+                                        <p className="mt-2 text-[12.5px] text-error-600">
+                                            {formState.errors.contactPerson.email.message}
+                                        </p>
+                                    )}
+
+                                </div>
+
+                                <div className="col-span-12 md:col-span-5 mb-4">
+
+                                    {/* Label.tsx */}
+                                    <label className="mb-1.5 block text-[13px] font-medium text-foreground">Telefon</label>
+
+                                    {/* TextField.tsx */}
+                                    <input 
+                                        className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100"
+                                        {...register("contactPerson.telefon", { required: "Bitte geben Sie die Telefonnummer an." })} 
+                                    />
+                                    
+                                    {/* ErrorMessage.tsx */}
+                                    {formState.errors.contactPerson?.telefon && (
+                                        <p className="mt-2 text-[12.5px] text-error-600">
+                                            {formState.errors.contactPerson.telefon.message}
+                                        </p>
+                                    )}
 
                                 </div>
 
                             </div>
+                            
+                        </section>
+                        {/* END 04 Ansprechperson -> contact-person.tsx */}
+                        
 
-                            <div className="col-span-12 mb-4">
-                                
-                                {/* Label.tsx */}
-                                <label className="mb-1.5 block text-[13px] font-medium text-foreground">Anmerkungen (optional)</label>
+                        {/* BEGIN 05 Teilnehmer:innen -> participants.tsx */}
+                        <section className="mb-8">
 
-                                {/* TextArea.tsx */}
-                                <textarea
-                                    className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100 min-h-[90px] resize-y"
-                                    placeholder="Besondere Wünsche, Ernährung, technische Anforderungen …" />
-                                
+                            <SectionHeading num="05" title="Teilnehmer:innen" subtitle={`${fields.length} Teilnehmer im Workshop`} />
+
+                            <div className="flex flex-col gap-3">
+
+                                {fields.map((field, index) => (
+
+                                    <div
+                                        key={field.id}
+                                        className="rounded-lg bg-surface px-3.5 py-3"
+                                    >
+
+                                        <div
+                                            className="grid grid-cols-1 md:grid-cols-[36px_1fr_1fr_1.4fr] items-center gap-2.5 "
+                                        >
+
+                                            <div className="font-mono text-[12px] tracking-wide text-neutral-500">
+                                                {String(index + 1).padStart(2, "0")}
+                                            </div>
+
+                                            {/* Vorname */}
+                                            {/* TextField.tsx */}
+                                            <input 
+                                                placeholder="Vorname"
+                                                className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100"
+                                                {...register(`teilnehmer.${index}.vorname` as const)}
+                                            />
+
+                                            {/* Nachname */}
+                                            {/* TextField.tsx */}
+                                            <input 
+                                                placeholder="Nachname"
+                                                className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100"
+                                                {...register(`teilnehmer.${index}.nachname` as const, { required: "Bitte geben Sie den Nachnamen an.", validate: (value) => value.trim().length > 0 || "Bitte geben Sie den Nachnamen an.", })}
+                                            />
+
+                                            {/* E-Mail */}
+                                            {/* TextField.tsx */}
+                                            <input 
+                                                placeholder="E-Mail"
+                                                className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100"
+                                                {...register(`teilnehmer.${index}.email` as const, { min: 1, required: "Bitte geben Sie die E-Mail an." })}
+                                            />
+
+                                        </div>
+
+                                        <div
+                                            className="grid grid-cols-1 md:grid-cols-[36px_1fr_1fr_1.4fr] items-center gap-2.5 "
+                                        >
+                                            <div></div>
+                                            <div>
+                                                {formState.errors.teilnehmer?.[index]?.vorname && (
+                                                    <p className="mt-2 text-[12.5px] text-error-600">
+                                                        {formState.errors.teilnehmer?.[index]?.vorname?.message}
+                                                    </p>
+                                                )}
+                                            </div>
+                                            <div>
+                                                {formState.errors.teilnehmer?.[index]?.nachname && (
+                                                    <p className="mt-2 text-[12.5px] text-error-600">
+                                                        {formState.errors.teilnehmer?.[index]?.nachname?.message}
+                                                    </p>
+                                                )}
+                                            </div>
+
+                                            <div>
+                                                {formState.errors.teilnehmer?.[index]?.email && (
+                                                    <p className="mt-2 text-[12.5px] text-error-600">
+                                                        {formState.errors.teilnehmer?.[index]?.email?.message}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                        
+                                    </div>
+                                ))}
+
+                            </div>
+
+                        </section>
+                        {/* END 05 Teilnehmer:innen -> participants.tsx */}
+
+                        
+                        {/* BEGIN 06 Rechnungsadresse -> billing-address.tsx -> address-fields.tsx */}
+                        <section className="mb-8">
+
+                            <SectionHeading num="06" title="Rechnungsadresse" />
+
+                            <label className="flex cursor-pointer items-start gap-2.5 text-[14px] leading-[1.55] text-foreground">
+                                <input 
+                                    type="checkbox" 
+                                    className="mt-0.5 h-4 w-4 accent-primary-700"
+                                    {...register("abweichendeRechnungsadresse")}
+                                />
+                                <span>Abweichende Rechnungsadresse verwenden</span>
+                            </label>
+                            
+                            {/* BEGIN address-fields.tsx */}
+                            {altBillingAddress && (
+                            
+                            <div className="mt-4 grid grid-cols-3 gap-x-3.5">
+
+                                <div className="col-span-3 mb-4">
+
+                                    {/* Label.tsx */}
+                                    <label className="mb-1.5 block text-[13px] font-medium text-foreground">Firmenname (Rechnung)</label>
+
+                                    {/* TextField.tsx */}
+                                    <input 
+                                        className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100"
+                                        {...register("rechnungsadresse.firma")}
+                                    />
+                                    
+                                    {/* ErrorMessage.tsx */}
+                                    {formState.errors.rechnungsadresse?.firma && (
+                                        <p className="mt-2 text-[12.5px] text-error-600">
+                                            {formState.errors.rechnungsadresse.firma.message}
+                                        </p>
+                                    )}
+
+                                </div>
+
+                                <div className="col-span-3 mb-4">
+
+                                    {/* Label.tsx */}
+                                    <label className="mb-1.5 block text-[13px] font-medium text-foreground">Straße (inkl. Hausnummer)</label>
+
+                                    {/* TextField.tsx */}
+                                    <input 
+                                        className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100"
+                                        {...register("rechnungsadresse.strasse")}
+                                    />
+
+                                    {/* ErrorMessage.tsx */}
+                                    {formState.errors.rechnungsadresse?.strasse && (
+                                        <p className="mt-2 text-[12.5px] text-error-600">
+                                            {formState.errors.rechnungsadresse.strasse.message}
+                                        </p>
+                                    )}
+
+                                </div>
+
+                                <div className="col-span-1 mb-4">
+
+                                    {/* Label.tsx */}
+                                    <label className="mb-1.5 block text-[13px] font-medium text-foreground">PLZ</label>
+
+                                    {/* TextField.tsx */}
+                                    <input 
+                                        className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100"
+                                        {...register("rechnungsadresse.plz")}
+                                    />
+
+                                    {/* ErrorMessage.tsx */}
+                                    {formState.errors.rechnungsadresse?.plz && (
+                                        <p className="mt-2 text-[12.5px] text-error-600">
+                                            {formState.errors.rechnungsadresse.plz.message}
+                                        </p>
+                                    )}
+
+                                </div>
+
+                                <div className="col-span-2 mb-4">
+                                    
+                                    {/* Label.tsx */}
+                                    <label className="mb-1.5 block text-[13px] font-medium text-foreground">Ort</label>
+
+                                    {/* TextField.tsx */}
+                                    <input 
+                                        className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100"
+                                        {...register("rechnungsadresse.ort")}
+                                    />
+
+                                    {/* ErrorMessage.tsx */}
+                                    {formState.errors.rechnungsadresse?.ort && (
+                                        <p className="mt-2 text-[12.5px] text-error-600">
+                                            {formState.errors.rechnungsadresse.ort.message}
+                                        </p>
+                                    )}
+                                    
+                                </div>
+
+                            </div>
+                            )}
+                            {/* END address-fields.tsx */}
+
+                        </section>
+
+                        {/* END 06 Rechnungsadresse -> billing-address.tsx -> address-fields.tsx */}
+                        
+
+                        {/* BEGIN 07 Weiteres -> extras-section.tsx */}
+                        <section className="mb-8">
+
+                            <SectionHeading num="07" title="Weiteres" />
+
+                            <div className="grid grid-cols-12 gap-x-3.5">
+
+                                <div className="col-span-12 mb-4">
+
+                                    {/* Gutschein-Code Eingabefeld */}
+                                    {/* Label.tsx */}
+                                    <label className="mb-1.5 block text-[13px] font-medium text-foreground">Gutscheincode (optional)</label>
+
+                                    <div className="flex items-stretch gap-2.5">
+
+                                        {/* TextField.tsx placeholder="" */}
+                                        {/* flex-1, damit das Input-Feld die gesamte verfügbare Breite einnimmt */}
+                                        <input 
+                                            placeholder="z.B. CODE2026" 
+                                            className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100"
+                                            {...register("gutscheinCode")}
+                                        />
+
+                                        {/* Einlösen */}
+                                        <button
+                                            type="button"
+                                            className="rounded-md bg-neutral-800 px-4.5 text-[13.5px] font-semibold text-white transition hover:bg-neutral-700"
+                                        >
+                                            Einlösen
+                                        </button>
+
+                                    </div>
+
+                                </div>
+
+                                <div className="col-span-12 mb-4">
+                                    
+                                    {/* Label.tsx */}
+                                    <label className="mb-1.5 block text-[13px] font-medium text-foreground">Anmerkungen (optional)</label>
+
+                                    {/* TextArea.tsx */}
+                                    <textarea
+                                        className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100 min-h-22.5 resize-y"
+                                        placeholder="Besondere Wünsche, Ernährung, technische Anforderungen …"
+                                        {...register("notizen")}
+                                    />
+                                    
+                                </div>
+
+                            </div>
+                        </section>
+                        {/* END 07 Weiteres -> extras-section.tsx */}
+                        
+
+                        {/* BEGIN Summary -> summary.tsx */}
+                        {/* bg-surface oder bg-border? */}
+                        <div className="mt-5 rounded-[10px] bg-surface px-6 py-5.5">
+
+                            <div className="mb-3.5 text-[11px] font-semibold uppercase tracking-[1.5px] text-primary-700">
+                                Zusammenfassung
+                            </div>
+                            
+                            {/* Workshop Titel, Dauer, Preis, Teilnehmeranzahl */}
+                            <div className="flex items-baseline justify-between py-1.5 text-[14px] text-foreground">
+                                <span>{workshop.titel} · {workshop.dauer}</span>
+                                <span className="font-mono text-[13.5px]">
+                                    {formatPrice(workshop.preis)} x {participantCountLabel}
+                                </span>
+                            </div>
+
+                            {/* Ausgewählter Termin */}
+                            <div className="flex items-baseline justify-between py-1.5 text-[14px] text-foreground">
+                                <span>Termin</span>
+                                <span className="font-mono text-[13.5px]">{selectedDateLabel}</span>
+                            </div>
+                            
+                            {/* Zwischensumme */}
+                            <div className="flex items-baseline justify-between py-1.5 text-[14px] text-foreground">
+                                <span>Zwischensumme</span>
+                                <span className="font-mono text-[13.5px]">{formatPrice(subtotal)}</span>
+                            </div>
+                            
+                            {/* Umsatzsteuer */}
+                            <div className="flex items-baseline justify-between py-1.5 text-[14px] text-muted">
+                                <span>USt. 19%</span>
+                                <span className="font-mono text-[13.5px]">{formatPrice(vat)}</span>
+                            </div>
+
+                            <div className="my-3 h-px bg-border" />
+                            
+                            {/* Gesamtsumme */}
+                            <div className="flex items-baseline justify-between py-1.5 text-[14px] text-foreground">
+                                <strong className="font-bold">Gesamtsumme</strong>
+                                <strong className="font-mono text-[17px] font-bold">{formatPrice(total)}</strong>
                             </div>
 
                         </div>
-                    </section>
-                    {/* END 07 Weiteres -> extras-section.tsx */}
-                    
-
-                    {/* BEGIN Summary -> summary.tsx */}
-                    {/* bg-surface oder bg-border? */}
-                    <div className="mt-5 rounded-[10px] bg-surface px-6 py-5.5">
-
-                        <div className="mb-3.5 text-[11px] font-semibold uppercase tracking-[1.5px] text-primary-700">
-                            Zusammenfassung
-                        </div>
+                        {/* END Summary -> summary.tsx */}
                         
-                        {/* Workshop Titel, Dauer, Preis, Teilnehmeranzahl */}
-                        <div className="flex items-baseline justify-between py-1.5 text-[14px] text-foreground">
-                            <span>[Titel] · [Dauer]</span>
-                            <span className="font-mono text-[13.5px]">
-                                [Preis] x [Teilnehmeranzahl]
-                            </span>
-                        </div>
 
-                        {/* Ausgewählter Termin */}
-                        <div className="flex items-baseline justify-between py-1.5 text-[14px] text-foreground">
-                            <span>Termin</span>
-                            <span className="font-mono text-[13.5px]">[Ausgewählter Termin]</span>
-                        </div>
-                        
-                        {/* Zwischensumme */}
-                        <div className="flex items-baseline justify-between py-1.5 text-[14px] text-foreground">
-                            <span>Zwischensumme</span>
-                            <span className="font-mono text-[13.5px]">[Zwischensumme]</span>
-                        </div>
-                        
-                        {/* Umsatzsteuer */}
-                        <div className="flex items-baseline justify-between py-1.5 text-[14px] text-muted">
-                            <span>USt. 19%</span>
-                            <span className="font-mono text-[13.5px]">[Umsatzsteuer]</span>
-                        </div>
-
-                        <div className="my-3 h-px bg-border" />
-                        
-                        {/* Gesamtsumme */}
-                        <div className="flex items-baseline justify-between py-1.5 text-[14px] text-foreground">
-                            <strong className="font-bold">Gesamtsumme</strong>
-                            <strong className="font-mono text-[17px] font-bold">[Gesamtsumme]</strong>
-                        </div>
-
-                    </div>
-                    {/* END Summary -> summary.tsx */}
-                    
-
-                    {/* BEGIN Consent -> consent.tsx */}
-                    <div className="mt-6 rounded-lg border border-neutral-200 bg-white px-5 py-5">
-                        
-                        {/* Label.tsx text-[13.5px] */}
-                        <label className="flex cursor-pointer items-start gap-2.5 text-[14px] leading-[1.55] text-foreground">
+                        {/* BEGIN Consent -> consent.tsx */}
+                        <div className="mt-6 rounded-lg border border-neutral-200 bg-white px-5 py-5">
                             
-                            <input
-                                type="checkbox"
-                                className="mt-0.5 h-4 w-4 accent-primary-700"
-                            />
+                            {/* Label.tsx text-[13.5px] */}
+                            <label className="flex cursor-pointer items-start gap-2.5 text-[14px] leading-[1.55] text-foreground">
+                                
+                                <input
+                                    type="checkbox"
+                                    className="mt-0.5 h-4 w-4 accent-primary-700"
+                                    {...register("consent", { required: true })}
+                                />
 
-                            <span>
-                                Ich bestätige die{" "}
-                                <Link href="/agb" target="_blank" rel="noopener noreferrer" className="text-primary-700 no-underline">
-                                    AGB
-                                </Link>{" "}
-                                inkl.{" "}
-                                <Link href="/agb#widerruf" target="_blank" rel="noopener noreferrer" className="text-primary-700 no-underline">
-                                    Widerrufsbelehrung
-                                </Link>{" "}
-                                und bin mit der Verarbeitung meiner Daten gemäß{" "}
-                                <Link href="/datenschutz" target="_blank" rel="noopener noreferrer" className="text-primary-700 no-underline">
-                                    Datenschutzerklärung
-                                </Link>{" "}
-                                einverstanden.
-                            </span>
-                        </label>
+                                <span>
+                                    Ich bestätige die{" "}
+                                    <Link href="/agb" target="_blank" rel="noopener noreferrer" className="text-primary-700 no-underline">
+                                        AGB
+                                    </Link>{" "}
+                                    inkl.{" "}
+                                    <Link href="/agb#widerruf" target="_blank" rel="noopener noreferrer" className="text-primary-700 no-underline">
+                                        Widerrufsbelehrung
+                                    </Link>{" "}
+                                    und bin mit der Verarbeitung meiner Daten gemäß{" "}
+                                    <Link href="/datenschutz" target="_blank" rel="noopener noreferrer" className="text-primary-700 no-underline">
+                                        Datenschutzerklärung
+                                    </Link>{" "}
+                                    einverstanden.
+                                </span>
+                            </label>
+
+                        </div>
+                        {/* END Consent -> consent.tsx */}
+                        
+
+                        {/* BEGIN Submit Footer -> submit-footer.tsx */}
+                        <div className="mt-5.5 flex items-center justify-between gap-4">
+
+                            {/* Hint */}
+                            <div className="text-[13px] leading-relaxed text-muted">
+                                Bitte füllen Sie alle Pflichtfelder aus und bestätigen Sie die Sicherheitsabfrage.
+                            </div>
+
+                            {/* Submit Button */}
+                            <button
+                                type="submit"
+                                disabled={!consent || formState.isSubmitting}
+                                className={`rounded-md px-7.5 py-3.5 text-[15px] font-semibold tracking-wide text-white transition ${
+                                    !consent || formState.isSubmitting 
+                                        ? "cursor-not-allowed bg-primary-700/50" 
+                                        : "cursor-pointer bg-primary-700 hover:bg-primary-700/90"
+                                    }`
+                                }
+                            >
+                                Verbindlich buchen
+                            </button>
+
+                        </div>
+                        {/* END Submit Footer -> submit-footer.tsx */}
 
                     </div>
-                    {/* END Consent -> consent.tsx */}
-                    
 
-                    {/* BEGIN Submit Footer -> submit-footer.tsx */}
-                    <div className="mt-5.5 flex items-center justify-between gap-4">
-
-                        {/* Hint */}
-                        <div className="text-[13px] leading-relaxed text-muted">[hint]</div>
-
-                        {/* Submit Button */}
-                        <button
-                            type="submit"
-                            className="rounded-md px-7.5 py-3.5 text-[15px] font-semibold tracking-wide text-white transition cursor-not-allowed bg-primary-700/50"
-                        >
-                            Verbindlich buchen
-                        </button>
-
+                    <div className="mt-8 rounded-lg border border-border bg-surface p-4 text-[13px] text-foreground">
+                        <pre className="whitespace-pre-wrap">
+                            {JSON.stringify(formData, null, 2)}
+                        </pre>
                     </div>
-                    {/* END Submit Footer -> submit-footer.tsx */}
 
-                </div>
-
-            </form>
+                </form>
+            </FormProvider>
         </>
     );
 }

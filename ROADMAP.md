@@ -229,8 +229,8 @@ fix: Header lag über Modal-Overlay - z-index von z-20 auf z-0 reduziert
 
 - [x] `react-hook-form` + `zod` Setup
 - [x] Booking-Formular unter `src/components/forms/` (zunächst mit allen Feldern inline, inkl. Datum, Teilnehmerzahl, Firmenadresse, Ansprechpartner, Rechnungsadresse)
-- [ ] `booking.schema.ts` unter `src/schemas/`
-- [ ] Formular-Typ per `z.infer<typeof bookingSchema>` abgeleitet (`BookingFormValues`), keine manuell doppelt gepflegten Types
+- [x] `booking.schema.ts` unter `src/schemas/`
+- [x] Formular-Typ per `z.infer<typeof bookingSchema>` abgeleitet (`BookingFormValues`), keine manuell doppelt gepflegten Types
 - [ ] **Refactor:** Field-Sections aus dem Booking-Formular extrahieren nach `src/components/forms/shared/`: `DateStep`, `ParticipantStepper`, `CompanyAddressFields`, `ContactPersonFields`, `BillingAddressFields` — `DateStep` nutzt `format-termin-status.ts` aus Phase 4 zur Anzeige des Termin-Status
 - [ ] Restliche Zod-Schemas unter `src/schemas/`: `contact-request.schema.ts`, `quote-request.schema.ts`, `notification-signup.schema.ts`
 - [ ] Kontakt-/Anfrageformular (`contact-request`) unter `src/components/forms/`, erreichbar über `src/app/anfrage/page.tsx` — deckt sowohl allgemeine Kontaktaufnahme als auch Anfragen zu Leistungen ab (nutzt extrahierte Field-Sections wo passend)
