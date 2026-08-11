@@ -220,6 +220,7 @@ feat: TerminRow auf Design-System-Farben umgestellt
 feat: Modal-Basis-Komponente mit createPortal
 feat: ActionStatusModal für Erfolgs-/Fehler-Rückmeldung ergänzt
 feat: ModalProvider mit React Context für zentrales Modal-State-Management
+fix: Header lag über Modal-Overlay - z-index von z-20 auf z-0 reduziert
 ```
 
 ---
