@@ -3,6 +3,7 @@ import "./globals.css";
 import Footer from "./_components/footer";
 import Header from "./_components/header";
 import { BackToTopButton } from "./_components/back-to-top-button";
+import ModalProvider from "@/providers/modal-provider";
 
 
 export const metadata: Metadata = {
@@ -21,7 +22,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Header />
 
         <main>
-          {children}
+          
+          <ModalProvider>
+            {children}
+          </ModalProvider>
+
         </main>
         
         <Footer />

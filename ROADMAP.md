@@ -212,7 +212,7 @@ feat: TerminRow auf Design-System-Farben umgestellt
 
 - [x] `Modal` Basis-Komponente unter `src/components/modals/` (Overlay, Close-Handling, mit `createPortal`)
 - [x] `ActionStatusModal` unter `src/components/modals/` (generische Erfolgs-/Fehler-Anzeige, Texte kommen von außen als Props – siehe die `*-status-messages.tsx` je Formular in Phase 6)
-- [ ] `ModalProvider` unter `src/providers/` (React Context intern, Open/Close-State + welches Modal aktiv ist, Einbindung im Root Layout)
+- [x] `ModalProvider` unter `src/providers/` (React Context intern, Open/Close-State + welches Modal aktiv ist, Einbindung im Root Layout)
 
 **Commits:**
 
