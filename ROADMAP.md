@@ -226,9 +226,9 @@ feat: ModalProvider mit React Context für zentrales Modal-State-Management
 
 ## Phase 6 – Formulare & Schreib-Aktionen
 
-- [ ] `react-hook-form` + `zod` Setup
+- [x] `react-hook-form` + `zod` Setup
+- [x] Booking-Formular unter `src/components/forms/` (zunächst mit allen Feldern inline, inkl. Datum, Teilnehmerzahl, Firmenadresse, Ansprechpartner, Rechnungsadresse)
 - [ ] `booking.schema.ts` unter `src/schemas/`
-- [ ] Booking-Formular unter `src/components/forms/` (zunächst mit allen Feldern inline, inkl. Datum, Teilnehmerzahl, Firmenadresse, Ansprechpartner, Rechnungsadresse)
 - [ ] Formular-Typ per `z.infer<typeof bookingSchema>` abgeleitet (`BookingFormValues`), keine manuell doppelt gepflegten Types
 - [ ] **Refactor:** Field-Sections aus dem Booking-Formular extrahieren nach `src/components/forms/shared/`: `DateStep`, `ParticipantStepper`, `CompanyAddressFields`, `ContactPersonFields`, `BillingAddressFields` — `DateStep` nutzt `format-termin-status.ts` aus Phase 4 zur Anzeige des Termin-Status
 - [ ] Restliche Zod-Schemas unter `src/schemas/`: `contact-request.schema.ts`, `quote-request.schema.ts`, `notification-signup.schema.ts`
@@ -247,8 +247,9 @@ feat: ModalProvider mit React Context für zentrales Modal-State-Management
 **Commits:**
 
 ```text
+feat: Booking-Formular als statisches Grundgerüst ergänzt
 feat: booking.schema.ts ergänzt
-feat: Booking-Formular mit react-hook-form und zod (Felder zunächst inline)
+feat: react-hook-form und zod in Booking-Formular integriert
 refactor: DateStep, ParticipantStepper und Address-/Kontakt-Fields aus Booking-Formular extrahiert
 feat: Zod-Schemas für Kontakt-/Anfrage-, Quote-Request- und Notification-Signup-Formular ergänzt
 feat: Kontakt-/Anfrageformular (/anfrage) mit react-hook-form und zod
