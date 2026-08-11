@@ -93,7 +93,7 @@ Neben der Präsentation meiner Dienstleistungen und Referenzen dient die Plattfo
     ├── components/
     │   ├── modals/                 # Modal, ActionStatusModal, *Modal-Wrapper
     │   └── forms/
-    │       ├── shared/             # DateStep, ParticipantStepper, Address-/Kontakt-Fields, TurnstileWidget
+    │       ├── shared/             # Label, TextField, SelectField, DateStep, ParticipantStepper, Address-/Kontakt-Fields, TurnstileWidget
     │       └── *.tsx + colokierte *-status-messages.tsx je Formular
     ├── emails/
     │   └── components/             # wiederverwendbare Email-Bausteine

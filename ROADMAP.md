@@ -231,6 +231,7 @@ fix: Header lag über Modal-Overlay - z-index von z-20 auf z-0 reduziert
 - [x] Booking-Formular unter `src/components/forms/` (zunächst mit allen Feldern inline, inkl. Datum, Teilnehmerzahl, Firmenadresse, Ansprechpartner, Rechnungsadresse)
 - [x] `booking.schema.ts` unter `src/schemas/`
 - [x] Formular-Typ per `z.infer<typeof bookingSchema>` abgeleitet (`BookingFormValues`), keine manuell doppelt gepflegten Types
+- [x] **Refactor:** Rohes `label`/`input` im Booking-Formular durch wiederverwendbare Feld-Komponenten unter `src/components/forms/shared/` ersetzt: `Label`, `TextField`, `SelectField`
 - [ ] **Refactor:** Field-Sections aus dem Booking-Formular extrahieren nach `src/components/forms/shared/`: `DateStep`, `ParticipantStepper`, `CompanyAddressFields`, `ContactPersonFields`, `BillingAddressFields` — `DateStep` nutzt `format-termin-status.ts` aus Phase 4 zur Anzeige des Termin-Status
 - [ ] Restliche Zod-Schemas unter `src/schemas/`: `contact-request.schema.ts`, `quote-request.schema.ts`, `notification-signup.schema.ts`
 - [ ] Kontakt-/Anfrageformular (`contact-request`) unter `src/components/forms/`, erreichbar über `src/app/anfrage/page.tsx` — deckt sowohl allgemeine Kontaktaufnahme als auch Anfragen zu Leistungen ab (nutzt extrahierte Field-Sections wo passend)
@@ -251,6 +252,7 @@ fix: Header lag über Modal-Overlay - z-index von z-20 auf z-0 reduziert
 feat: Booking-Formular als statisches Grundgerüst ergänzt
 feat: booking.schema.ts ergänzt
 feat: react-hook-form und zod in Booking-Formular integriert
+refactor: label/input im Booking-Formular durch Label, TextField und SelectField ersetzt
 refactor: DateStep, ParticipantStepper und Address-/Kontakt-Fields aus Booking-Formular extrahiert
 feat: Zod-Schemas für Kontakt-/Anfrage-, Quote-Request- und Notification-Signup-Formular ergänzt
 feat: Kontakt-/Anfrageformular (/anfrage) mit react-hook-form und zod
@@ -596,6 +598,8 @@ feat: Stories für WorkshopCard
 | 2026-08-09 | 2.6 | *Manuel Kübler* | `BackToTopButton`-Komponente in Phase 2 ergänzt (`src/app/_components/`, global im Root Layout) |
 | 2026-08-09 | 2.7 | *Manuel Kübler* | Phase 3 um Error-Pages erweitert (`not-found.tsx`, `error.tsx`, `global-error.tsx`), Phase umbenannt in „Rechtliches & Error-Pages" |
 | 2026-08-09 | 2.8 | *Manuel Kübler* | `format-date-range.ts` als neue Utility für `WorkshopCard` in Phase 4 ergänzt |
+| 2026-08-11 | 2.9 | *Manuel Kübler* | Booking-Schema von Anfang an mit wiederverwendbaren Teil-Schemas unter `src/schemas/shared/` geplant (`address`, `contact-person`, `teilnehmer`, `termin`), kein nachträglicher Split |
+| 2026-08-11 | 2.10 | *Manuel Kübler* | `Label`, `TextField`, `SelectField` als Refactor-Schritt vor der Field-Section-Extraktion in Phase 6 ergänzt |
 
 **Versionierung – Major.Minor (kein SemVer-Patch-Level, da kein "Breaking Change"-Konzept für eine Roadmap sinnvoll ist):**
 

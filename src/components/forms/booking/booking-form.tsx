@@ -9,6 +9,10 @@ import SectionHeading from "../shared/section-heading";
 import { Workshop } from "@/types/workshop";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { formatPrice } from "@/utils/format-price";
+import TextField from "../shared/text-field";
+import ErrorMessage from "../shared/error-message";
+import SelectField from "../shared/select-field";
+import Label from "../shared/label";
 
 export default function BookingForm() {
 
@@ -275,13 +279,13 @@ export default function BookingForm() {
                                     -
                                 </button>
 
-                                {/* TextField.tsx */}
-                                <input 
+                                {/* Teilnehmeranzahl */}
+                                <TextField
                                     type="number"
                                     min={1}
                                     max={20}
                                     step="any"
-                                    className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100 w-20! text-center" 
+                                    className="w-20! text-center"
                                     {...register("teilnehmerzahl", { required: true, min: 1, max: 20, valueAsNumber: true })}
                                 />
                                 
@@ -320,19 +324,16 @@ export default function BookingForm() {
                                 <div className="col-span-3 mb-4">
 
                                     {/* Label.tsx */}
-                                    <label className="mb-1.5 block text-[13px] font-medium text-foreground">Firmenname (Rechnung)</label>
+                                    <Label>Firmenname (Rechnung)</Label>
 
-                                    {/* TextField.tsx */}
-                                    <input 
-                                        className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100" 
+                                    {/* Firma */}
+                                    <TextField
                                         {...register("adresse.firma", { required: "Bitte geben Sie den Firmennamen an." })}
                                     />
                                     
                                     {/* ErrorMessage.tsx */}
                                     {formState.errors.adresse?.firma && (
-                                        <p className="mt-2 text-[12.5px] text-error-600">
-                                            {formState.errors.adresse.firma.message}
-                                        </p>
+                                        <ErrorMessage message={formState.errors.adresse.firma.message} />
                                     )}
 
                                 </div>
@@ -340,19 +341,16 @@ export default function BookingForm() {
                                 <div className="col-span-3 mb-4">
 
                                     {/* Label.tsx */}
-                                    <label className="mb-1.5 block text-[13px] font-medium text-foreground">Straße (inkl. Hausnummer)</label>
+                                    <Label>Straße (inkl. Hausnummer)</Label>
 
-                                    {/* TextField.tsx */}
-                                    <input 
-                                        className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100" 
+                                    {/* Straße */}
+                                    <TextField
                                         {...register("adresse.strasse", { required: "Bitte geben Sie die Straße an." })}
                                     />
 
                                     {/* ErrorMessage.tsx */}
                                     {formState.errors.adresse?.strasse && (
-                                        <p className="mt-2 text-[12.5px] text-error-600">
-                                            {formState.errors.adresse.strasse.message}
-                                        </p>
+                                        <ErrorMessage message={formState.errors.adresse.strasse.message} />
                                     )}
 
                                 </div>
@@ -360,19 +358,16 @@ export default function BookingForm() {
                                 <div className="col-span-1 mb-4">
 
                                     {/* Label.tsx */}
-                                    <label className="mb-1.5 block text-[13px] font-medium text-foreground">PLZ</label>
+                                    <Label>PLZ</Label>
 
-                                    {/* TextField.tsx */}
-                                    <input 
-                                        className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100" 
+                                    {/* PLZ */}
+                                    <TextField
                                         {...register("adresse.plz", { required: "Bitte geben Sie die PLZ an." })}
                                     />
 
                                     {/* ErrorMessage.tsx */}
                                     {formState.errors.adresse?.plz && (
-                                        <p className="mt-2 text-[12.5px] text-error-600">
-                                            {formState.errors.adresse.plz.message}
-                                        </p>
+                                        <ErrorMessage message={formState.errors.adresse.plz.message} />
                                     )}
 
                                 </div>
@@ -380,19 +375,16 @@ export default function BookingForm() {
                                 <div className="col-span-2 mb-4">
                                     
                                     {/* Label.tsx */}
-                                    <label className="mb-1.5 block text-[13px] font-medium text-foreground">Ort</label>
+                                    <Label>Ort</Label>
 
-                                    {/* TextField.tsx */}
-                                    <input 
-                                        className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100" 
+                                    {/* Ort */}
+                                    <TextField
                                         {...register("adresse.ort", { required: "Bitte geben Sie den Ort an." })}
                                     />
 
                                     {/* ErrorMessage.tsx */}
                                     {formState.errors.adresse?.ort && (
-                                        <p className="mt-2 text-[12.5px] text-error-600">
-                                            {formState.errors.adresse.ort.message}
-                                        </p>
+                                        <ErrorMessage message={formState.errors.adresse.ort.message} />
                                     )}
                                     
                                 </div>
@@ -403,11 +395,10 @@ export default function BookingForm() {
                             <div className="mb-4">
 
                                 {/* Label.tsx */}
-                                <label className="mb-1.5 block text-[13px] font-medium text-foreground">Webseite (optional)</label>
+                                <Label>Webseite (optional)</Label>
 
-                                {/* TextField.tsx */}
-                                <input 
-                                    className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100" 
+                                {/* Webseite */}
+                                <TextField
                                     {...register("webseite")}
                                 />
 
@@ -427,24 +418,22 @@ export default function BookingForm() {
                                 <div className="col-span-6 md:col-span-3 mb-4">
 
                                     {/* Label.tsx */}
-                                    <label className="mb-1.5 block text-[13px] font-medium text-foreground">Anrede</label>
+                                    <Label>Anrede</Label>
 
-                                    {/* SelectField.tsx */}
-                                    <select
-                                        className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100"
+                                    {/* Anrede */}
+                                    <SelectField
+                                        options={[
+                                            { value: "Frau", label: "Frau" },
+                                            { value: "Herr", label: "Herr" },
+                                            { value: "Divers", label: "Divers" },
+                                            { value: "Keine Angabe", label: "Keine Angabe" },
+                                        ]}
                                         {...register("contactPerson.anrede", { required: "Bitte wählen Sie eine Anrede aus." })}
-                                    >
-                                        <option value="Frau">Frau</option>
-                                        <option value="Herr">Herr</option>
-                                        <option value="Divers">Divers</option>
-                                        <option value="Keine Angabe">Keine Angabe</option>
-                                    </select>
-
+                                    />
+                                    
                                     {/* ErrorMessage.tsx */}
                                     {formState.errors.contactPerson?.anrede && (
-                                        <p className="mt-2 text-[12.5px] text-error-600">
-                                            {formState.errors.contactPerson.anrede.message}
-                                        </p>
+                                        <ErrorMessage message={formState.errors.contactPerson.anrede.message} />
                                     )}
 
                                 </div>
@@ -452,19 +441,16 @@ export default function BookingForm() {
                                 <div className="col-span-12 md:col-span-4 mb-4">
 
                                     {/* Label.tsx */}
-                                    <label className="mb-1.5 block text-[13px] font-medium text-foreground">Vorname</label>
+                                    <Label>Vorname</Label>
 
-                                    {/* TextField.tsx */}
-                                    <input 
-                                        className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100"
+                                    {/* Vorname */}
+                                    <TextField
                                         {...register("contactPerson.vorname", { required: "Bitte geben Sie den Vornamen an." })}
                                     />
                                     
                                     {/* ErrorMessage.tsx */}
                                     {formState.errors.contactPerson?.vorname && (
-                                        <p className="mt-2 text-[12.5px] text-error-600">
-                                            {formState.errors.contactPerson.vorname.message}
-                                        </p>
+                                        <ErrorMessage message={formState.errors.contactPerson.vorname.message} />
                                     )}
 
                                 </div>
@@ -472,19 +458,16 @@ export default function BookingForm() {
                                 <div className="col-span-12 md:col-span-5 mb-4">
 
                                     {/* Label.tsx */}
-                                    <label className="mb-1.5 block text-[13px] font-medium text-foreground">Nachname</label>
+                                    <Label>Nachname</Label>
 
-                                    {/* TextField.tsx */}
-                                    <input 
-                                        className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100"
+                                    {/* Nachname */}
+                                    <TextField
                                         {...register("contactPerson.nachname", { required: "Bitte geben Sie den Nachnamen an." })}
                                     />
                                     
                                     {/* ErrorMessage.tsx */}
                                     {formState.errors.contactPerson?.nachname && (
-                                        <p className="mt-2 text-[12.5px] text-error-600">
-                                            {formState.errors.contactPerson.nachname.message}
-                                        </p>
+                                        <ErrorMessage message={formState.errors.contactPerson.nachname.message} />
                                     )}
 
                                 </div>
@@ -492,40 +475,33 @@ export default function BookingForm() {
                                 <div className="col-span-12 md:col-span-7 mb-4">
 
                                     {/* Label.tsx */}
-                                    <label className="mb-1.5 block text-[13px] font-medium text-foreground">E-Mail</label>
+                                    <Label>E-Mail</Label>
 
-                                    {/* TextField.tsx */}
-                                    <input 
+                                    {/* E-Mail */}
+                                    <TextField
                                         type="email"
-                                        className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100"
-                                        {...register("contactPerson.email", { required: "Bitte geben Sie die E-Mail-Adresse an." })} 
+                                        {...register("contactPerson.email", { required: "Bitte geben Sie die E-Mail-Adresse an." })}
                                     />
                                     
                                     {/* ErrorMessage.tsx */}
                                     {formState.errors.contactPerson?.email && (
-                                        <p className="mt-2 text-[12.5px] text-error-600">
-                                            {formState.errors.contactPerson.email.message}
-                                        </p>
+                                        <ErrorMessage message={formState.errors.contactPerson.email.message} />
                                     )}
 
                                 </div>
 
                                 <div className="col-span-12 md:col-span-5 mb-4">
 
-                                    {/* Label.tsx */}
-                                    <label className="mb-1.5 block text-[13px] font-medium text-foreground">Telefon</label>
+                                    <Label>Telefon</Label>
 
-                                    {/* TextField.tsx */}
-                                    <input 
-                                        className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100"
-                                        {...register("contactPerson.telefon", { required: "Bitte geben Sie die Telefonnummer an." })} 
+                                    {/* Telefon */}
+                                    <TextField
+                                        {...register("contactPerson.telefon", { required: "Bitte geben Sie die Telefonnummer an." })}
                                     />
                                     
                                     {/* ErrorMessage.tsx */}
                                     {formState.errors.contactPerson?.telefon && (
-                                        <p className="mt-2 text-[12.5px] text-error-600">
-                                            {formState.errors.contactPerson.telefon.message}
-                                        </p>
+                                        <ErrorMessage message={formState.errors.contactPerson.telefon.message} />
                                     )}
 
                                 </div>
@@ -559,26 +535,20 @@ export default function BookingForm() {
                                             </div>
 
                                             {/* Vorname */}
-                                            {/* TextField.tsx */}
-                                            <input 
+                                            <TextField
                                                 placeholder="Vorname"
-                                                className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100"
                                                 {...register(`teilnehmer.${index}.vorname` as const)}
                                             />
 
                                             {/* Nachname */}
-                                            {/* TextField.tsx */}
-                                            <input 
+                                            <TextField
                                                 placeholder="Nachname"
-                                                className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100"
                                                 {...register(`teilnehmer.${index}.nachname` as const, { required: "Bitte geben Sie den Nachnamen an.", validate: (value) => value.trim().length > 0 || "Bitte geben Sie den Nachnamen an.", })}
                                             />
 
                                             {/* E-Mail */}
-                                            {/* TextField.tsx */}
-                                            <input 
+                                            <TextField
                                                 placeholder="E-Mail"
-                                                className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100"
                                                 {...register(`teilnehmer.${index}.email` as const, { min: 1, required: "Bitte geben Sie die E-Mail an." })}
                                             />
 
@@ -590,24 +560,18 @@ export default function BookingForm() {
                                             <div></div>
                                             <div>
                                                 {formState.errors.teilnehmer?.[index]?.vorname && (
-                                                    <p className="mt-2 text-[12.5px] text-error-600">
-                                                        {formState.errors.teilnehmer?.[index]?.vorname?.message}
-                                                    </p>
+                                                    <ErrorMessage message={formState.errors.teilnehmer?.[index]?.vorname?.message} />
                                                 )}
                                             </div>
                                             <div>
                                                 {formState.errors.teilnehmer?.[index]?.nachname && (
-                                                    <p className="mt-2 text-[12.5px] text-error-600">
-                                                        {formState.errors.teilnehmer?.[index]?.nachname?.message}
-                                                    </p>
+                                                    <ErrorMessage message={formState.errors.teilnehmer?.[index]?.nachname?.message} />
                                                 )}
                                             </div>
 
                                             <div>
                                                 {formState.errors.teilnehmer?.[index]?.email && (
-                                                    <p className="mt-2 text-[12.5px] text-error-600">
-                                                        {formState.errors.teilnehmer?.[index]?.email?.message}
-                                                    </p>
+                                                    <ErrorMessage message={formState.errors.teilnehmer?.[index]?.email?.message} />
                                                 )}
                                             </div>
                                         </div>
@@ -643,19 +607,16 @@ export default function BookingForm() {
                                 <div className="col-span-3 mb-4">
 
                                     {/* Label.tsx */}
-                                    <label className="mb-1.5 block text-[13px] font-medium text-foreground">Firmenname (Rechnung)</label>
+                                    <Label>Firmenname (Rechnung)</Label>
 
-                                    {/* TextField.tsx */}
-                                    <input 
-                                        className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100"
+                                    {/* Firma */}
+                                    <TextField
                                         {...register("rechnungsadresse.firma")}
                                     />
                                     
                                     {/* ErrorMessage.tsx */}
                                     {formState.errors.rechnungsadresse?.firma && (
-                                        <p className="mt-2 text-[12.5px] text-error-600">
-                                            {formState.errors.rechnungsadresse.firma.message}
-                                        </p>
+                                        <ErrorMessage message={formState.errors.rechnungsadresse.firma.message} />
                                     )}
 
                                 </div>
@@ -663,19 +624,16 @@ export default function BookingForm() {
                                 <div className="col-span-3 mb-4">
 
                                     {/* Label.tsx */}
-                                    <label className="mb-1.5 block text-[13px] font-medium text-foreground">Straße (inkl. Hausnummer)</label>
+                                    <Label>Straße (inkl. Hausnummer)</Label>
 
-                                    {/* TextField.tsx */}
-                                    <input 
-                                        className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100"
+                                    {/* Straße (inkl. Hausnummer) */}
+                                    <TextField
                                         {...register("rechnungsadresse.strasse")}
                                     />
 
                                     {/* ErrorMessage.tsx */}
                                     {formState.errors.rechnungsadresse?.strasse && (
-                                        <p className="mt-2 text-[12.5px] text-error-600">
-                                            {formState.errors.rechnungsadresse.strasse.message}
-                                        </p>
+                                        <ErrorMessage message={formState.errors.rechnungsadresse.strasse.message} />
                                     )}
 
                                 </div>
@@ -683,19 +641,16 @@ export default function BookingForm() {
                                 <div className="col-span-1 mb-4">
 
                                     {/* Label.tsx */}
-                                    <label className="mb-1.5 block text-[13px] font-medium text-foreground">PLZ</label>
+                                    <Label>PLZ</Label>
 
-                                    {/* TextField.tsx */}
-                                    <input 
-                                        className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100"
+                                    {/* PLZ */}
+                                    <TextField
                                         {...register("rechnungsadresse.plz")}
                                     />
 
                                     {/* ErrorMessage.tsx */}
                                     {formState.errors.rechnungsadresse?.plz && (
-                                        <p className="mt-2 text-[12.5px] text-error-600">
-                                            {formState.errors.rechnungsadresse.plz.message}
-                                        </p>
+                                        <ErrorMessage message={formState.errors.rechnungsadresse.plz.message} />
                                     )}
 
                                 </div>
@@ -703,19 +658,16 @@ export default function BookingForm() {
                                 <div className="col-span-2 mb-4">
                                     
                                     {/* Label.tsx */}
-                                    <label className="mb-1.5 block text-[13px] font-medium text-foreground">Ort</label>
+                                    <Label>Ort</Label>
 
-                                    {/* TextField.tsx */}
-                                    <input 
-                                        className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100"
+                                    {/* Ort */}
+                                    <TextField
                                         {...register("rechnungsadresse.ort")}
                                     />
 
                                     {/* ErrorMessage.tsx */}
                                     {formState.errors.rechnungsadresse?.ort && (
-                                        <p className="mt-2 text-[12.5px] text-error-600">
-                                            {formState.errors.rechnungsadresse.ort.message}
-                                        </p>
+                                        <ErrorMessage message={formState.errors.rechnungsadresse.ort.message} />
                                     )}
                                     
                                 </div>
@@ -740,15 +692,14 @@ export default function BookingForm() {
 
                                     {/* Gutschein-Code Eingabefeld */}
                                     {/* Label.tsx */}
-                                    <label className="mb-1.5 block text-[13px] font-medium text-foreground">Gutscheincode (optional)</label>
+                                    <Label>Gutscheincode (optional)</Label>
 
                                     <div className="flex items-stretch gap-2.5">
 
-                                        {/* TextField.tsx placeholder="" */}
-                                        {/* flex-1, damit das Input-Feld die gesamte verfügbare Breite einnimmt */}
-                                        <input 
-                                            placeholder="z.B. CODE2026" 
-                                            className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100"
+                                        {/* Gutscheincode */}
+                                        <TextField
+                                            placeholder="z.B. CODE2026"
+                                            className="flex-1"
                                             {...register("gutscheinCode")}
                                         />
 
@@ -767,7 +718,7 @@ export default function BookingForm() {
                                 <div className="col-span-12 mb-4">
                                     
                                     {/* Label.tsx */}
-                                    <label className="mb-1.5 block text-[13px] font-medium text-foreground">Anmerkungen (optional)</label>
+                                    <Label>Anmerkungen (optional)</Label>
 
                                     {/* TextArea.tsx */}
                                     <textarea
@@ -775,6 +726,7 @@ export default function BookingForm() {
                                         placeholder="Besondere Wünsche, Ernährung, technische Anforderungen …"
                                         {...register("notizen")}
                                     />
+
                                     
                                 </div>
 
