@@ -1,3 +1,4 @@
+import Button from "@/components/ui/button";
 import { useFormContext, useWatch } from "react-hook-form";
 
 type SubmitFooterFormData = {
@@ -32,6 +33,7 @@ export default function SubmitFooter({
                 {hint}
             </div>
 
+            {/*}
             <button
                 type="submit"
                 disabled={disabled}
@@ -43,6 +45,12 @@ export default function SubmitFooter({
             >
                 {isSubmitting ? "Wird gesendet …" : buttonLabel}
             </button>
+            */}
+
+            <Button type="submit" variant="primary" size="lg" isSubmitting={isSubmitting} disabled={disabled}>
+                {buttonLabel}
+            </Button>
+            
         </div>
     );
 };

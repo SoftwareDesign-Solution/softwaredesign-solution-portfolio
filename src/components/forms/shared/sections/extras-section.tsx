@@ -3,6 +3,7 @@ import { useFormContext } from "react-hook-form";
 import SectionHeading from "../section-heading";
 import TextField from "../text-field";
 import ErrorMessage from "../error-message";
+import Button from "@/components/ui/button";
 
 interface ExtrasSectionProps {
     num: string;
@@ -43,12 +44,17 @@ export default function ExtrasSection({
                             />
 
                             {/* Einlösen */}
+                            <Button type="button" variant="dark" className="px-4.5 py-2.5 text-[13.5px]">
+                                Einlösen
+                            </Button>
+                            {/*}
                             <button
                                 type="button"
                                 className="rounded-md bg-neutral-800 px-4.5 text-[13.5px] font-semibold text-white transition hover:bg-neutral-700"
                             >
                                 Einlösen
                             </button>
+                            */}
 
                         </div>
 

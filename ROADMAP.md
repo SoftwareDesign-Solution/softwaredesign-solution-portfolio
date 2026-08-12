@@ -43,9 +43,10 @@ Jeder Schritt = ein bewusster Meilenstein → nach Fertigstellung committen & pu
 │   │   ├── layout.tsx
 │   │   └── page.tsx
 │   ├── components/
+│   │   ├── ui/                      # Button, Card – generische, formularunabhängige UI-Primitive
 │   │   ├── modals/                  # Modal, ActionStatusModal, *Modal-Wrapper
 │   │   └── forms/                   # *.tsx + colokierte *-status-messages.tsx je Formular
-│   │       └── shared/              # DateStep, ParticipantStepper, turnstile-widget.tsx, ...
+│   │       └── shared/              # Label, TextField, SelectField, AppointmentSelection, ParticipantStepper, turnstile-widget.tsx, ...
 │   ├── emails/
 │   │   └── components/              # geteilte Email-Bausteine
 │   ├── lib/
@@ -237,6 +238,7 @@ fix: Header lag über Modal-Overlay - z-index von z-20 auf z-0 reduziert
 - [x] Kontakt-/Anfrageformular (`contact-request`) unter `src/components/forms/`, erreichbar über `src/app/anfrage/page.tsx` — deckt sowohl allgemeine Kontaktaufnahme als auch Anfragen zu Leistungen ab (nutzt extrahierte Field-Sections wo passend)
 - [x] Quote-Request-Formular unter `src/components/forms/` (nutzt extrahierte Field-Sections wo passend)
 - [x] Notification-Signup-Formular unter `src/components/forms/`
+- [x] **Refactor:** `Button.tsx` unter `src/components/ui/` extrahiert (wiederholte `className`-Strings, z. B. `ParticipantStepper` +/- Buttons) — generisch, nicht formularspezifisch, daher unter `ui/`
 - [ ] Modal-Wrapper für die Formulare unter `src/components/modals/`: `BookingModal`, `QuoteRequestModal`, `NotificationSignupModal` (nutzen `Modal` + jeweiliges Formular)
 - [ ] TypeScript-Migration (`.jsx` → `.tsx`)
 - [ ] `TurnstileWidget` Komponente unter `src/components/forms/shared/` (Wrapper um `next-turnstile`)
@@ -258,6 +260,7 @@ feat: Zod-Schemas für Kontakt-/Anfrage-, Quote-Request- und Notification-Signup
 feat: Kontakt-/Anfrageformular (/anfrage) mit react-hook-form und zod
 feat: Quote-Request- mit react-hook-form und zod
 feat: Notification-Signup-Formular mit react-hook-form und zod
+refactor: Button.tsx als wiederverwendbare Komponente extrahiert (bisher wiederholte className-Strings, z. B. ParticipantStepper +/- Buttons)
 feat: Modal-Wrapper für Booking-, Quote-Request- und Notification-Signup-Formular
 refactor: TypeScript-Migration - typed interfaces für Formulare
 feat: TurnstileWidget-Komponente ergänzt

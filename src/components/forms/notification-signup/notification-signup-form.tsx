@@ -8,6 +8,7 @@ import { Workshop } from "@/types/workshop";
 import Label from "../shared/label";
 import TextField from "../shared/text-field";
 import ErrorMessage from "../shared/error-message";
+import Button from "@/components/ui/button";
 
 export default function NotificationSignupForm() {
 
@@ -115,6 +116,7 @@ export default function NotificationSignupForm() {
 
                 </div>
 
+                {/*
                 <div className="mt-5.5 flex justify-end gap-2.5">
 
                     <button
@@ -136,6 +138,17 @@ export default function NotificationSignupForm() {
                         >
                             {isSubmitting ? "Wird gesendet …" : "Bestätigen"}
                     </button>
+
+                </div>
+                */}
+
+                <div className="mt-5.5 flex justify-end gap-2.5">
+
+                    <Button type="button" variant="secondary" size="xs">Abbrechen</Button>
+                    
+                    <Button type="submit" variant="primary" size="sm" isSubmitting={isSubmitting}>
+                        Bestätigen
+                    </Button>
 
                 </div>
 

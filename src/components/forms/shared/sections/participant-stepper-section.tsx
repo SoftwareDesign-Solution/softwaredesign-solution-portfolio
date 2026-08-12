@@ -4,6 +4,7 @@ import { useFormContext } from "react-hook-form";
 import { BookingFormData } from "@/schemas/forms/booking.schema";
 import SectionHeading from "../section-heading";
 import TextField from "../text-field";
+import Button from "@/components/ui/button";
 
 interface ParticipantStepperSectionProps {
     num: string;
@@ -44,6 +45,7 @@ export default function ParticipantStepperSection({
 
             <div className="flex flex-wrap items-center gap-3.5">
 
+                {/*}
                 <button
                     type="button"
                     onClick={() => stepParticipants(-1)}
@@ -51,6 +53,11 @@ export default function ParticipantStepperSection({
                 >
                     -
                 </button>
+                */}
+
+                <Button type="button" variant="muted" size="icon" onClick={() => stepParticipants(-1)}>
+                    -
+                </Button>
 
                 {/* Teilnehmeranzahl */}
                 <TextField
@@ -62,6 +69,7 @@ export default function ParticipantStepperSection({
                     {...register("teilnehmerzahl", { required: true, min: 1, max: 20, valueAsNumber: true })}
                 />
                 
+                {/*
                 <button
                     type="button"
                     onClick={() => stepParticipants(1)}
@@ -69,6 +77,11 @@ export default function ParticipantStepperSection({
                 >
                     +
                 </button>
+                */}
+
+                <Button type="button" variant="muted" size="icon" onClick={() => stepParticipants(1)}>
+                    +
+                </Button>
 
                 <span className="basis-full ml-2 text-[13px] text-muted md:ml-2 md:basis-auto">
                     Max. 20 · für größere Gruppen Inhouse anfragen
