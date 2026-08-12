@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { SubmitHandler, useForm, useWatch, FormProvider } from "react-hook-form";
 import { type ContactRequestFormData, contactRequestFormSchema } from "@/schemas/forms/contact-request.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,6 +9,8 @@ import TextField from "../shared/text-field";
 import SelectField from "../shared/select-field";
 import ErrorMessage from "../shared/error-message";
 import Link from "next/dist/client/link";
+import TurnstileWidgetSection from "../shared/sections/turnstile-widget-section";
+import { TurnstileRef } from "nextjs-turnstile";
 
 export default function ContactRequestForm() {
 
@@ -31,6 +33,9 @@ export default function ContactRequestForm() {
                 telefon: "",
             },
             nachricht: "",
+            turnstile: {
+                token: "",
+            },
         },
     });
 
@@ -44,6 +49,9 @@ export default function ContactRequestForm() {
         defaultValue: "",
     })?.length ?? 0;
 
+    // Datenschutzerklärung & Sicherheitsabfrage (Turnstile)
+    const turnstileRef = useRef<TurnstileRef>(null);
+    
     const onSubmit: SubmitHandler<ContactRequestFormData> = (data) => {
             //console.log(methods.formState.errors);
             //console.log("Booking submitted:", { workshop: 'Test', ...data });
@@ -267,6 +275,8 @@ export default function ContactRequestForm() {
                             {formState.errors.acceptDataProcessing && (
                                 <ErrorMessage message={formState.errors.acceptDataProcessing.message} />
                             )}
+
+                            <TurnstileWidgetSection turnstileRef={turnstileRef} />
 
                             <div className="mt-6 flex flex-col items-center gap-2.5">
 

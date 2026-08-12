@@ -2,6 +2,7 @@ import { z } from "zod";
 import { addressSchema, optionalAddressSchema } from "./shared/address.schema";
 import { contactPersonSchema } from "./shared/contact-person.schema";
 import { terminSchema } from "./shared/termin.schema";
+import { turnstileSchema } from "./shared/turnstile-schema";
 
 export const quoteRequestFormSchema = z.object({
     
@@ -36,7 +37,10 @@ export const quoteRequestFormSchema = z.object({
     notizen: z.string().optional(),
 
     // Consent
-    consent: z.boolean()
+    consent: z.boolean(),
+
+    // Turnstile token
+    turnstile: turnstileSchema,
 
 })
 .superRefine((data, ctx) => {

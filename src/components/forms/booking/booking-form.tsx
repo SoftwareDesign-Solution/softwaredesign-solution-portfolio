@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { FormProvider, SubmitHandler, useForm, useWatch } from "react-hook-form";
+import { useRef, useState } from "react";
+import { FormProvider, SubmitHandler, useForm, useFormState, useWatch } from "react-hook-form";
 import Link from "next/link";
 import { BookingData, bookingFormSchema, type BookingFormData } from "@/schemas/forms/booking.schema";
 import { Workshop } from "@/types/workshop";
@@ -17,6 +17,10 @@ import SummarySection from "../shared/sections/summary-section";
 import ConsentSection from "../shared/sections/consent-section";
 import SubmitFooter from "../shared/submit-footer";
 import { WorkshopFormProps } from "@/types/workshop-props";
+import TurnstileWidget from "../shared/turnstile-widget";
+import ErrorMessage from "../shared/error-message";
+import { TurnstileRef } from "nextjs-turnstile";
+import TurnstileWidgetSection from "../shared/sections/turnstile-widget-section";
 
 export default function BookingForm({ 
     workshop, 
@@ -63,10 +67,15 @@ export default function BookingForm({
             gutscheinCode: "",
             notizen: "",
             consent: false,
+            turnstile: {
+                token: "",
+            },
         },
     });
 
     const { control, formState, handleSubmit } = methods;
+
+    const { errors } = useFormState({ control });
 
     const [formData, setFormData] = useState<BookingData | null>(null);
 
@@ -83,6 +92,9 @@ export default function BookingForm({
     const subtotal = Number(workshop.preis) * participantCountLabel;
     const vat = Math.round(subtotal * 0.19);
     const total = subtotal + vat;
+
+    // Datenschutzerklärung & Sicherheitsabfrage (Turnstile)
+    const turnstileRef = useRef<TurnstileRef>(null);
 
     const onSubmit: SubmitHandler<BookingFormData> = (data) => {
         //console.log(methods.formState.errors);
@@ -103,7 +115,7 @@ export default function BookingForm({
                 gesamtbetrag: total
             }
         });
-  };
+    };
 
     return (
         <>
@@ -151,7 +163,10 @@ export default function BookingForm({
                         </Link>{" "}
                         einverstanden.
                     </ConsentSection>
-                    
+
+
+                    {/* Turnstile */}
+                    <TurnstileWidgetSection turnstileRef={turnstileRef} />
                     
 
                     {/* Submit Footer */}

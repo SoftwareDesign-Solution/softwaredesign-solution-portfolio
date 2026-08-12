@@ -5,7 +5,7 @@ import Link from "next/link";
 import type { Workshop } from "@/types/workshop";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { QuoteRequestData, type QuoteRequestFormData, quoteRequestFormSchema } from "@/schemas/forms/quote-request.schema";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import ContactPersonSection from "../shared/sections/contact-person-section";
 import CompanyAddressSection from "../shared/sections/company-address-section";
 import ParticipantStepperSection from "../shared/sections/participant-stepper-section";
@@ -16,6 +16,8 @@ import SummarySection from "../shared/sections/summary-section";
 import ExtrasSection from "../shared/sections/extras-section";
 import SubmitFooter from "../shared/submit-footer";
 import { WorkshopFormProps } from "@/types/workshop-props";
+import TurnstileWidgetSection from "../shared/sections/turnstile-widget-section";
+import { TurnstileRef } from "nextjs-turnstile";
 
 export default function QuoteRequestForm({ 
     workshop, 
@@ -54,6 +56,9 @@ export default function QuoteRequestForm({
             */
             notizen: "",
             consent: false,
+            turnstile: {
+                token: "",
+            },
         },
     });
 
@@ -72,6 +77,9 @@ export default function QuoteRequestForm({
     const subtotal = Number(workshop.preis) * participantCountLabel;
     const vat = Math.round(subtotal * 0.19);
     const total = subtotal + vat;
+
+    // Datenschutzerklärung & Sicherheitsabfrage (Turnstile)
+    const turnstileRef = useRef<TurnstileRef>(null);
 
     const onSubmit: SubmitHandler<QuoteRequestFormData> = (data) => {
         //console.log(methods.formState.errors);
@@ -131,6 +139,9 @@ export default function QuoteRequestForm({
                             </Link>{" "}
                             einverstanden.
                         </ConsentSection>
+
+                        {/* Turnstile */}
+                        <TurnstileWidgetSection turnstileRef={turnstileRef} />
 
                         {/* Submit Footer */}
                         <SubmitFooter

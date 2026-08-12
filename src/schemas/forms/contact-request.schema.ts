@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { addressSchema } from "./shared/address.schema";
 import { contactPersonSchema } from "./shared/contact-person.schema";
+import { turnstileSchema } from "./shared/turnstile-schema";
 
 export const contactRequestFormSchema = z.object({
 
@@ -18,6 +19,9 @@ export const contactRequestFormSchema = z.object({
     source: z.string().optional(),
 
     acceptDataProcessing: z.boolean().refine((value) => value === true, "Bitte stimmen Sie der Verarbeitung Ihrer Daten zu."),
+
+    // Turnstile token
+    turnstile: turnstileSchema,
 
 });
 

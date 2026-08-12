@@ -240,8 +240,8 @@ fix: Header lag über Modal-Overlay - z-index von z-20 auf z-0 reduziert
 - [x] Notification-Signup-Formular unter `src/components/forms/`
 - [x] **Refactor:** `Button.tsx` unter `src/components/ui/` extrahiert (wiederholte `className`-Strings, z. B. `ParticipantStepper` +/- Buttons) — generisch, nicht formularspezifisch, daher unter `ui/`
 - [x] Modal-Wrapper für die Formulare unter `src/components/modals/`: `BookingModal`, `QuoteRequestModal`, `NotificationSignupModal` (nutzen `Modal` + jeweiliges Formular)
-- [ ] TypeScript-Migration (`.jsx` → `.tsx`)
-- [ ] `TurnstileWidget` Komponente unter `src/components/forms/shared/` (Wrapper um `next-turnstile`)
+- [x] TypeScript-Migration (`.jsx` → `.tsx`)
+- [x] `TurnstileWidget` Komponente unter `src/components/forms/shared/` (Wrapper um `nextjs-turnstile`)
 - [ ] `src/lib/turnstile.ts` – `verifyTurnstileToken()` gegen Cloudflare siteverify-API
 - [ ] Server Actions (`src/app/actions/`): `send-contact-request.ts` (nur E-Mail-Versand, keine DB-Persistierung), `create-booking.ts`, `create-quote-request.ts`, `create-notification-signup.ts` (DB-Insert + E-Mail) — nutzen `sql` aus `src/lib/db.ts` + `resend` aus `src/lib/resend.ts` direkt (noch keine Service-Schicht); jede Action verifiziert zuerst den Turnstile-Token über `src/lib/turnstile.ts`, bevor verarbeitet wird
 - [ ] `revalidatePath` / `redirect` nach den jeweiligen Mutationen
