@@ -20,7 +20,7 @@ export default function ActionStatusModal({
   heading,
   body,
   meta,
-  zIndex,
+  zIndex = 9999,
   maxWidth,
 }: ActionStatusModalProps) {
 

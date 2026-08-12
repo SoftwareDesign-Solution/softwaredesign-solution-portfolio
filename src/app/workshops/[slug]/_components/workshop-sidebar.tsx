@@ -18,7 +18,7 @@ export default function WorkshopSidebar(workshop: Workshop) {
     
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const { showActionStatus, openBookingModal } = useModal();
+    const { showActionStatus, openBookingModal, openNotificationSignupModal, openQuoteRequestModal } = useModal();
     
     const showModal = () => {
       
@@ -39,6 +39,8 @@ export default function WorkshopSidebar(workshop: Workshop) {
 
     return (
         <aside className="self-start sticky top-24">
+
+          <div className="border border-solid border-border rounded-lg p-5 shadow-md">
 
             {/* Jetzt buchen */}
             <div className="text-xs text-muted uppercase tracking-[1.5px] font-semibold mb-2.5">
@@ -83,7 +85,7 @@ export default function WorkshopSidebar(workshop: Workshop) {
 
               {/* Angebot anfordern */}
               {/*<ActionButton variant="outline">Angebot anfordern</ActionButton>*/}
-              <Button variant="outline" fullWidth>
+              <Button variant="outline" fullWidth onClick={() => openQuoteRequestModal(workshop)}>
                 Angebot anfordern
               </Button>
  
@@ -97,7 +99,7 @@ export default function WorkshopSidebar(workshop: Workshop) {
 
               {/* Bei neuen Terminen benachrichtigen */}
               {/*<ActionButton variant="dashed">Bei neuen Terminen benachrichtigen</ActionButton>*/}
-              <Button variant="dashed" fullWidth>
+              <Button variant="dashed" fullWidth onClick={() => openNotificationSignupModal(workshop)}>
                 Bei neuen Terminen benachrichtigen
               </Button>
             
@@ -126,6 +128,8 @@ export default function WorkshopSidebar(workshop: Workshop) {
               heading={() => "Platz reserviert!"} 
               body={() => "Vielen Dank für Ihre Reservierung. Wir haben Ihnen eine Bestätigung per E-Mail gesendet."}
             />
+
+          </div>
             
         </aside>
     );

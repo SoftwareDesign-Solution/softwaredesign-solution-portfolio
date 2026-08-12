@@ -15,37 +15,14 @@ import ConsentSection from "../shared/sections/consent-section";
 import SummarySection from "../shared/sections/summary-section";
 import ExtrasSection from "../shared/sections/extras-section";
 import SubmitFooter from "../shared/submit-footer";
+import { WorkshopFormProps } from "@/types/workshop-props";
 
-export default function QuoteRequestForm() {
-
-    const workshop: Workshop = {
-        id: 1,
-        slug: "beispiel-workshop",
-        titel: "Beispiel Workshop",
-        preis: 100,
-        active: true,
-        dauer: "2 Tage",
-        termine: [
-            {
-                id: 1,
-                workshop_id: 1,
-                datumVon: "2024-07-01",
-                datumBis: "2024-07-04",
-                format: "Online",
-                status: "verfuegbar",
-                active: true,
-            },
-            {
-                id: 2,
-                workshop_id: 1,
-                datumVon: "2024-07-07",
-                datumBis: "2024-07-10",
-                format: "Online",
-                status: "verfuegbar",
-                active: true,
-            }
-        ]
-    };
+export default function QuoteRequestForm({ 
+    workshop, 
+    onClose, 
+    onSuccess, 
+    onError 
+}: WorkshopFormProps) {
 
     const methods = useForm<QuoteRequestFormData>({
         resolver: zodResolver(quoteRequestFormSchema),
@@ -80,7 +57,7 @@ export default function QuoteRequestForm() {
         },
     });
 
-    const { control, handleSubmit } = methods;
+    const { control, formState, handleSubmit } = methods;
 
     const [formData, setFormData] = useState<QuoteRequestData | null>(null);
 

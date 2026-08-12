@@ -142,7 +142,7 @@ feat: BackToTopButton-Komponente ergänzt
 
 ---
 
-## Phase 3 – Rechtliches
+## Phase 3 – Rechtliches & Error-Pages
 
 - [x] `src/app/impressum/page.tsx`
 - [x] `src/app/datenschutz/page.tsx`
@@ -239,7 +239,7 @@ fix: Header lag über Modal-Overlay - z-index von z-20 auf z-0 reduziert
 - [x] Quote-Request-Formular unter `src/components/forms/` (nutzt extrahierte Field-Sections wo passend)
 - [x] Notification-Signup-Formular unter `src/components/forms/`
 - [x] **Refactor:** `Button.tsx` unter `src/components/ui/` extrahiert (wiederholte `className`-Strings, z. B. `ParticipantStepper` +/- Buttons) — generisch, nicht formularspezifisch, daher unter `ui/`
-- [ ] Modal-Wrapper für die Formulare unter `src/components/modals/`: `BookingModal`, `QuoteRequestModal`, `NotificationSignupModal` (nutzen `Modal` + jeweiliges Formular)
+- [x] Modal-Wrapper für die Formulare unter `src/components/modals/`: `BookingModal`, `QuoteRequestModal`, `NotificationSignupModal` (nutzen `Modal` + jeweiliges Formular)
 - [ ] TypeScript-Migration (`.jsx` → `.tsx`)
 - [ ] `TurnstileWidget` Komponente unter `src/components/forms/shared/` (Wrapper um `next-turnstile`)
 - [ ] `src/lib/turnstile.ts` – `verifyTurnstileToken()` gegen Cloudflare siteverify-API
@@ -605,6 +605,7 @@ feat: Stories für WorkshopCard
 | 2026-08-11 | 2.9 | *Manuel Kübler* | Booking-Schema von Anfang an mit wiederverwendbaren Teil-Schemas unter `src/schemas/shared/` geplant (`address`, `contact-person`, `teilnehmer`, `termin`), kein nachträglicher Split |
 | 2026-08-11 | 2.10 | *Manuel Kübler* | `Label`, `TextField`, `SelectField` als Refactor-Schritt vor der Field-Section-Extraktion in Phase 6 ergänzt |
 | 2026-08-11 | 2.11 | *Manuel Kübler* | `DateStep` in `AppointmentSelection` umbenannt (kein Multistep-Wizard, Name suggerierte das fälschlich) |
+| 2026-08-12 | 2.12 | *Manuel Kübler* | `src/components/ui/` als neues Verzeichnis für generische UI-Primitive ergänzt (`Button`, `Card`) |
 
 **Versionierung – Major.Minor (kein SemVer-Patch-Level, da kein "Breaking Change"-Konzept für eine Roadmap sinnvoll ist):**
 

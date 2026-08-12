@@ -1,7 +1,9 @@
+"use client";
+
 import TerminRow from "@/components/termin-row";
+import { useModal } from "@/providers/modal-provider";
 import { Termin } from "@/types/termin";
 import { Workshop } from "@/types/workshop";
-import { formatDateRange } from "@/utils/format-date-range";
 import { formatPrice } from "@/utils/format-price";
 import Link from "next/link";
 
@@ -14,6 +16,8 @@ interface WorkshopCardProps {
 const MAX_VISIBLE_TERMINE = 3;
 
 export default function WorkshopCard({ workshop, index, counter }: WorkshopCardProps) {
+
+    const { openNotificationSignupModal, openQuoteRequestModal } = useModal(); // This line seems to be incomplete or unnecessary, consider removing it if not used.
 
     const visibleTermine: Termin[] = workshop.termine ? workshop.termine.slice(0, MAX_VISIBLE_TERMINE): [];
     const remainingCount: number = workshop.termine ? workshop.termine.length - visibleTermine.length : 0;
@@ -96,7 +100,10 @@ export default function WorkshopCard({ workshop, index, counter }: WorkshopCardP
 
                 </div>
 
-                <button className="relative z-2 flex items-center gap-2 text-sm text-muted cursor-pointer py-2.5 px-0.5 mb-1">
+                <button 
+                    className="relative z-2 flex items-center gap-2 text-sm text-muted cursor-pointer py-2.5 px-0.5 mb-1"
+                    onClick={() => openNotificationSignupModal(workshop)}
+                >
                     <svg
                         width="13"
                         height="13"
@@ -115,6 +122,7 @@ export default function WorkshopCard({ workshop, index, counter }: WorkshopCardP
 
                 <button
                     className="relative z-2 flex items-center gap-2 text-sm text-muted cursor-pointer pb-2.5 px-0.5 mb-1"
+                    onClick={() => openQuoteRequestModal(workshop)}
                 >
                     <svg
                         width="13"

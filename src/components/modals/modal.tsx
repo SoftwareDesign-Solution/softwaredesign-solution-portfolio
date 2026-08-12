@@ -22,7 +22,7 @@ export default function Modal({
     title, 
     maxWidth ="max-w-[960px]", 
     size = "lg", 
-    align, 
+    align = "start", 
     zIndex = 9000,
     showHeader = true,
     children 
@@ -58,6 +58,7 @@ export default function Modal({
     return createPortal(
         <div
             className={`fixed inset-0 z-[${zIndex}] flex justify-center overflow-y-auto bg-neutral-900/55 px-6 py-10 backdrop-blur-xs ${alignClass}`}
+            style={{ zIndex }}
             onMouseDown={(e) => {
                 if (e.target === e.currentTarget) onClose?.();
             }}
@@ -67,7 +68,7 @@ export default function Modal({
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="modal-title"
-                className={`max-h-[calc(100vh-80px)] ${maxWidth} overflow-y-auto rounded-xl bg-white shadow-2xl`}
+                className={`w-full max-h-[calc(100vh-80px)] ${maxWidth} overflow-y-auto rounded-xl bg-white shadow-2xl`}
             >
 
                 {showHeader ? (

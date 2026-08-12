@@ -9,37 +9,14 @@ import Label from "../shared/label";
 import TextField from "../shared/text-field";
 import ErrorMessage from "../shared/error-message";
 import Button from "@/components/ui/button";
+import { WorkshopFormProps } from "@/types/workshop-props";
 
-export default function NotificationSignupForm() {
-
-    const workshop: Workshop = {
-        id: 1,
-        slug: "beispiel-workshop",
-        titel: "Beispiel Workshop",
-        preis: 100,
-        active: true,
-        dauer: "2 Tage",
-        termine: [
-            {
-                id: 1,
-                workshop_id: 1,
-                datumVon: "2024-07-01",
-                datumBis: "2024-07-04",
-                format: "Online",
-                status: "verfuegbar",
-                active: true,
-            },
-            {
-                id: 2,
-                workshop_id: 1,
-                datumVon: "2024-07-07",
-                datumBis: "2024-07-10",
-                format: "Online",
-                status: "verfuegbar",
-                active: true,
-            }
-        ]
-    };
+export default function NotificationSignupForm({ 
+    workshop, 
+    onClose, 
+    onSuccess, 
+    onError 
+}: WorkshopFormProps) {
 
     const {
         register,
