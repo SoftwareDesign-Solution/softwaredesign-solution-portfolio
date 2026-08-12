@@ -1,4 +1,4 @@
-import { useFormContext } from "react-hook-form";
+import { useFormContext, useFormState } from "react-hook-form";
 import type { AddressFormData } from "@/schemas/forms/shared/address.schema";
 import Label from "./label";
 import TextField from "./text-field";
@@ -23,8 +23,11 @@ export default function AddressFields({
 }: AddressFieldsProps) {
     const {
         register,
-        formState: { errors },
+        control,
+        //formState: { errors },
     } = useFormContext<FormWithAddresses>();
+
+    const { errors } = useFormState({ control });
 
     const addressErrors = errors[name];
 

@@ -1,4 +1,4 @@
-import { useFormContext, useFieldArray, useWatch } from "react-hook-form";
+import { useFormContext, useFieldArray, useFormState, useWatch } from "react-hook-form";
 import { TeilnehmerFormData } from "@/schemas/forms/shared/teilnehmer.schema";
 import SectionHeading from "../section-heading";
 import TextField from "../text-field";
@@ -16,11 +16,13 @@ export default function ParticipantsSection({
     const { 
         register, 
         control, 
-        formState: { errors } 
+        //formState: { errors } 
     } = useFormContext<{
         teilnehmerzahl: number;
         teilnehmer: TeilnehmerFormData[];
     }>();
+
+    const { errors } = useFormState({ control });
 
     const participantCount = useWatch({
         control,

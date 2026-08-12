@@ -1,6 +1,6 @@
 "use client";
 
-import { Controller, useFormContext } from "react-hook-form";
+import { Controller, useFormContext, useFormState } from "react-hook-form";
 import { BookingFormData } from "@/schemas/forms/booking.schema";
 import { Termin } from "@/types/termin";
 import SectionHeading from "../section-heading";
@@ -20,8 +20,9 @@ export default function AppointmentSelectionSection({
 
     const {
         control,
-        formState: { errors },
     } = useFormContext<BookingFormData>();
+
+    const { errors } = useFormState({ control });
 
     return (
         <section className="mb-8">

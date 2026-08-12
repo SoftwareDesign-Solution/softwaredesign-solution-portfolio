@@ -1,4 +1,4 @@
-import { useFormContext } from "react-hook-form";
+import { useFormContext, useFormState } from "react-hook-form";
 import { ContactPersonFormData } from "@/schemas/forms/shared/contact-person.schema";
 import Label from "../label";
 import SectionHeading from "../section-heading";
@@ -19,10 +19,13 @@ export default function ContactPersonSection({
 }: ContactPersonSectionProps) {
 
     const {
+        control,
         register,
-        formState: { errors },
+        //formState: { errors },
     } = useFormContext<FormWithContactPerson>();
     
+    const { errors } = useFormState({ control });
+
     return (
         <section className="mb-8">
         
