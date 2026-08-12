@@ -48,4 +48,5 @@ export async function getWorkshops(): Promise<Workshop[]> {
 
     return workshops;
 
+    // ) FILTER (WHERE t.active = TRUE AND t.id IS NOT NULL AND t.datum_von >= CURRENT_DATE),
 }

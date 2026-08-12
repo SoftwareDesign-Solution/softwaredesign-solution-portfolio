@@ -34,7 +34,8 @@ export async function getWorkshop(slug: string): Promise<Workshop | null> {
                         'datumVon', t.datum_von,
                         'datumBis', t.datum_bis,
                         'format', t.format,
-                        'status', t.status
+                        'status', t.status,
+                        'active', t.active
                     ) ORDER BY t.datum_von
                 ) FILTER (WHERE t.active = TRUE AND t.id IS NOT NULL),
                 '[]'
@@ -48,4 +49,6 @@ export async function getWorkshop(slug: string): Promise<Workshop | null> {
 
     return workshops.length > 0 ? workshops[0] : null;
     
+    // ) FILTER (WHERE t.active = TRUE AND t.id IS NOT NULL AND t.datum_von >= CURRENT_DATE),
+
 };
