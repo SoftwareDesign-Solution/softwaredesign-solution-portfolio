@@ -232,7 +232,7 @@ fix: Header lag über Modal-Overlay - z-index von z-20 auf z-0 reduziert
 - [x] `booking.schema.ts` unter `src/schemas/`
 - [x] Formular-Typ per `z.infer<typeof bookingSchema>` abgeleitet (`BookingFormValues`), keine manuell doppelt gepflegten Types
 - [x] **Refactor:** Rohes `label`/`input` im Booking-Formular durch wiederverwendbare Feld-Komponenten unter `src/components/forms/shared/` ersetzt: `Label`, `TextField`, `SelectField`
-- [ ] **Refactor:** Field-Sections aus dem Booking-Formular extrahieren nach `src/components/forms/shared/`: `DateStep`, `ParticipantStepper`, `CompanyAddressFields`, `ContactPersonFields`, `BillingAddressFields` — `DateStep` nutzt `format-termin-status.ts` aus Phase 4 zur Anzeige des Termin-Status
+- [ ] **Refactor:** Field-Sections aus dem Booking-Formular extrahieren nach `src/components/forms/shared/`: `AppointmentSelection`, `ParticipantStepper`, `CompanyAddressFields`, `ContactPersonFields`, `BillingAddressFields` — `DateStep` nutzt `format-termin-status.ts` aus Phase 4 zur Anzeige des Termin-Status
 - [ ] Restliche Zod-Schemas unter `src/schemas/`: `contact-request.schema.ts`, `quote-request.schema.ts`, `notification-signup.schema.ts`
 - [ ] Kontakt-/Anfrageformular (`contact-request`) unter `src/components/forms/`, erreichbar über `src/app/anfrage/page.tsx` — deckt sowohl allgemeine Kontaktaufnahme als auch Anfragen zu Leistungen ab (nutzt extrahierte Field-Sections wo passend)
 - [ ] Quote-Request-Formular unter `src/components/forms/` (nutzt extrahierte Field-Sections wo passend)
@@ -600,6 +600,7 @@ feat: Stories für WorkshopCard
 | 2026-08-09 | 2.8 | *Manuel Kübler* | `format-date-range.ts` als neue Utility für `WorkshopCard` in Phase 4 ergänzt |
 | 2026-08-11 | 2.9 | *Manuel Kübler* | Booking-Schema von Anfang an mit wiederverwendbaren Teil-Schemas unter `src/schemas/shared/` geplant (`address`, `contact-person`, `teilnehmer`, `termin`), kein nachträglicher Split |
 | 2026-08-11 | 2.10 | *Manuel Kübler* | `Label`, `TextField`, `SelectField` als Refactor-Schritt vor der Field-Section-Extraktion in Phase 6 ergänzt |
+| 2026-08-11 | 2.11 | *Manuel Kübler* | `DateStep` in `AppointmentSelection` umbenannt (kein Multistep-Wizard, Name suggerierte das fälschlich) |
 
 **Versionierung – Major.Minor (kein SemVer-Patch-Level, da kein "Breaking Change"-Konzept für eine Roadmap sinnvoll ist):**
 
