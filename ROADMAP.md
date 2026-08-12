@@ -234,9 +234,9 @@ fix: Header lag über Modal-Overlay - z-index von z-20 auf z-0 reduziert
 - [x] **Refactor:** Rohes `label`/`input` im Booking-Formular durch wiederverwendbare Feld-Komponenten unter `src/components/forms/shared/` ersetzt: `Label`, `TextField`, `SelectField`
 - [x] **Refactor:** Field-Sections aus dem Booking-Formular extrahieren nach `src/components/forms/shared/`: `AppointmentSelection`, `ParticipantStepper`, `CompanyAddressFields`, `ContactPersonFields`, `BillingAddressFields` — `DateStep` nutzt `format-termin-status.ts` aus Phase 4 zur Anzeige des Termin-Status
 - [x] Restliche Zod-Schemas unter `src/schemas/`: `contact-request.schema.ts`, `quote-request.schema.ts`, `notification-signup.schema.ts`
-- [ ] Kontakt-/Anfrageformular (`contact-request`) unter `src/components/forms/`, erreichbar über `src/app/anfrage/page.tsx` — deckt sowohl allgemeine Kontaktaufnahme als auch Anfragen zu Leistungen ab (nutzt extrahierte Field-Sections wo passend)
-- [ ] Quote-Request-Formular unter `src/components/forms/` (nutzt extrahierte Field-Sections wo passend)
-- [ ] Notification-Signup-Formular unter `src/components/forms/`
+- [x] Kontakt-/Anfrageformular (`contact-request`) unter `src/components/forms/`, erreichbar über `src/app/anfrage/page.tsx` — deckt sowohl allgemeine Kontaktaufnahme als auch Anfragen zu Leistungen ab (nutzt extrahierte Field-Sections wo passend)
+- [x] Quote-Request-Formular unter `src/components/forms/` (nutzt extrahierte Field-Sections wo passend)
+- [x] Notification-Signup-Formular unter `src/components/forms/`
 - [ ] Modal-Wrapper für die Formulare unter `src/components/modals/`: `BookingModal`, `QuoteRequestModal`, `NotificationSignupModal` (nutzen `Modal` + jeweiliges Formular)
 - [ ] TypeScript-Migration (`.jsx` → `.tsx`)
 - [ ] `TurnstileWidget` Komponente unter `src/components/forms/shared/` (Wrapper um `next-turnstile`)
@@ -256,7 +256,8 @@ refactor: label/input im Booking-Formular durch Label, TextField und SelectField
 refactor: DateStep, ParticipantStepper und Address-/Kontakt-Fields aus Booking-Formular extrahiert
 feat: Zod-Schemas für Kontakt-/Anfrage-, Quote-Request- und Notification-Signup-Formular ergänzt
 feat: Kontakt-/Anfrageformular (/anfrage) mit react-hook-form und zod
-feat: Quote-Request- und Notification-Signup-Formular mit react-hook-form und zod
+feat: Quote-Request- mit react-hook-form und zod
+feat: Notification-Signup-Formular mit react-hook-form und zod
 feat: Modal-Wrapper für Booking-, Quote-Request- und Notification-Signup-Formular
 refactor: TypeScript-Migration - typed interfaces für Formulare
 feat: TurnstileWidget-Komponente ergänzt
