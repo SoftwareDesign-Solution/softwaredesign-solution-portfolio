@@ -1,10 +1,9 @@
 import { z } from "zod";
 import { addressSchema, optionalAddressSchema } from "./shared/address.schema";
 import { contactPersonSchema } from "./shared/contact-person.schema";
-import { teilnehmerSchema } from "./shared/teilnehmer.schema";
 import { terminSchema } from "./shared/termin.schema";
 
-export const bookingFormSchema = z.object({
+export const quoteRequestFormSchema = z.object({
     
     // Wprlshop-Termin
     //datum: z.string(),//.min(1, "Bitte wählen Sie einen Termin aus"),
@@ -29,17 +28,11 @@ export const bookingFormSchema = z.object({
     // Ansprechpartner
     ansprechpartner: contactPersonSchema,
 
-    // Teilnehmerliste
-    teilnehmer: z.array(
-        teilnehmerSchema
-    ),
-
     // Rechnungsadresse
     abweichendeRechnungsadresse: z.boolean().optional(),
     rechnungsadresse: optionalAddressSchema.partial().optional(),
     
     // Weiteres
-    gutscheinCode: z.string().optional(),
     notizen: z.string().optional(),
 
     // Consent
@@ -65,9 +58,9 @@ export const bookingFormSchema = z.object({
     }
 });
 
-export const bookingSchema = bookingFormSchema.extend({
+export const quoteRequestSchema = quoteRequestFormSchema.extend({
     
-    // Additional fields for the booking schema
+    // Additional fields for the quote request schema
     workshop: z.object({
         id: z.number(),
         titel: z.string(),
@@ -83,5 +76,5 @@ export const bookingSchema = bookingFormSchema.extend({
 
 });
 
-export type BookingFormData = z.infer<typeof bookingFormSchema>;
-export type BookingData = z.infer<typeof bookingSchema>;
+export type QuoteRequestFormData = z.infer<typeof quoteRequestFormSchema>;
+export type QuoteRequestData = z.infer<typeof quoteRequestSchema>;

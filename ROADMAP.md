@@ -232,8 +232,8 @@ fix: Header lag über Modal-Overlay - z-index von z-20 auf z-0 reduziert
 - [x] `booking.schema.ts` unter `src/schemas/`
 - [x] Formular-Typ per `z.infer<typeof bookingSchema>` abgeleitet (`BookingFormValues`), keine manuell doppelt gepflegten Types
 - [x] **Refactor:** Rohes `label`/`input` im Booking-Formular durch wiederverwendbare Feld-Komponenten unter `src/components/forms/shared/` ersetzt: `Label`, `TextField`, `SelectField`
-- [ ] **Refactor:** Field-Sections aus dem Booking-Formular extrahieren nach `src/components/forms/shared/`: `AppointmentSelection`, `ParticipantStepper`, `CompanyAddressFields`, `ContactPersonFields`, `BillingAddressFields` — `DateStep` nutzt `format-termin-status.ts` aus Phase 4 zur Anzeige des Termin-Status
-- [ ] Restliche Zod-Schemas unter `src/schemas/`: `contact-request.schema.ts`, `quote-request.schema.ts`, `notification-signup.schema.ts`
+- [x] **Refactor:** Field-Sections aus dem Booking-Formular extrahieren nach `src/components/forms/shared/`: `AppointmentSelection`, `ParticipantStepper`, `CompanyAddressFields`, `ContactPersonFields`, `BillingAddressFields` — `DateStep` nutzt `format-termin-status.ts` aus Phase 4 zur Anzeige des Termin-Status
+- [x] Restliche Zod-Schemas unter `src/schemas/`: `contact-request.schema.ts`, `quote-request.schema.ts`, `notification-signup.schema.ts`
 - [ ] Kontakt-/Anfrageformular (`contact-request`) unter `src/components/forms/`, erreichbar über `src/app/anfrage/page.tsx` — deckt sowohl allgemeine Kontaktaufnahme als auch Anfragen zu Leistungen ab (nutzt extrahierte Field-Sections wo passend)
 - [ ] Quote-Request-Formular unter `src/components/forms/` (nutzt extrahierte Field-Sections wo passend)
 - [ ] Notification-Signup-Formular unter `src/components/forms/`
