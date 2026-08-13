@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import getClientIp from "@/lib/get-client-ip";
 import { verifyTurnstileToken } from "@/lib/turnstile";
 import { NotificationSignupData, notificationSignupSchema } from "@/schemas/forms/notification-signup.schema";
-
+import { generateSecureToken } from "@/utils/generate-secure-token";
 export interface CreateNotificationSignupResult {
     notificationSignupId: string;
     confirmationEmailSent: boolean;
@@ -39,7 +39,6 @@ export async function createNotificationSignup(data: NotificationSignupData): Pr
         throw new Error("Sicherheitsabfrage fehlgeschlagen. Bitte bestätigen Sie, dass Sie kein Roboter sind.");
     }
 
-    
     let ipAddress: string | null = null;
 
     try {
@@ -48,7 +47,9 @@ export async function createNotificationSignup(data: NotificationSignupData): Pr
         console.error("Fehler beim Ermitteln der Client-IP-Adresse:", error);
     }
 
-
+    const confirmationToken = generateSecureToken();
+    const unsubscribeToken = generateSecureToken();
+    
     let notificationSignupId: string;
 
     // 3. DB-Insert + E-Mail-Versand — in try/catch, aber OHNE redirect() darin!
@@ -78,7 +79,7 @@ export async function createNotificationSignup(data: NotificationSignupData): Pr
 
         const [notificationSignup] = await db`
             INSERT INTO workshop_benachrichtigung (
-                workshop_id, workshop_titel, vorname, nachname, email, ip_adresse, confirmation_expires_at
+                workshop_id, workshop_titel, vorname, nachname, email, ip_adresse, confirmation_token, confirmation_expires_at, unsubscribe_token
             )
             VALUES (
                 ${workshop.workshop_id},
@@ -87,7 +88,9 @@ export async function createNotificationSignup(data: NotificationSignupData): Pr
                 ${notificationSignupData.nachname},
                 ${notificationSignupData.email},
                 ${ipAddress}, -- TODO: IP-Adresse aus Request-Context ermitteln,
-                now() + interval '24 hours'
+                ${confirmationToken},
+                now() + interval '24 hours',
+                ${unsubscribeToken}
             )
             RETURNING id;
         `;
