@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { verifyTurnstileToken } from "@/lib/turnstile";
 import { QuoteRequestData, quoteRequestSchema } from "@/schemas/forms/quote-request.schema";
 import { getClientIp } from "nextjs-turnstile";
+import { generateSecureToken } from "@/utils/generate-secure-token";
 
 export interface CreateQuoteRequestResult {
     quoteRequestId: string;
@@ -51,6 +52,7 @@ export async function createQuoteRequest(data: QuoteRequestData): Promise<Create
         console.error("Fehler beim Ermitteln der Client-IP-Adresse:", error);
     }
 
+    const confirmationToken = generateSecureToken();
 
     let quoteRequestId: string;
 
@@ -114,6 +116,7 @@ export async function createQuoteRequest(data: QuoteRequestData): Promise<Create
                 preis,
                 gesamtpreis,
                 ip_adresse,
+                confirmation_token,
                 confirmation_expires_at
             )
             VALUES (
@@ -140,6 +143,7 @@ export async function createQuoteRequest(data: QuoteRequestData): Promise<Create
                 ${workshopTermin.preis},
                 ${gesamtbetrag},
                 ${ipAddress ?? null}, -- TODO: IP-Adresse aus Request-Context ermitteln
+                ${confirmationToken},
                 now() + interval '24 hours' -- confirmation_expires_at
             )
             RETURNING id;

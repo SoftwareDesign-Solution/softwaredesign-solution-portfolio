@@ -254,8 +254,8 @@ fix: Header lag über Modal-Overlay - z-index von z-20 auf z-0 reduziert
 - [x] `confirm-quote-request.ts` unter `src/app/actions/` – prüft Token/Gültigkeit, setzt `confirmed_at`, löst Hinweis-Mail + interne Kopie aus; wird aus `quote-requests/[id]/confirm/page.tsx` aufgerufen
 - [x] `src/app/quote-requests/[id]/confirm/page.tsx` – Double-Opt-In-Bestätigung für Quote-Request (analog zu `notifications/[id]/confirm`, Server Component, liest `?token=` aus `searchParams`)
 - [x] `generate-secure-token.ts` unter `src/utils/` – `generateSecureToken()`, erzeugt opakes Zufalls-Token via `crypto.randomBytes(32).toString('base64url')` (Node `node:crypto`); genutzt in `create-notification-signup.ts` und `create-quote-request.ts` beim Erstellen des Datensatzes
-- [ ] Migration: `confirmation_token` in `workshop_benachrichtigung` von `UUID DEFAULT gen_random_uuid()` auf `TEXT` (kein DB-Default) umgestellt – Token wird ab jetzt im Anwendungscode über `generate-secure-token.ts` erzeugt, nicht mehr per DB-Default
-- [ ] Migration: `angebotsanfrage` um `confirmation_token` (TEXT, kein Default), `confirmation_expires_at`, `confirmed_at` erweitert (Double-Opt-In, gleiches Token-Verfahren wie `workshop_benachrichtigung`)
+- [x] Migration: `confirmation_token` in `workshop_benachrichtigung` von `UUID DEFAULT gen_random_uuid()` auf `TEXT` (kein DB-Default) umgestellt – Token wird ab jetzt im Anwendungscode über `generate-secure-token.ts` erzeugt, nicht mehr per DB-Default
+- [x] Migration: `angebotsanfrage` um `confirmation_token` (TEXT, kein Default), `confirmation_expires_at`, `confirmed_at` erweitert (Double-Opt-In, gleiches Token-Verfahren wie `workshop_benachrichtigung`)
 
 **Commits:**
 
@@ -624,6 +624,7 @@ feat: Stories für WorkshopCard
 | 2026-08-12 | 2.13 | *Manuel Kübler* | `isSameDay` als zusätzlicher Export in `format-date-range.ts` ergänzt (Phase 4) |
 | 2026-08-12 | 2.14 | *Manuel Kübler* | Quote-Request um Double-Opt-In-Flow erweitert (`src/app/quote-requests/[id]/confirm/page.tsx`, E-Mail-Checkliste in Phase 7 angepasst) |
 | 2026-08-13 | 2.15 | *Manuel Kübler* | `confirm-notification-signup.ts` und `confirm-quote-request.ts` Server Actions in Phase 6 ergänzt |
+| 2026-08-13 | 2.16 | *Manuel Kübler* | `confirmation_token` von UUID (`gen_random_uuid()`) auf opakes Zufalls-Token (TEXT, anwendungsseitig via `generate-secure-token.ts` erzeugt) umgestellt, betrifft `workshop_benachrichtigung` und `angebotsanfrage` |
 
 **Versionierung – Major.Minor (kein SemVer-Patch-Level, da kein "Breaking Change"-Konzept für eine Roadmap sinnvoll ist):**
 
