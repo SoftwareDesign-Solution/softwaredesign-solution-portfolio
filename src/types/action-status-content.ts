@@ -15,8 +15,8 @@ export interface ActionStatusRenderContext {
 export interface ActionStatusContent {
   variant?: ActionStatusVariant;
   kicker: string;
-  heading: (ctx: ActionStatusRenderContext) => ReactNode;
-  body: (ctx: ActionStatusRenderContext) => ReactNode;
+  heading: (ctx?: ActionStatusRenderContext) => ReactNode;
+  body: (ctx?: ActionStatusRenderContext) => ReactNode;
   meta?: ActionStatusModalMetaItem[];
   zIndex?: number;
   maxWidth?: string;
