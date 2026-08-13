@@ -20,3 +20,7 @@ export function formatDateRange(datumVon: string, datumBis: string): string {
  
   return `${formatDayOnly(datumVon)}–${formatDate(datumBis)}`;
 }
+
+export function isSameDay(datumVon: string, datumBis: string): boolean {
+  return new Date(datumVon).toDateString() === new Date(datumBis).toDateString();
+}
