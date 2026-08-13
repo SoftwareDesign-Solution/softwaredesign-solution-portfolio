@@ -173,6 +173,7 @@ feat: Error Boundary (error.tsx, global-error.tsx) ergänzt
 *(Workshops selbst werden nicht über die App verwaltet, sondern direkt in Neon gepflegt – hier geht es nur um Lesen & Anzeigen.)*
 
 - [x] `format-date-range.ts` unter `src/utils/` (formatiert einen Datumsbereich, z. B. für `WorkshopCard` – Anzeige des Termin-Zeitraums)
+- [x] `isSameDay` als zusätzlicher Export in `format-date-range.ts` (unterscheidet "am" bei eintägigen vs. "vom...bis" bei mehrtägigen Workshops)
 - [x] `WorkshopCard` Komponente unter `src/app/_components/sections` (einzelne Workshop-Kachel, aktuell nur auf Startseite verwendet)
 - [x] `WorkshopList` Komponente unter `src/app/_components/sections` (Server Component, rendert Cards, aktuell nur auf Startseite verwendet)
 - [x] Einbindung von `WorkshopList` auf der Startseite
@@ -189,7 +190,7 @@ feat: Error Boundary (error.tsx, global-error.tsx) ergänzt
   | `verfuegbar` | "Verfügbar" | ausreichend Plätze frei |
   | `planung` | "In Planung" | keine Termine vorhanden → Text "Aktuell keine Termine geplant." |
 
-  wiederverwendbar, u. a. in Phase 6 im Booking-Formular für die Termin-Auswahl (`DateStep`)
+  wiederverwendbar, u. a. in Phase 6 im Booking-Formular für die Termin-Auswahl (`AppointmentSelection`)
 
 - [x] `TerminRow` Komponente zur zentralen Darstellung von Terminen in `src/app/_components/workshop-card.tsx` & `src/app/workshops/[slug]/_components/workshop-sidebar.tsx` eingebunden
 
@@ -197,6 +198,7 @@ feat: Error Boundary (error.tsx, global-error.tsx) ergänzt
 
 ```text
 feat: formatDateRange Utility für WorkshopCard ergänzt
+feat: isSameDay Utility in format-date-range.ts ergänzt - unterscheidet "am" (eintägig) vs. "vom...bis" (mehrtägig) für die Termin-Anzeige
 feat: WorkshopCard-Komponente
 feat: WorkshopList als Server Component, Einbindung auf Startseite
 feat: WorkshopDetailPage mit async params
@@ -233,7 +235,7 @@ fix: Header lag über Modal-Overlay - z-index von z-20 auf z-0 reduziert
 - [x] `booking.schema.ts` unter `src/schemas/`
 - [x] Formular-Typ per `z.infer<typeof bookingSchema>` abgeleitet (`BookingFormValues`), keine manuell doppelt gepflegten Types
 - [x] **Refactor:** Rohes `label`/`input` im Booking-Formular durch wiederverwendbare Feld-Komponenten unter `src/components/forms/shared/` ersetzt: `Label`, `TextField`, `SelectField`
-- [x] **Refactor:** Field-Sections aus dem Booking-Formular extrahieren nach `src/components/forms/shared/`: `AppointmentSelection`, `ParticipantStepper`, `CompanyAddressFields`, `ContactPersonFields`, `BillingAddressFields` — `DateStep` nutzt `format-termin-status.ts` aus Phase 4 zur Anzeige des Termin-Status
+- [x] **Refactor:** Field-Sections aus dem Booking-Formular extrahieren nach `src/components/forms/shared/`: `AppointmentSelection`, `ParticipantStepper`, `CompanyAddressFields`, `ContactPersonFields`, `BillingAddressFields` — `AppointmentSelection` nutzt `format-termin-status.ts` aus Phase 4 zur Anzeige des Termin-Status
 - [x] Restliche Zod-Schemas unter `src/schemas/`: `contact-request.schema.ts`, `quote-request.schema.ts`, `notification-signup.schema.ts`
 - [x] Kontakt-/Anfrageformular (`contact-request`) unter `src/components/forms/`, erreichbar über `src/app/anfrage/page.tsx` — deckt sowohl allgemeine Kontaktaufnahme als auch Anfragen zu Leistungen ab (nutzt extrahierte Field-Sections wo passend)
 - [x] Quote-Request-Formular unter `src/components/forms/` (nutzt extrahierte Field-Sections wo passend)
@@ -246,7 +248,11 @@ fix: Header lag über Modal-Overlay - z-index von z-20 auf z-0 reduziert
 - [x] Server Actions (`src/app/actions/`): `send-contact-request.ts` (nur E-Mail-Versand, keine DB-Persistierung), `create-booking.ts`, `create-quote-request.ts`, `create-notification-signup.ts` (DB-Insert + E-Mail) — nutzen `sql` aus `src/lib/db.ts` + `resend` aus `src/lib/resend.ts` direkt (noch keine Service-Schicht); jede Action verifiziert zuerst den Turnstile-Token über `src/lib/turnstile.ts`, bevor verarbeitet wird
 - [ ] `revalidatePath` / `redirect` nach den jeweiligen Mutationen
 - [x] Status-Messages je Formular im gleichen Verzeichnis wie das jeweilige Formular (`src/components/forms/`): `booking-status-messages.tsx`, `contact-request-status-messages.tsx`, `quote-request-status-messages.tsx`, `notification-signup-status-messages.tsx` (Erfolgs-/Fehlertexte, z. B. "Buchung erfolgreich" / "Fehler beim Senden")
-- [ ] `ActionStatusModal` nach jedem Formular-Submit eingebunden, nutzt die jeweilige `*-status-messages.tsx` (zeigt Ergebnis der jeweiligen Server Action an)
+- [x] `ActionStatusModal` nach jedem Formular-Submit eingebunden, nutzt die jeweilige `*-status-messages.tsx` (zeigt Ergebnis der jeweiligen Server Action an)
+- [x] `confirm-notification-signup.ts` unter `src/app/actions/` – prüft Token/Gültigkeit, setzt `confirmed_at`, löst Hinweis-Mail aus; wird aus `notifications/[id]/confirm/page.tsx` aufgerufen
+- [x] `src/app/notifications/[id]/confirm/page.tsx` reserviert für Double-Opt-In-Bestätigung (Server Component, liest `?token=` aus `searchParams`, keine separate API-Route nötig)
+- [x] `confirm-quote-request.ts` unter `src/app/actions/` – prüft Token/Gültigkeit, setzt `confirmed_at`, löst Hinweis-Mail + interne Kopie aus; wird aus `quote-requests/[id]/confirm/page.tsx` aufgerufen
+- [x] `src/app/quote-requests/[id]/confirm/page.tsx` – Double-Opt-In-Bestätigung für Quote-Request (analog zu `notifications/[id]/confirm`, Server Component, liest `?token=` aus `searchParams`)
 
 **Commits:**
 
@@ -255,7 +261,7 @@ feat: Booking-Formular als statisches Grundgerüst ergänzt
 feat: booking.schema.ts ergänzt
 feat: react-hook-form und zod in Booking-Formular integriert
 refactor: label/input im Booking-Formular durch Label, TextField und SelectField ersetzt
-refactor: DateStep, ParticipantStepper und Address-/Kontakt-Fields aus Booking-Formular extrahiert
+refactor: AppointmentSelection, ParticipantStepper und Address-/Kontakt-Fields aus Booking-Formular extrahiert
 feat: Zod-Schemas für Kontakt-/Anfrage-, Quote-Request- und Notification-Signup-Formular ergänzt
 feat: Kontakt-/Anfrageformular (/anfrage) mit react-hook-form und zod
 feat: Quote-Request- mit react-hook-form und zod
@@ -271,6 +277,10 @@ feat: create-quote-request.ts Server Action ergänzt (inkl. Turnstile-Verifizier
 feat: create-notification-signup.ts Server Action ergänzt (inkl. Turnstile-Verifizierung)
 feat: Status-Messages je Formular (*-status-messages.tsx) ergänzt
 feat: ActionStatusModal nach Formular-Submits eingebunden
+feat: confirm-notification-signup.ts Server Action ergänzt
+feat: notificatons/[id]/confirm - Double-Opt-In-Bestätigungsseite für Notification-signup
+feat: confirm-quote-request.ts Server Action ergänzt
+feat: quote-requests/[id]/confirm - Double-Opt-In-Bestätigungsseite für Quote-Request
 ```
 
 ---
@@ -286,13 +296,11 @@ feat: ActionStatusModal nach Formular-Submits eingebunden
 - [ ] Kontakt-/Anfrageformular (`/anfrage`) – interne Kopie
 - [ ] Booking – Bestätigungs-Mail an Kunde
 - [ ] Booking – interne Kopie
-- [ ] Quote-Request – Bestätigungs-Mail an Kunde
-- [ ] Quote-Request – interne Kopie
 - [ ] Notification-Signup "Neue Termine" – Double-Opt-In Confirmation-Mail (mit Bestätigungslink)
 - [ ] Notification-Signup "Neue Termine" – Hinweis-Mail nach Bestätigung (Info: Benachrichtigung bei neuen Terminen aktiv)
-
 - [ ] Integration direkt in `send-contact-request.ts`, `create-booking.ts`, `create-quote-request.ts`, `create-notification-signup.ts` (noch kein `email-service.ts`)
-- [ ] Double-Opt-In Confirmation-Mail wird über `src/app/notifications/[id]/confirm/page.tsx` ausgelöst (Hinweis-Mail nach erfolgreicher Bestätigung)
+- [ ] Double-Opt-In Confirmation-Mail (Notification-Signup) wird über `src/app/notifications/[id]/confirm/page.tsx` ausgelöst (Hinweis-Mail nach erfolgreicher Bestätigung)
+- [ ] Double-Opt-In Confirmation-Mail (Quote-Request) wird über `src/app/quote-requests/[id]/confirm/page.tsx` ausgelöst (Hinweis-Mail + interne Kopie nach erfolgreicher Bestätigung)
 - [ ] `package.json` Script für lokale Email-Vorschau:
   
   ```json
@@ -306,7 +314,8 @@ feat: src/lib/resend.ts für Resend-Client-Konfiguration
 feat: wiederverwendbare Email-Bausteine unter src/emails/components ergänzt
 feat: Kontakt-/Anfrageformular Bestätigungs-Mail und interne Kopie
 feat: Booking Bestätigungs-Mail und interne Kopie
-feat: Quote-Request Bestätigungs-Mail und interne Kopie
+feat: Double-Opt-In Confirmation-Mail für Quote-Request
+feat: Hinweis-Mail und interne Kopie nach Bestätigung der Quote-Request
 feat: Double-Opt-In Confirmation-Mail für Neue-Termine-Benachrichtigung
 feat: Hinweis-Mail nach Bestätigung der Neue-Termine-Benachrichtigung
 chore: email:dev Script in package.json ergänzt
@@ -421,8 +430,8 @@ feat: Seed-Datei vuejs-advanced.sql ergänzt
 - [ ] Workshop-Liste auf Startseite rendert korrekt
 - [ ] WorkshopDetailPage rendert korrekt (Details + Sidebar)
 - [ ] Kontakt-/Anfrageformular (`/anfrage`): Happy Path + Validierungsfehler
-- [ ] Booking-Formular: Happy Path (inkl. DateStep, ParticipantStepper, Adress-Sections) + Validierungsfehler
-- [ ] Quote-Request-Formular: Happy Path + Validierungsfehler
+- [ ] Booking-Formular: Happy Path (inkl. AppointmentSelection, ParticipantStepper, Adress-Sections) + Validierungsfehler
+- [ ] Quote-Request-Formular: Happy Path + Validierungsfehler + Double-Opt-In-Bestätigungslink (`/quote-requests/[id]/confirm?token=...`)
 - [ ] Notification-Signup: Happy Path + Double-Opt-In-Bestätigungslink (`/notifications/[id]/confirm?token=...`)
 - [ ] `ActionStatusModal` zeigt Erfolg/Fehler korrekt an
 - [ ] Rechtsseiten (Impressum, Datenschutz, AGB) erreichbar
@@ -442,7 +451,7 @@ test: E2E-Test Navigation & MobileMenu
 test: E2E-Test Workshop-Liste und WorkshopDetailPage
 test: E2E-Test Kontakt-/Anfrageformular
 test: E2E-Test Booking-Formular
-test: E2E-Test Quote-Request-Formular
+test: E2E-Test Quote-Request-Formular inkl. Double-Opt-In
 test: E2E-Test Notification-Signup inkl. Double-Opt-In
 test: E2E-Test ActionStatusModal
 test: E2E-Test Rechtsseiten
@@ -461,7 +470,7 @@ test: Unit-Test für Preisberechnung
 
 - [ ] Storybook Setup (inkl. Tailwind-Integration)
 - [ ] Stories für Basis-Komponenten: `Modal`, `ActionStatusModal`
-- [ ] Stories für Field-Sections: `DateStep`, `ParticipantStepper`, `CompanyAddressFields`, `ContactPersonFields`, `BillingAddressFields`
+- [ ] Stories für Field-Sections: `AppointmentSelection`, `ParticipantStepper`, `CompanyAddressFields`, `ContactPersonFields`, `BillingAddressFields`
 - [ ] Stories für Layout-Komponenten: `Header`, `Footer`, `MobileMenu`, `HamburgerButton`
 - [ ] Stories für `WorkshopCard`
 
@@ -470,7 +479,7 @@ test: Unit-Test für Preisberechnung
 ```text
 chore: Storybook Setup inkl. Tailwind-Integration
 feat: Stories für Modal und ActionStatusModal
-feat: Stories für Field-Sections (DateStep, ParticipantStepper, Address-/Kontakt-Fields)
+feat: Stories für Field-Sections (AppointmentSelection, ParticipantStepper, Address-/Kontakt-Fields)
 feat: Stories für Header, Footer, MobileMenu, HamburgerButton
 feat: Stories für WorkshopCard
 ```
@@ -606,6 +615,9 @@ feat: Stories für WorkshopCard
 | 2026-08-11 | 2.10 | *Manuel Kübler* | `Label`, `TextField`, `SelectField` als Refactor-Schritt vor der Field-Section-Extraktion in Phase 6 ergänzt |
 | 2026-08-11 | 2.11 | *Manuel Kübler* | `DateStep` in `AppointmentSelection` umbenannt (kein Multistep-Wizard, Name suggerierte das fälschlich) |
 | 2026-08-12 | 2.12 | *Manuel Kübler* | `src/components/ui/` als neues Verzeichnis für generische UI-Primitive ergänzt (`Button`, `Card`) |
+| 2026-08-12 | 2.13 | *Manuel Kübler* | `isSameDay` als zusätzlicher Export in `format-date-range.ts` ergänzt (Phase 4) |
+| 2026-08-12 | 2.14 | *Manuel Kübler* | Quote-Request um Double-Opt-In-Flow erweitert (`src/app/quote-requests/[id]/confirm/page.tsx`, E-Mail-Checkliste in Phase 7 angepasst) |
+| 2026-08-13 | 2.15 | *Manuel Kübler* | `confirm-notification-signup.ts` und `confirm-quote-request.ts` Server Actions in Phase 6 ergänzt |
 
 **Versionierung – Major.Minor (kein SemVer-Patch-Level, da kein "Breaking Change"-Konzept für eine Roadmap sinnvoll ist):**
 
