@@ -1,10 +1,10 @@
+/* eslint-disable react-hooks/refs */
 "use client";
 
 import { useRef, useState } from "react";
 import { FormProvider, SubmitHandler, useForm, useFormState, useWatch } from "react-hook-form";
 import Link from "next/link";
 import { BookingData, bookingFormSchema, type BookingFormData } from "@/schemas/forms/booking.schema";
-import { Workshop } from "@/types/workshop";
 import { zodResolver } from "@hookform/resolvers/zod";
 import AppointmentSelectionSection from "../shared/sections/appointment-selection-section";
 import ParticipantStepperSection from "../shared/sections/participant-stepper-section";
@@ -17,10 +17,10 @@ import SummarySection from "../shared/sections/summary-section";
 import ConsentSection from "../shared/sections/consent-section";
 import SubmitFooter from "../shared/submit-footer";
 import { WorkshopFormProps } from "@/types/workshop-props";
-import TurnstileWidget from "../shared/turnstile-widget";
-import ErrorMessage from "../shared/error-message";
 import { TurnstileRef } from "nextjs-turnstile";
 import TurnstileWidgetSection from "../shared/sections/turnstile-widget-section";
+import { createBooking } from "@/app/actions/create-booking";
+import { bookingErrorMessage, bookingSuccessMessage } from "./booking-form-status-messages";
 
 export default function BookingForm({ 
     workshop, 
@@ -96,15 +96,20 @@ export default function BookingForm({
     // Datenschutzerklärung & Sicherheitsabfrage (Turnstile)
     const turnstileRef = useRef<TurnstileRef>(null);
 
-    const onSubmit: SubmitHandler<BookingFormData> = (data) => {
+    const resetTurnstile = () => {
+        turnstileRef.current?.reset();
+        methods.setValue("turnstile.token", "");
+    };
+
+    const onSubmit: SubmitHandler<BookingFormData> = async (data) => {
         //console.log(methods.formState.errors);
         //console.log("Booking submitted:", { workshop: 'Test', ...data });
         //alert("Booking submitted: " + JSON.stringify({ workshop: 'Test', ...data }, null, 2));
 
-        setFormData({
+        const bookingData: BookingData = {
             workshop: {
                 id: workshop.id,
-                titel: workshop.titel
+                titel: workshop.titel,
             },
             ...data,
             summary: {
@@ -114,7 +119,50 @@ export default function BookingForm({
                 umsatzsteuer: vat,
                 gesamtbetrag: total
             }
-        });
+        };
+
+        setFormData(bookingData);
+
+        try {
+            
+            const result = await createBooking(bookingData);
+
+            if (result.bookingId) {
+
+                const shortReference = result.bookingId.split("-")[0];
+
+                onSuccess(bookingSuccessMessage({
+                    titel: workshop.titel,
+                    ref: String(shortReference),
+                    vorname: bookingData.ansprechpartner.vorname,
+                    email: bookingData.ansprechpartner.email,
+                    teilnehmerzahl: bookingData.teilnehmer.length,
+                    datumVon: String(bookingData.termin?.datumVon),
+                    datumBis: String(bookingData.termin?.datumBis),
+                }));
+
+                onClose?.();
+
+                //alert(`Buchung erfolgreich erstellt. ${result}`);
+
+                /*
+                const shortReference = result.split("-")[0];
+                onSuccess(bookingSuccessMessage({
+                    workshopTitle: workshop.titel,
+                    reference: shortReference,
+                }));
+                */
+            }
+        } catch (error) {
+            
+            onError(bookingErrorMessage({
+                titel: workshop.titel,
+                vorname: bookingData.ansprechpartner.vorname,
+            }));
+
+            resetTurnstile();
+
+        }
     };
 
     return (
@@ -174,12 +222,6 @@ export default function BookingForm({
                         hint="Bitte füllen Sie alle Pflichtfelder aus und bestätigen Sie die Sicherheitsabfrage."
                         buttonLabel="Verbindlich buchen"
                     />
-
-                    <div className="mt-8 rounded-lg border border-border bg-surface p-4 text-[13px] text-foreground">
-                        <pre className="whitespace-pre-wrap">
-                            {JSON.stringify(formData, null, 2)}
-                        </pre>
-                    </div>
 
                 </form>
             </FormProvider>

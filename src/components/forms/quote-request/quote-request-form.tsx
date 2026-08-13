@@ -1,8 +1,8 @@
+ /* eslint-disable react-hooks/refs */
 "use client";
 
 import { SubmitHandler, useForm, useWatch, FormProvider } from "react-hook-form";
 import Link from "next/link";
-import type { Workshop } from "@/types/workshop";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { QuoteRequestData, type QuoteRequestFormData, quoteRequestFormSchema } from "@/schemas/forms/quote-request.schema";
 import { useRef, useState } from "react";
@@ -18,6 +18,8 @@ import SubmitFooter from "../shared/submit-footer";
 import { WorkshopFormProps } from "@/types/workshop-props";
 import TurnstileWidgetSection from "../shared/sections/turnstile-widget-section";
 import { TurnstileRef } from "nextjs-turnstile";
+import { createQuoteRequest } from "@/app/actions/create-quote-request";
+import { quoteRequestErrorMessage, quoteRequestSuccessMessage } from "./quote-request-form-status-messages";
 
 export default function QuoteRequestForm({ 
     workshop, 
@@ -81,15 +83,21 @@ export default function QuoteRequestForm({
     // Datenschutzerklärung & Sicherheitsabfrage (Turnstile)
     const turnstileRef = useRef<TurnstileRef>(null);
 
-    const onSubmit: SubmitHandler<QuoteRequestFormData> = (data) => {
+    const resetTurnstile = () => {
+        turnstileRef.current?.reset();
+        methods.setValue("turnstile.token", "");
+    };
+
+    const onSubmit: SubmitHandler<QuoteRequestFormData> = async (data) => {
         //console.log(methods.formState.errors);
         //console.log("Booking submitted:", { workshop: 'Test', ...data });
         //alert("Booking submitted: " + JSON.stringify({ workshop: 'Test', ...data }, null, 2));
 
-        setFormData({
+
+        const quoteRequestData: QuoteRequestData = {
             workshop: {
                 id: workshop.id,
-                titel: workshop.titel
+                titel: workshop.titel,
             },
             ...data,
             summary: {
@@ -99,7 +107,39 @@ export default function QuoteRequestForm({
                 umsatzsteuer: vat,
                 gesamtbetrag: total
             }
-        });
+        };
+
+        setFormData(quoteRequestData);
+
+        try {
+
+            const result = await createQuoteRequest(quoteRequestData);
+
+            if (result) {
+
+                onSuccess(quoteRequestSuccessMessage({
+                    vorname: quoteRequestData.ansprechpartner.vorname,
+                    email: quoteRequestData.ansprechpartner.email,
+                    titel: quoteRequestData.workshop.titel,
+                    datumVon: String(quoteRequestData.termin?.datumVon),
+                    datumBis: String(quoteRequestData.termin?.datumBis),
+                }));
+
+                onClose?.();
+
+            }
+
+        } catch (error) {
+
+            onError(quoteRequestErrorMessage({
+                vorname: quoteRequestData.ansprechpartner.vorname,
+                titel: quoteRequestData.workshop.titel,
+            }));
+
+            resetTurnstile();
+
+        }
+
     };
 
     return (

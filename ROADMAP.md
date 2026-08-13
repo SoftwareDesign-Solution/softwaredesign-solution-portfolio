@@ -243,9 +243,9 @@ fix: Header lag über Modal-Overlay - z-index von z-20 auf z-0 reduziert
 - [x] TypeScript-Migration (`.jsx` → `.tsx`)
 - [x] `TurnstileWidget` Komponente unter `src/components/forms/shared/` (Wrapper um `nextjs-turnstile`)
 - [x] `src/lib/turnstile.ts` – `verifyTurnstileToken()` gegen Cloudflare siteverify-API
-- [ ] Server Actions (`src/app/actions/`): `send-contact-request.ts` (nur E-Mail-Versand, keine DB-Persistierung), `create-booking.ts`, `create-quote-request.ts`, `create-notification-signup.ts` (DB-Insert + E-Mail) — nutzen `sql` aus `src/lib/db.ts` + `resend` aus `src/lib/resend.ts` direkt (noch keine Service-Schicht); jede Action verifiziert zuerst den Turnstile-Token über `src/lib/turnstile.ts`, bevor verarbeitet wird
+- [x] Server Actions (`src/app/actions/`): `send-contact-request.ts` (nur E-Mail-Versand, keine DB-Persistierung), `create-booking.ts`, `create-quote-request.ts`, `create-notification-signup.ts` (DB-Insert + E-Mail) — nutzen `sql` aus `src/lib/db.ts` + `resend` aus `src/lib/resend.ts` direkt (noch keine Service-Schicht); jede Action verifiziert zuerst den Turnstile-Token über `src/lib/turnstile.ts`, bevor verarbeitet wird
 - [ ] `revalidatePath` / `redirect` nach den jeweiligen Mutationen
-- [ ] Status-Messages je Formular im gleichen Verzeichnis wie das jeweilige Formular (`src/components/forms/`): `booking-status-messages.tsx`, `contact-request-status-messages.tsx`, `quote-request-status-messages.tsx`, `notification-signup-status-messages.tsx` (Erfolgs-/Fehlertexte, z. B. "Buchung erfolgreich" / "Fehler beim Senden")
+- [x] Status-Messages je Formular im gleichen Verzeichnis wie das jeweilige Formular (`src/components/forms/`): `booking-status-messages.tsx`, `contact-request-status-messages.tsx`, `quote-request-status-messages.tsx`, `notification-signup-status-messages.tsx` (Erfolgs-/Fehlertexte, z. B. "Buchung erfolgreich" / "Fehler beim Senden")
 - [ ] `ActionStatusModal` nach jedem Formular-Submit eingebunden, nutzt die jeweilige `*-status-messages.tsx` (zeigt Ergebnis der jeweiligen Server Action an)
 
 **Commits:**

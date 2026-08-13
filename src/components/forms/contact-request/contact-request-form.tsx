@@ -1,4 +1,6 @@
+/* eslint-disable react-hooks/refs */
 "use client";
+
 import { useRef, useState } from "react";
 import { SubmitHandler, useForm, useWatch, FormProvider } from "react-hook-form";
 import { type ContactRequestFormData, contactRequestFormSchema } from "@/schemas/forms/contact-request.schema";
@@ -11,8 +13,13 @@ import ErrorMessage from "../shared/error-message";
 import Link from "next/dist/client/link";
 import TurnstileWidgetSection from "../shared/sections/turnstile-widget-section";
 import { TurnstileRef } from "nextjs-turnstile";
+import { sendContactRequest } from "@/app/actions/send-contact-request";
+import { contactRequestErrorMessage, contactRequestSuccessMessage } from "./contact-request-form-status-messages";
+import { useModal } from "@/providers/modal-provider";
 
 export default function ContactRequestForm() {
+
+    const { showActionStatus } = useModal();
 
     const methods = useForm<ContactRequestFormData>({
         resolver: zodResolver(contactRequestFormSchema),
@@ -51,16 +58,48 @@ export default function ContactRequestForm() {
 
     // Datenschutzerklärung & Sicherheitsabfrage (Turnstile)
     const turnstileRef = useRef<TurnstileRef>(null);
+
+    const resetTurnstile = () => {
+        turnstileRef.current?.reset();
+        methods.setValue("turnstile.token", "");
+    };
     
-    const onSubmit: SubmitHandler<ContactRequestFormData> = (data) => {
-            //console.log(methods.formState.errors);
-            //console.log("Booking submitted:", { workshop: 'Test', ...data });
-            //alert("Booking submitted: " + JSON.stringify({ workshop: 'Test', ...data }, null, 2));
-    
-            setFormData({...data});
-            //console.log("Form data:", data);
-            //alert("Form data: " + JSON.stringify(data, null, 2));
-      };
+    const onSubmit: SubmitHandler<ContactRequestFormData> = async (data) => {
+        //console.log(methods.formState.errors);
+        //console.log("Booking submitted:", { workshop: 'Test', ...data });
+        //alert("Booking submitted: " + JSON.stringify({ workshop: 'Test', ...data }, null, 2));
+
+        setFormData({...data});
+        //console.log("Form data:", data);
+        //alert("Form data: " + JSON.stringify(data, null, 2));
+
+        try {
+
+            await sendContactRequest(data);
+
+            showActionStatus(contactRequestSuccessMessage({
+                vorname: data.ansprechpartner.vorname,
+                email: data.ansprechpartner.email,
+            }));
+
+            methods.reset();
+            resetTurnstile();
+            
+        } catch (error) {
+            
+            showActionStatus(contactRequestErrorMessage({
+                vorname: data.ansprechpartner.vorname,
+            }));
+
+            /*
+             * Das bereits geprüfte Turnstile-Token ist nur einmal
+             * verwendbar. Für einen erneuten Versuch zurücksetzen.
+             */
+            resetTurnstile();
+
+        }
+            
+    };
       
     return (
         <>
@@ -292,14 +331,6 @@ export default function ContactRequestForm() {
                                     {formState.isSubmitting ? "Wird gesendet …" : "Anfrage absenden"}
                                 </button>
                             </div>
-                        </div>
-
-                        <div className="mt-2 col-span-2 rounded-lg border border-border bg-surface p-4 text-[13px] text-foreground">
-                            
-                            <pre className="whitespace-pre-wrap">
-                                {JSON.stringify(formData, null, 2)}
-                            </pre>
-                            
                         </div>
 
                     </div>

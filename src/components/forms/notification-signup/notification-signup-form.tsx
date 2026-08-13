@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/refs */
 "use client";
 
 import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
@@ -12,6 +13,9 @@ import Button from "@/components/ui/button";
 import { WorkshopFormProps } from "@/types/workshop-props";
 import TurnstileWidgetSection from "../shared/sections/turnstile-widget-section";
 import { TurnstileRef } from "nextjs-turnstile";
+import { verifyTurnstileToken } from "@/lib/turnstile";
+import { createNotificationSignup } from "@/app/actions/create-notification-signup";
+import { notificationSignupErrorMessage, notificationSignupSuccessMessage } from "./notification-signup-form-status-messages";
 
 export default function NotificationSignupForm({ 
     workshop, 
@@ -38,20 +42,79 @@ export default function NotificationSignupForm({
 
     // Datenschutzerklärung & Sicherheitsabfrage (Turnstile)
     const turnstileRef = useRef<TurnstileRef>(null);
+
+    const resetTurnstile = () => {
+        turnstileRef.current?.reset();
+        methods.setValue("turnstile.token", "");
+    };
     
-    const onSubmit: SubmitHandler<NotificationSignupFormData> = (data) => {
+    const onSubmit: SubmitHandler<NotificationSignupFormData> = async (data) => {
         //console.log(methods.formState.errors);
         //console.log("Booking submitted:", { workshop: 'Test', ...data });
         //alert("Booking submitted: " + JSON.stringify({ workshop: 'Test', ...data }, null, 2));
 
+        const { turnstile: { token: turnstileToken } } = data;
+
+        const isHuman = verifyTurnstileToken(turnstileToken);
+
+        if (!isHuman) {
+            alert("Sicherheitsabfrage fehlgeschlagen. Bitte bestätigen Sie, dass Sie kein Roboter sind.");
+            return;
+        };
+
+        /*
         setFormData({
             workshop: {
                 id: workshop.id,
                 titel: workshop.titel
             },
             ...data});
+        */
         //console.log("Form data:", data);
         //alert("Form data: " + JSON.stringify(data, null, 2));
+
+        const notificationSignupData: NotificationSignupData = {
+            workshop: {
+                id: workshop.id,
+                titel: workshop.titel,
+            },
+            ...data,
+        };
+        
+        // Nur zur Debug-Ausgabe erforderlich
+        setFormData(notificationSignupData);
+
+        try {
+            
+            const result = await createNotificationSignup(notificationSignupData);
+
+            if (result.notificationSignupId) {
+                const shortReference = result.notificationSignupId.split("-")[0];
+
+                onSuccess(notificationSignupSuccessMessage({
+                    workshopTitle: workshop.titel,
+                    vorname: notificationSignupData.vorname,
+                    email: notificationSignupData.email,
+                    ref: String(shortReference),
+                    status: "pending",
+                }))
+
+                onClose?.();
+
+            }
+            //alert(`Benachrichtigungsanmeldung erfolgreich erstellt. ${result}`);
+
+        } catch (error) {
+
+            alert((error as Error).message);
+            
+            onError(notificationSignupErrorMessage({
+                vorname: notificationSignupData.vorname,
+            }));
+
+            resetTurnstile();
+        }
+
     };
 
     return (
@@ -142,14 +205,6 @@ export default function NotificationSignupForm({
                         Wir nutzen deine Daten ausschließlich, um dich bei neuen Terminen zu benachrichtigen.
                         Nach Klick auf &quot;Bestätigen&quot; senden wir dir eine Mail mit Bestätigungs-Link
                         (Double-Opt-In). Abmeldung jederzeit über den Link in jeder Benachrichtigung.
-                    </div>
-
-                    <div className="mt-4.5 text-muted text-[13px]">
-                        
-                        <pre className="whitespace-pre-wrap">
-                            {JSON.stringify(formData, null, 2)}
-                        </pre>
-
                     </div>
 
                 </div>
