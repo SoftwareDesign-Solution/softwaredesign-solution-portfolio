@@ -26,3 +26,13 @@ export const contactRequestFormSchema = z.object({
 });
 
 export type ContactRequestFormData = z.infer<typeof contactRequestFormSchema>;
+
+export type ContactRequestData = Pick<
+    ContactRequestFormData,
+    | "adresse"
+    | "webseite"
+    | "bereitsKunde"
+    | "ansprechpartner"
+    | "nachricht"
+    | "source"
+>;
