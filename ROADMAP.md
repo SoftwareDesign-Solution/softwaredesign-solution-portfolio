@@ -300,21 +300,21 @@ refactor: Nicht mehr benötigte Schemas entfernt
 
 ## Phase 7 – E-Mail-Versand
 
-- [ ] `src/lib/resend.ts` – Resend-Client-Konfiguration (API-Key, zentrale Instanz)
-- [ ] Wiederverwendbare Bausteine unter `src/emails/components/` (z. B. Layout, Header, Footer, Button), um Code-Duplikation zwischen den Templates zu vermeiden
+- [x] `src/lib/resend.ts` – Resend-Client-Konfiguration (API-Key, zentrale Instanz)
+- [x] Wiederverwendbare Bausteine unter `src/emails/components/` (z. B. Layout, Header, Footer, Button), um Code-Duplikation zwischen den Templates zu vermeiden
 
 **Checkliste Benachrichtigungen (Templates via React Email):**
 
-- [ ] Kontakt-/Anfrageformular (`/anfrage`) – Bestätigungs-Mail an Kunde
-- [ ] Kontakt-/Anfrageformular (`/anfrage`) – interne Kopie
-- [ ] Booking – Bestätigungs-Mail an Kunde
-- [ ] Booking – interne Kopie
-- [ ] Notification-Signup "Neue Termine" – Double-Opt-In Confirmation-Mail (mit Bestätigungslink)
-- [ ] Notification-Signup "Neue Termine" – Hinweis-Mail nach Bestätigung (Info: Benachrichtigung bei neuen Terminen aktiv)
-- [ ] Integration direkt in `send-contact-request.ts`, `create-booking.ts`, `create-quote-request.ts`, `create-notification-signup.ts` (noch kein `email-service.ts`)
-- [ ] Double-Opt-In Confirmation-Mail (Notification-Signup) wird über `src/app/notifications/[id]/confirm/page.tsx` ausgelöst (Hinweis-Mail nach erfolgreicher Bestätigung)
-- [ ] Double-Opt-In Confirmation-Mail (Quote-Request) wird über `src/app/quote-requests/[id]/confirm/page.tsx` ausgelöst (Hinweis-Mail + interne Kopie nach erfolgreicher Bestätigung)
-- [ ] `package.json` Script für lokale Email-Vorschau:
+- [x] Kontakt-/Anfrageformular (`/anfrage`) – Bestätigungs-Mail an Kunde
+- [x] Kontakt-/Anfrageformular (`/anfrage`) – interne Kopie
+- [x] Booking – Bestätigungs-Mail an Kunde
+- [x] Booking – interne Kopie
+- [x] Notification-Signup "Neue Termine" – Double-Opt-In Confirmation-Mail (mit Bestätigungslink)
+- [x] Notification-Signup "Neue Termine" – Hinweis-Mail nach Bestätigung (Info: Benachrichtigung bei neuen Terminen aktiv)
+- [x] Integration direkt in `send-contact-request.ts`, `create-booking.ts`, `create-quote-request.ts`, `create-notification-signup.ts` (noch kein `email-service.ts`)
+- [x] Double-Opt-In Confirmation-Mail (Notification-Signup) wird über `src/app/notifications/[id]/confirm/page.tsx` ausgelöst (Hinweis-Mail nach erfolgreicher Bestätigung)
+- [x] Double-Opt-In Confirmation-Mail (Quote-Request) wird über `src/app/quote-requests/[id]/confirm/page.tsx` ausgelöst (Hinweis-Mail + interne Kopie nach erfolgreicher Bestätigung)
+- [x] `package.json` Script für lokale Email-Vorschau:
   
   ```json
   "email:dev": "email dev --dir ./src/emails --port 3001"
