@@ -6,6 +6,7 @@ import { verifyTurnstileToken } from "@/lib/turnstile";
 import { getClientIp } from "nextjs-turnstile";
 import { generateSecureToken } from "@/utils/generate-secure-token";
 import { type CreateQuoteRequestData, createQuoteRequestSchema, sendQuoteRequestOptInEmailSchema } from "@/schemas/quote-request.schema";
+import { sendQuoteRequestOptInEmail } from "@/services/emails/send-quote-request-optin-email";
 export interface CreateQuoteRequestResult {
     quoteRequestId: string;
     emailId?: string;
@@ -204,8 +205,8 @@ export async function createQuoteRequest(data: CreateQuoteRequestData): Promise<
         });
         */
        
-        // Benachrichtigung mit Bestätigungslink per E-Mail versenden
-        
+        const response = await sendQuoteRequestOptInEmail(emailData);
+
         return {
             quoteRequestId,
             emailId: response,
