@@ -2,7 +2,7 @@
 "use client";
 
 import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
-import { NotificationSignupData, NotificationSignupFormData, notificationSignupFormSchema } from "@/schemas/forms/notification-signup.schema";
+//import { NotificationSignupData, NotificationSignupFormData, notificationSignupFormSchema } from "@/schemas/notification-signup.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRef, useState } from "react";
 import { Workshop } from "@/types/workshop";
@@ -16,6 +16,7 @@ import { TurnstileRef } from "nextjs-turnstile";
 import { verifyTurnstileToken } from "@/lib/turnstile";
 import { createNotificationSignup } from "@/app/actions/create-notification-signup";
 import { notificationSignupErrorMessage, notificationSignupSuccessMessage } from "./notification-signup-form-status-messages";
+import { CreateNotificationSignupData, NotificationSignupFormData, notificationSignupFormSchema } from "@/schemas/notification-signup.schema";
 
 export default function NotificationSignupForm({ 
     workshop, 
@@ -38,7 +39,7 @@ export default function NotificationSignupForm({
 
     const { register, handleSubmit, formState: { errors, isSubmitting } } = methods;
 
-    const [formData, setFormData] = useState<NotificationSignupData | null>(null);
+    const [formData, setFormData] = useState<CreateNotificationSignupData | null>(null);
 
     // Datenschutzerklärung & Sicherheitsabfrage (Turnstile)
     const turnstileRef = useRef<TurnstileRef>(null);
@@ -73,7 +74,7 @@ export default function NotificationSignupForm({
         //console.log("Form data:", data);
         //alert("Form data: " + JSON.stringify(data, null, 2));
 
-        const notificationSignupData: NotificationSignupData = {
+        const notificationSignupData: CreateNotificationSignupData = {
             workshop: {
                 id: workshop.id,
                 titel: workshop.titel,

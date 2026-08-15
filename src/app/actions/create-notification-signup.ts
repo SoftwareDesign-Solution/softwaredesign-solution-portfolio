@@ -3,18 +3,19 @@
 import { db } from "@/lib/db";
 import getClientIp from "@/lib/get-client-ip";
 import { verifyTurnstileToken } from "@/lib/turnstile";
-import { NotificationSignupData, notificationSignupSchema } from "@/schemas/forms/notification-signup.schema";
+import { CreateNotificationSignupData, createNotificationSignupSchema, sendNotificationSignupOptInEmailSchema } from "@/schemas/notification-signup.schema";
 import { generateSecureToken } from "@/utils/generate-secure-token";
+
 export interface CreateNotificationSignupResult {
     notificationSignupId: string;
     confirmationEmailSent: boolean;
 }
 
-export async function createNotificationSignup(data: NotificationSignupData): Promise<CreateNotificationSignupResult> {
+export async function createNotificationSignup(data: CreateNotificationSignupData): Promise<CreateNotificationSignupResult> {
     
     // 1. Server-seitige Zod-Validierung — nie nur auf Client-Validierung verlassen,
     //    da die Server Action theoretisch auch direkt (ohne UI) aufrufbar ist.
-    const validationResult = notificationSignupSchema.safeParse(data);
+    const validationResult = createNotificationSignupSchema.safeParse(data);
 
     if (!validationResult.success) {
         console.error(
@@ -50,32 +51,32 @@ export async function createNotificationSignup(data: NotificationSignupData): Pr
     const confirmationToken = generateSecureToken();
     const unsubscribeToken = generateSecureToken();
     
+    /*
+     * Workshop, Termin und Preis anhand der IDs serverseitig laden.
+     * Idealerweise liefert die Abfrage nur aktive und buchbare Termine.
+     */
+    const [workshop] = await db`
+        SELECT
+            w.id AS workshop_id,
+            w.titel AS workshop_titel
+        FROM workshop w
+        WHERE w.id = ${notificationSignupData.workshop.id}
+            AND w.active = TRUE
+        LIMIT 1
+    `;
+
+    if (!workshop) {
+        throw new Error(
+            "Der ausgewählte Workshop ist nicht verfügbar."
+        );
+    }
+
     let notificationSignupId: string;
 
     // 3. DB-Insert + E-Mail-Versand — in try/catch, aber OHNE redirect() darin!
     //    redirect() wirft intern einen speziellen Error (NEXT_REDIRECT), der sonst
     //    versehentlich vom catch-Block abgefangen würde.
     try {
-
-        /*
-         * Workshop, Termin und Preis anhand der IDs serverseitig laden.
-         * Idealerweise liefert die Abfrage nur aktive und buchbare Termine.
-         */
-        const [workshop] = await db`
-            SELECT
-                w.id AS workshop_id,
-                w.titel AS workshop_titel
-            FROM workshop w
-            WHERE w.id = ${notificationSignupData.workshop.id}
-                AND w.active = TRUE
-            LIMIT 1
-        `;
-
-        if (!workshop) {
-            throw new Error(
-                "Der ausgewählte Workshop ist nicht verfügbar."
-            );
-        }
 
         const [notificationSignup] = await db`
             INSERT INTO workshop_benachrichtigung (
@@ -89,7 +90,7 @@ export async function createNotificationSignup(data: NotificationSignupData): Pr
                 ${notificationSignupData.email},
                 ${ipAddress}, -- TODO: IP-Adresse aus Request-Context ermitteln,
                 ${confirmationToken},
-                now() + interval '24 hours',
+                now() + interval '3 DAY',
                 ${unsubscribeToken}
             )
             RETURNING id;
@@ -112,7 +113,14 @@ export async function createNotificationSignup(data: NotificationSignupData): Pr
 
     try {
 
-        // Buchungsbestätigung per E-Mail versenden
+        // E-Mail-Daten validieren und ggf. transformieren
+        const emailData = sendNotificationSignupOptInEmailSchema.parse({ 
+            ...notificationSignupData, 
+            expiresInDay: 3,
+            confirmationLink: `http://localhost:3000/notifications/${notificationSignupId}/confirm?token=${confirmationToken}`,
+        });
+
+        // Benachrichtigung mit Bestätigungslink per E-Mail versenden
 
         return {
             notificationSignupId,

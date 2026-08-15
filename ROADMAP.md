@@ -256,6 +256,7 @@ fix: Header lag über Modal-Overlay - z-index von z-20 auf z-0 reduziert
 - [x] `generate-secure-token.ts` unter `src/utils/` – `generateSecureToken()`, erzeugt opakes Zufalls-Token via `crypto.randomBytes(32).toString('base64url')` (Node `node:crypto`); genutzt in `create-notification-signup.ts` und `create-quote-request.ts` beim Erstellen des Datensatzes
 - [x] Migration: `confirmation_token` in `workshop_benachrichtigung` von `UUID DEFAULT gen_random_uuid()` auf `TEXT` (kein DB-Default) umgestellt – Token wird ab jetzt im Anwendungscode über `generate-secure-token.ts` erzeugt, nicht mehr per DB-Default
 - [x] Migration: `angebotsanfrage` um `confirmation_token` (TEXT, kein Default), `confirmation_expires_at`, `confirmed_at` erweitert (Double-Opt-In, gleiches Token-Verfahren wie `workshop_benachrichtigung`)
+- [x] **Refactor (geplant):** Schemas pro Formular in vier Teile aufgeteilt – `{name}-base.schema.ts` (gemeinsame Kernfelder), `{name}-form.schema.ts` (react-hook-form-Validierung inkl. Turnstile-Token), `{name}-action.schema.ts` (Server-Action-Input, ohne Turnstile/UI-only-Felder), `{name}-email.schema.ts` (Datenteilmenge fürs E-Mail-Template) – betrifft `booking`, `contact-request`, `quote-request`, `notification-signup`; verallgemeinert/ersetzt das bisherige `ContactRequestData`-Pick-Muster aus `contact-request.schema.ts`
 
 **Commits:**
 
@@ -287,6 +288,12 @@ feat: quote-requests/[id]/confirm - Double-Opt-In-Bestätigungsseite für Quote-
 feat: generate-secure-token.ts ergänzt - opakes Zufalls-Token statt UUID
 feat: confirmation_token in workshop_benachrichtigung auf TEXT umgestellt (kein DB-Default mehr)
 feat: confirmation_token, confirmation_expires_at und confirmed_at für Double-Opt-In in angebotsanfrage ergänzt
+refactor: Shared-Schemas
+refactor: Booking-Schemas in Base/Form/Action/Email aufgeteilt
+refactor: Contact-Request-Schemas in Base/Form/Action/Email aufgeteilt
+refactor: Quote-Request-Schemas in Base/Form/Action/Email aufgeteilt
+refactor: Notification-Signup-Schemas in Base/Form/Action/Email aufgeteilt
+refactor: Nicht mehr benötigte Schemas entfernt
 ```
 
 ---
@@ -371,11 +378,13 @@ feat: Filterleiste nach Thema für Referenzen-Seite
 - [ ] Umgebungsvariablen in Vercel hinterlegt (Neon, Resend)
 - [ ] Cloudflare DNS-Records für Vercel-Target konfiguriert
 - [ ] Preview-Deployments für Feature-Branches testen
+- [ ] README.md: Screenshots ergänzt (Startseite, Workshop-Detailseite, Buchungsformular, Anfrageformular, Termin-Benachrichtigung, Design-Page, E-Mail-Benachrichtigungen)
 
 **Commit:**
 
 ```text
 chore: Vercel-Deployment-Konfiguration ergänzt
+docs: Screenshots in README.md ergänzt
 ```
 
 ---
@@ -625,6 +634,8 @@ feat: Stories für WorkshopCard
 | 2026-08-12 | 2.14 | *Manuel Kübler* | Quote-Request um Double-Opt-In-Flow erweitert (`src/app/quote-requests/[id]/confirm/page.tsx`, E-Mail-Checkliste in Phase 7 angepasst) |
 | 2026-08-13 | 2.15 | *Manuel Kübler* | `confirm-notification-signup.ts` und `confirm-quote-request.ts` Server Actions in Phase 6 ergänzt |
 | 2026-08-13 | 2.16 | *Manuel Kübler* | `confirmation_token` von UUID (`gen_random_uuid()`) auf opakes Zufalls-Token (TEXT, anwendungsseitig via `generate-secure-token.ts` erzeugt) umgestellt, betrifft `workshop_benachrichtigung` und `angebotsanfrage` |
+| 2026-08-14 | 2.17 | *Manuel Kübler* | README: Live-Link und Screenshot-Bereich (App-Screenshots + E-Mail-Benachrichtigungen) ergänzt; Screenshots-Punkt in Phase 9 nachgetragen |
+| 2026-08-14 | 2.18 | *Manuel Kübler* | Geplantes Schema-Refactoring in Phase 6 ergänzt: Base/Form/Action/Email-Aufteilung für Booking, Contact-Request, Quote-Request, Notification-Signup |
 
 **Versionierung – Major.Minor (kein SemVer-Patch-Level, da kein "Breaking Change"-Konzept für eine Roadmap sinnvoll ist):**
 
