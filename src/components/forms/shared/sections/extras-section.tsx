@@ -74,7 +74,7 @@ export default function ExtrasSection({
                     <textarea
                         className="w-full rounded-md border border-border bg-white px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary-700 focus:ring-2 focus:ring-primary-100 min-h-22.5 resize-y"
                         placeholder="Besondere Wünsche, Ernährung, technische Anforderungen …"
-                        {...register("notizen")}
+                        {...register("nachricht")}
                     />
 
                     

@@ -2,19 +2,22 @@
 
 import { db } from "@/lib/db";
 import { verifyTurnstileToken } from "@/lib/turnstile";
-import { BookingData, bookingSchema } from "@/schemas/forms/booking.schema";
+import { CreateBookingData, createBookingSchema, sendBookingConfirmationEmailSchema } from "@/schemas/booking.schema";
+//import { BookingData, bookingSchema } from "@/schemas/forms/booking.schema";
 import { getClientIp } from "nextjs-turnstile";
 
 export interface CreateBookingResult {
     bookingId: string;
+    emailId?: string;
     confirmationEmailSent: boolean;
+    error?: string;
 }
 
-export async function createBooking(data: BookingData): Promise<CreateBookingResult> {
+export async function createBooking(data: CreateBookingData): Promise<CreateBookingResult> {
     
     // 1. Server-seitige Zod-Validierung — nie nur auf Client-Validierung verlassen,
     //    da die Server Action theoretisch auch direkt (ohne UI) aufrufbar ist
-    const validationResult = bookingSchema.safeParse(data);
+    const validationResult = createBookingSchema.safeParse(data);
 
     if (!validationResult.success) {
         console.error(
@@ -63,6 +66,40 @@ export async function createBooking(data: BookingData): Promise<CreateBookingRes
     }
     
     
+    /*
+     * Workshop, Termin und Preis anhand der IDs serverseitig laden.
+     * Idealerweise liefert die Abfrage nur aktive und buchbare Termine.
+     */
+    const [workshopTermin] = await db`
+        SELECT
+            w.id AS workshop_id,
+            w.titel AS workshop_titel,
+            w.preis,
+            t.id AS termin_id,
+            t.datum_von AS "datumVon",
+            t.datum_bis AS "datumBis"
+        FROM workshop w
+        INNER JOIN termin t ON t.workshop_id = w.id
+        WHERE w.id = ${bookingData.workshop.id}
+            AND t.id = ${bookingData.termin?.id}
+            AND w.active = TRUE
+            AND t.active = TRUE
+            AND t.status <> 'ausgebucht'
+        LIMIT 1
+    `;
+
+    console.log("Workshop und Termin geladen:", workshopTermin);
+
+    if (!workshopTermin) {
+        throw new Error(
+            "Der ausgewählte Workshop oder Termin ist nicht verfügbar."
+        );
+    }
+
+    const gesamtbetrag = 
+        Number(workshopTermin.preis) * Number(bookingData.teilnehmerzahl);
+
+        
     let bookingId: string;
 
     // 3. DB-Insert + E-Mail-Versand — in try/catch, aber OHNE redirect() darin!
@@ -70,38 +107,6 @@ export async function createBooking(data: BookingData): Promise<CreateBookingRes
     //    versehentlich vom catch-Block abgefangen würde.
     try {
         
-        /*
-         * Workshop, Termin und Preis anhand der IDs serverseitig laden.
-         * Idealerweise liefert die Abfrage nur aktive und buchbare Termine.
-         */
-        const [workshopTermin] = await db`
-            SELECT
-                w.id AS workshop_id,
-                w.titel AS workshop_titel,
-                w.preis,
-                t.datum_von AS "datumVon",
-                t.datum_bis AS "datumBis"
-            FROM workshop w
-            INNER JOIN termin t ON t.workshop_id = w.id
-            WHERE w.id = ${bookingData.workshop.id}
-                AND t.id = ${bookingData.termin?.id}
-                AND w.active = TRUE
-                AND t.active = TRUE
-                AND t.status <> 'ausgebucht'
-            LIMIT 1
-        `;
-
-        console.log("Workshop und Termin geladen:", workshopTermin);
-
-        if (!workshopTermin) {
-            throw new Error(
-                "Der ausgewählte Workshop oder Termin ist nicht verfügbar."
-            );
-        }
-
-        const gesamtbetrag = 
-            Number(workshopTermin.preis) * Number(bookingData.teilnehmerzahl);
-
         const [booking] = await db`
             INSERT INTO buchung (
                 workshop_id,
@@ -150,7 +155,7 @@ export async function createBooking(data: BookingData): Promise<CreateBookingRes
                 ${bookingData.rechnungsadresse?.strasse ?? null},
                 ${bookingData.rechnungsadresse?.plz ?? null},
                 ${bookingData.rechnungsadresse?.ort ?? null},
-                ${bookingData.notizen ?? null},
+                ${bookingData.nachricht ?? null},
                 ${workshopTermin.preis},
                 ${gesamtbetrag},
                 ${ipAddress ?? null} -- TODO: IP-Adresse aus Request-Context ermitteln
@@ -175,7 +180,25 @@ export async function createBooking(data: BookingData): Promise<CreateBookingRes
     try {
 
         // Buchungsbestätigung per E-Mail versenden
+        // booking-confirmation-email.tsx per E-Mail versenden
 
+        const emailData = sendBookingConfirmationEmailSchema.parse({
+            ...bookingData,
+            workshop: {
+                id: workshopTermin.workshop_id,
+                titel: workshopTermin.workshop_titel,
+            },
+            termin: {
+                id: workshopTermin.termin_id,
+                datumVon: String(workshopTermin.datum_von),
+                datumBis: String(workshopTermin.datum_bis),
+            },
+            salutation: `Hallo ${bookingData.ansprechpartner.vorname}`,
+            gesamtpreis: gesamtbetrag
+        })
+
+        // Buchungsbestätigung per E-Mail versenden
+        
         return {
             bookingId,
             confirmationEmailSent: true,
@@ -185,6 +208,7 @@ export async function createBooking(data: BookingData): Promise<CreateBookingRes
         
         return {
             bookingId,
+            error: "Fehler beim Versenden der Bestätigungs-E-Mail: " + (error as Error).message,
             confirmationEmailSent: false,
         };
 

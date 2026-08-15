@@ -1,10 +1,10 @@
-/* eslint-disable react-hooks/refs */
+ /* eslint-disable react-hooks/refs */
 "use client";
 
 import { useRef, useState } from "react";
 import { FormProvider, SubmitHandler, useForm, useFormState, useWatch } from "react-hook-form";
 import Link from "next/link";
-import { BookingData, bookingFormSchema, type BookingFormData } from "@/schemas/forms/booking.schema";
+//import { BookingData, bookingFormSchema, type BookingFormData } from "@/schemas/forms/booking.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import AppointmentSelectionSection from "../shared/sections/appointment-selection-section";
 import ParticipantStepperSection from "../shared/sections/participant-stepper-section";
@@ -21,6 +21,7 @@ import { TurnstileRef } from "nextjs-turnstile";
 import TurnstileWidgetSection from "../shared/sections/turnstile-widget-section";
 import { createBooking } from "@/app/actions/create-booking";
 import { bookingErrorMessage, bookingSuccessMessage } from "./booking-form-status-messages";
+import { bookingFormSchema, type BookingFormData, type CreateBookingData } from "@/schemas/booking.schema";
 
 export default function BookingForm({ 
     workshop, 
@@ -65,7 +66,7 @@ export default function BookingForm({
             },
             */
             gutscheinCode: "",
-            notizen: "",
+            nachricht: "",
             consent: false,
             turnstile: {
                 token: "",
@@ -73,25 +74,27 @@ export default function BookingForm({
         },
     });
 
-    const { control, formState, handleSubmit } = methods;
+    const { handleSubmit } = methods;
 
-    const { errors } = useFormState({ control });
+    //const { errors } = useFormState({ control });
 
-    const [formData, setFormData] = useState<BookingData | null>(null);
+    const [formData, setFormData] = useState<CreateBookingData | null>(null);
 
 
     // 02 - Teilnehmeranzahl
+    /*
     const participantCount = useWatch({
         control,
         name: "teilnehmerzahl",
     });
+    */
 
 
     // Zusammenfassung
-    const participantCountLabel = Math.min(Math.max(Number(participantCount) || 1, 1), 20);
-    const subtotal = Number(workshop.preis) * participantCountLabel;
-    const vat = Math.round(subtotal * 0.19);
-    const total = subtotal + vat;
+    //const participantCountLabel = Math.min(Math.max(Number(participantCount) || 1, 1), 20);
+    //const subtotal = Number(workshop.preis) * participantCountLabel;
+    //const vat = Math.round(subtotal * 0.19);
+    //const total = subtotal + vat;
 
     // Datenschutzerklärung & Sicherheitsabfrage (Turnstile)
     const turnstileRef = useRef<TurnstileRef>(null);
@@ -106,12 +109,13 @@ export default function BookingForm({
         //console.log("Booking submitted:", { workshop: 'Test', ...data });
         //alert("Booking submitted: " + JSON.stringify({ workshop: 'Test', ...data }, null, 2));
 
-        const bookingData: BookingData = {
+        const bookingData: CreateBookingData = {
             workshop: {
                 id: workshop.id,
                 titel: workshop.titel,
             },
             ...data,
+            /*
             summary: {
                 preis: Number(workshop.preis),
                 teilnehmerzahl: participantCountLabel,
@@ -119,6 +123,7 @@ export default function BookingForm({
                 umsatzsteuer: vat,
                 gesamtbetrag: total
             }
+            */
         };
 
         setFormData(bookingData);
@@ -126,6 +131,8 @@ export default function BookingForm({
         try {
             
             const result = await createBooking(bookingData);
+
+            //alert(`Buchung erfolgreich erstellt. ${result.bookingId} ${result.emailId ? `Email ID: ${result.emailId}` : ""} ${result.error ? `Error: ${result.error}` : ""}`);
 
             if (result.bookingId) {
 
@@ -143,15 +150,6 @@ export default function BookingForm({
 
                 onClose?.();
 
-                //alert(`Buchung erfolgreich erstellt. ${result}`);
-
-                /*
-                const shortReference = result.split("-")[0];
-                onSuccess(bookingSuccessMessage({
-                    workshopTitle: workshop.titel,
-                    reference: shortReference,
-                }));
-                */
             }
         } catch (error) {
             
@@ -163,6 +161,7 @@ export default function BookingForm({
             resetTurnstile();
 
         }
+       
     };
 
     return (
@@ -222,6 +221,14 @@ export default function BookingForm({
                         hint="Bitte füllen Sie alle Pflichtfelder aus und bestätigen Sie die Sicherheitsabfrage."
                         buttonLabel="Verbindlich buchen"
                     />
+
+                    <div className="mt-2 col-span-2 rounded-lg border border-border bg-surface p-4 text-[13px] text-foreground">
+                            
+                        <pre className="whitespace-pre-wrap">
+                            {JSON.stringify(formData, null, 2)}
+                        </pre>
+                        
+                    </div>
 
                 </form>
             </FormProvider>
