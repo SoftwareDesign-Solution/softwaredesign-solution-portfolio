@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { verifyTurnstileToken } from "@/lib/turnstile";
 import { CreateBookingData, createBookingSchema, sendBookingConfirmationEmailSchema } from "@/schemas/booking.schema";
 //import { BookingData, bookingSchema } from "@/schemas/forms/booking.schema";
+import { sendBookingConfirmationEmail } from "@/services/emails/send-booking-confirmation-email";
 import { getClientIp } from "nextjs-turnstile";
 
 export interface CreateBookingResult {
@@ -197,10 +198,11 @@ export async function createBooking(data: CreateBookingData): Promise<CreateBook
             gesamtpreis: gesamtbetrag
         })
 
-        // Buchungsbestätigung per E-Mail versenden
-        
+        const emailId = await sendBookingConfirmationEmail(emailData);
+
         return {
             bookingId,
+            emailId,
             confirmationEmailSent: true,
         };
 
