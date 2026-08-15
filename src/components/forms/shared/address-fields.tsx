@@ -1,5 +1,5 @@
 import { useFormContext, useFormState } from "react-hook-form";
-import type { AddressFormData } from "@/schemas/forms/shared/address.schema";
+import type { AddressFormData } from "@/schemas/shared/address.schema";
 import Label from "./label";
 import TextField from "./text-field";
 import ErrorMessage from "./error-message";

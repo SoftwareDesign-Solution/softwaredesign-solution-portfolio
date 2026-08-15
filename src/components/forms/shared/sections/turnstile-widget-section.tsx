@@ -2,7 +2,7 @@ import { RefObject } from "react";
 import { useFormContext, useFormState } from "react-hook-form";
 import type { TurnstileRef } from "nextjs-turnstile";
 import TurnstileWidget from "../turnstile-widget";
-import { TurnstileFormData } from "@/schemas/forms/shared/turnstile-schema";
+import { TurnstileFormData } from "@/schemas/shared/turnstile-schema";
 import ErrorMessage from "../error-message";
 
 type FormWithTurnstile = {

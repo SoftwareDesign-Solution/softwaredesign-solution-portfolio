@@ -1,5 +1,5 @@
 import { useFormContext, useFormState } from "react-hook-form";
-import { ContactPersonFormData } from "@/schemas/forms/shared/contact-person.schema";
+import { ContactPersonFormData } from "@/schemas/shared/contact-person.schema";
 import Label from "../label";
 import SectionHeading from "../section-heading";
 import SelectField from "../select-field";

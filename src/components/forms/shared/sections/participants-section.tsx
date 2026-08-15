@@ -1,5 +1,5 @@
 import { useFormContext, useFieldArray, useFormState, useWatch } from "react-hook-form";
-import { TeilnehmerFormData } from "@/schemas/forms/shared/teilnehmer.schema";
+import { TeilnehmerFormData } from "@/schemas/shared/teilnehmer.schema";
 import SectionHeading from "../section-heading";
 import TextField from "../text-field";
 import ErrorMessage from "../error-message";

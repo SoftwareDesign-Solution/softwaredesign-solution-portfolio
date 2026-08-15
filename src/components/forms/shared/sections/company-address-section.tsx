@@ -1,4 +1,4 @@
-import type { AddressFormData } from "@/schemas/forms/shared/address.schema";
+import type { AddressFormData } from "@/schemas/shared/address.schema";
 import { useFormContext } from "react-hook-form";
 import SectionHeading from "../section-heading";
 import TextField from "../text-field";
