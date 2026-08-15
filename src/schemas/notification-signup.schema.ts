@@ -44,7 +44,7 @@ export const sendNotificationSignupOptInEmailSchema = notificationSignupBaseSche
 
 });
 
-export const sendNotificationSignupConfirmedEmailSchema = z.object({
+export const sendNotificationSignupConfirmedEmailSchema = notificationSignupBaseSchema.extend({
 
     // Workshop
     workshop: workshopSchema,

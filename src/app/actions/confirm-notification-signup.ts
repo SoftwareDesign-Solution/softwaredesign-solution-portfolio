@@ -2,6 +2,8 @@
 
 import { z } from "zod";
 import { db } from "@/lib/db";
+import { sendNotificationSignupConfirmedEmail } from "@/services/emails/send-notification-signup-confirmed-email";
+import { sendNotificationSignupConfirmedEmailSchema } from "@/schemas/notification-signup.schema";
 
 const inputSchema = z.object({
     id: z.uuid(),
@@ -51,13 +53,42 @@ export async function confirmNotificationSignup(props: InputData): Promise<Confi
             AND confirmed_at IS NULL
             AND confirmation_expires_at > NOW()
         RETURNING 
-            workshop_titel AS "workshopTitel",
+            id,
+            jsonb_build_object(
+                'id', workshop_id,
+                'titel', workshop_titel
+            ) AS workshop,
             vorname,
             nachname,
-            email
+            email,
+            unsubscribe_token AS "unsubscribeToken"
     `;
 
     if (confirmedRows.length > 0) {
+
+        const confirmedRow = confirmedRows[0];
+
+        /*
+         * Ab hier ist die Benachrichtigung definitiv aktiviert.
+         *
+         * Ein E-Mail-Fehler darf deshalb nicht mehr dazu führen,
+         * dass der Client die gesamte Buchung als fehlgeschlagen
+         * behandelt.
+         */
+        try {
+
+            const emailData = sendNotificationSignupConfirmedEmailSchema.parse({
+                ...confirmedRow,
+                unsubscribeLink: `http://localhost:3000/notifications/${confirmedRow.id}/unsubscribe?token=${confirmedRow.unsubscribeToken}`
+            });
+
+            // notification-signup-confirmed-email.tsx per E-Mail versenden
+            const result = await sendNotificationSignupConfirmedEmail(emailData);
+
+        } catch (error) {
+            console.error("Fehler beim Versenden der Bestätigungs-E-Mail: " + (error as Error).message);
+        }
+
         return {
             status: "confirmed",
             data: confirmedRows[0] as NotificationSignupConfirmationData
