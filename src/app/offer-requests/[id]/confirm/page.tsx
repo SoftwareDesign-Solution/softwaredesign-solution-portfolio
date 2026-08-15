@@ -1,5 +1,6 @@
 import { confirmQuoteRequest } from "@/app/actions/confirm-quote-request";
 import { formatDateRange, isSameDay } from "@/utils/format-date-range";
+import { type QuoteRequestConfirmedData } from "@/schemas/quote-request.schema";
 
 interface OfferRequestConfirmationPageProps {
     params: Promise<{
@@ -72,25 +73,25 @@ export default async function OfferRequestConfirmationPage({
                 </h1>
 
                 <p className="text-xl leading-[1.55] text-foreground max-w-205 mt-4">
-                    Sie haben ein unverbindliches Angebot für den Workshop <strong>{confirmationData?.workshopTitel}</strong> 
-                    {isSameDay(String(confirmationData?.datumVon), String(confirmationData?.datumBis)) ? 'am' : 'vom'} <strong>{formatDateRange(String(confirmationData?.datumVon), String(confirmationData?.datumBis))}</strong> angefordert.
+                    Sie haben ein unverbindliches Angebot für den Workshop <strong>{confirmationData?.workshop.titel}</strong>{" "}
+                    {isSameDay(String(confirmationData?.termin!.datumVon), String(confirmationData?.termin!.datumBis)) ? 'am' : 'vom'} <strong>{formatDateRange(String(confirmationData?.termin!.datumVon), String(confirmationData?.termin!.datumBis))}</strong> angefordert.
                 </p>
 
                 <div className="mt-10 py-5.5 px-5.5 bg-surface rounded-lg">
                     
                     <div className="flex justify-between items-baseline py-1.5 px-0 text-sm text-muted">
                         <span>Firma</span>
-                        <span className="font-mono text-[13.5px]">{confirmationData?.firma}</span>
+                        <span className="font-mono text-[13.5px]">{`${confirmationData?.rechnungsadresse?.firma || confirmationData?.adresse.firma || ''}`}</span>
                     </div>
 
                     <div className="flex justify-between items-baseline py-1.5 px-0 text-sm text-muted">
                         <span>Ansprechpartner</span>
-                        <span className="font-mono text-[13.5px]">{confirmationData?.vorname} {confirmationData?.nachname}</span>
+                        <span className="font-mono text-[13.5px]">{confirmationData?.ansprechpartner?.vorname} {confirmationData?.ansprechpartner?.nachname}</span>
                     </div>
 
                     <div className="flex justify-between items-baseline py-1.5 px-0 text-sm text-muted">
                         <span>E-Mail</span>
-                        <span className="font-mono text-[13.5px]">{confirmationData?.email}</span>
+                        <span className="font-mono text-[13.5px]">{confirmationData?.ansprechpartner?.email}</span>
                     </div>
 
                     <div className="flex justify-between items-baseline py-1.5 px-0 text-sm text-muted">
@@ -101,7 +102,7 @@ export default async function OfferRequestConfirmationPage({
                 </div>
 
                 <div className="mt-6 py-3.5 px-4.5 bg-success-50 rounded-md text-sm text-muted leading-[1.55] border-l-3 border-success-500">
-                    Anmeldung bestätigt — Sie werden benachrichtigt, sobald ein neuer Termin angelegt wird.
+                    Anfrage bestätigt — Ihr Angebot wird erstellt und Ihnen in Kürze per E-Mail zugesendet.
                 </div>
 
             </section>
