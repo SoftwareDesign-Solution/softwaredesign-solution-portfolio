@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import getClientIp from "@/lib/get-client-ip";
 import { verifyTurnstileToken } from "@/lib/turnstile";
 import { CreateNotificationSignupData, createNotificationSignupSchema, sendNotificationSignupOptInEmailSchema } from "@/schemas/notification-signup.schema";
+import { sendNotificationSignupOptInEmail } from "@/services/emails/send-notification-signup-optin-email";
 import { generateSecureToken } from "@/utils/generate-secure-token";
 
 export interface CreateNotificationSignupResult {
@@ -121,6 +122,7 @@ export async function createNotificationSignup(data: CreateNotificationSignupDat
         });
 
         // Benachrichtigung mit Bestätigungslink per E-Mail versenden
+        const result = await sendNotificationSignupOptInEmail(emailData);
 
         return {
             notificationSignupId,
