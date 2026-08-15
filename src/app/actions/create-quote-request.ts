@@ -2,20 +2,21 @@
 
 import { db } from "@/lib/db";
 import { verifyTurnstileToken } from "@/lib/turnstile";
-import { QuoteRequestData, quoteRequestSchema } from "@/schemas/forms/quote-request.schema";
+//import { QuoteRequestData, quoteRequestSchema } from "@/schemas/forms/quote-request.schema";
 import { getClientIp } from "nextjs-turnstile";
 import { generateSecureToken } from "@/utils/generate-secure-token";
-
+import { type CreateQuoteRequestData, createQuoteRequestSchema, sendQuoteRequestOptInEmailSchema } from "@/schemas/quote-request.schema";
 export interface CreateQuoteRequestResult {
     quoteRequestId: string;
+    emailId?: string;
     confirmationEmailSent: boolean;
 }
 
-export async function createQuoteRequest(data: QuoteRequestData): Promise<CreateQuoteRequestResult> {
+export async function createQuoteRequest(data: CreateQuoteRequestData): Promise<CreateQuoteRequestResult> {
     
     // 1. Server-seitige Zod-Validierung — nie nur auf Client-Validierung verlassen,
     //    da die Server Action theoretisch auch direkt (ohne UI) aufrufbar ist
-    const validationResult = quoteRequestSchema.safeParse(data);
+    const validationResult = createQuoteRequestSchema.safeParse(data);
 
     if (!validationResult.success) {
         console.error(
@@ -54,6 +55,34 @@ export async function createQuoteRequest(data: QuoteRequestData): Promise<Create
 
     const confirmationToken = generateSecureToken();
 
+    /*
+     * Workshop, Termin und Preis anhand der IDs serverseitig laden.
+     * Idealerweise liefert die Abfrage nur aktive und buchbare Termine.
+     */
+    const [workshopTermin] = await db`
+        SELECT
+            w.id AS workshop_id,
+            w.titel AS workshop_titel,
+            w.preis,
+            t.id AS termin_id,
+            t.datum_von,
+            t.datum_bis
+        FROM workshop w
+        INNER JOIN termin t ON t.workshop_id = w.id
+        WHERE w.id = ${quoteRequestData.workshop.id}
+            AND t.id = ${quoteRequestData.termin?.id}
+            AND w.active = TRUE
+            AND t.active = TRUE
+            AND t.status <> 'ausgebucht'
+        LIMIT 1
+    `;
+
+    if (!workshopTermin) {
+        throw new Error(
+            "Der ausgewählte Workshop oder Termin ist nicht verfügbar."
+        );
+    }
+
     let quoteRequestId: string;
 
     // 3. DB-Insert + E-Mail-Versand — in try/catch, aber OHNE redirect() darin!
@@ -61,37 +90,10 @@ export async function createQuoteRequest(data: QuoteRequestData): Promise<Create
     //    versehentlich vom catch-Block abgefangen würde.
     try {
 
-        /*
-         * Workshop, Termin und Preis anhand der IDs serverseitig laden.
-         * Idealerweise liefert die Abfrage nur aktive und buchbare Termine.
-         */
-        const [workshopTermin] = await db`
-            SELECT
-                w.id AS workshop_id,
-                w.titel AS workshop_titel,
-                w.preis,
-                t.datum_von,
-                t.datum_bis
-            FROM workshop w
-            INNER JOIN termin t ON t.workshop_id = w.id
-            WHERE w.id = ${quoteRequestData.workshop.id}
-                AND t.id = ${quoteRequestData.termin?.id}
-                AND w.active = TRUE
-                AND t.active = TRUE
-                AND t.status <> 'ausgebucht'
-            LIMIT 1
-        `;
-
-        if (!workshopTermin) {
-            throw new Error(
-                "Der ausgewählte Workshop oder Termin ist nicht verfügbar."
-            );
-        }
-
         const gesamtbetrag = 
             Number(workshopTermin.preis) * Number(quoteRequestData.teilnehmerzahl);
 
-        const [booking] = await db`
+        const [quoteRequest] = await db`
             INSERT INTO angebotsanfrage (
                 workshop_id,
                 workshop_titel,
@@ -139,17 +141,17 @@ export async function createQuoteRequest(data: QuoteRequestData): Promise<Create
                 ${quoteRequestData.rechnungsadresse?.strasse ?? null},
                 ${quoteRequestData.rechnungsadresse?.plz ?? null},
                 ${quoteRequestData.rechnungsadresse?.ort ?? null},
-                ${quoteRequestData.notizen ?? null},
+                ${quoteRequestData.nachricht ?? null},
                 ${workshopTermin.preis},
                 ${gesamtbetrag},
                 ${ipAddress ?? null}, -- TODO: IP-Adresse aus Request-Context ermitteln
                 ${confirmationToken},
-                now() + interval '24 hours' -- confirmation_expires_at
+                now() + interval '3 DAY' -- confirmation_expires_at
             )
             RETURNING id;
         `;
         
-        quoteRequestId = String(booking.id);
+        quoteRequestId = String(quoteRequest.id);
 
     } catch (error) {
         throw new Error("Fehler beim Erstellen der Angebotsanfrage: " + (error as Error).message);
@@ -164,14 +166,55 @@ export async function createQuoteRequest(data: QuoteRequestData): Promise<Create
      */
     try {
 
-        // Buchungsbestätigung per E-Mail versenden
+        console.log("QuoteRequestData:", quoteRequestData);
+        console.log("WorkshopTermin:", workshopTermin);
 
+        const emailData = sendQuoteRequestOptInEmailSchema.parse({
+            ...quoteRequestData,
+            workshop: {
+                id: workshopTermin.workshop_id,
+                titel: workshopTermin.workshop_titel,
+            },
+            termin: {
+                id: workshopTermin.termin_id,
+                datumVon: String(workshopTermin.datum_von),
+                datumBis: String(workshopTermin.datum_bis),
+            },
+            salutation: `Sehr geehrte${quoteRequestData.ansprechpartner.anrede === 'Herr' ? 'r Herr' : ' Frau'} ${quoteRequestData.ansprechpartner.nachname},`,
+            confirmationLink: `${process.env.NEXT_PUBLIC_BASE_URL}/offer-requests/${quoteRequestId}/confirm?token=${confirmationToken}`,
+        });
+
+        console.log("EmailData:", emailData);
+
+        
+        // Benachrichtigung mit Bestätigungslink per E-Mail versenden
+        // quote-request-optin-email.tsx per E-Mail versenden
+        /*
+        const response = await sendQuoteRequestOptInEmail({
+            workshopTitel: workshopTermin.workshop_titel,
+            termin: {
+                datumVon: workshopTermin.datum_von,
+                datumBis: workshopTermin.datum_bis,
+            },
+            salutation: `${quoteRequestData.ansprechpartner.anrede} ${quoteRequestData.ansprechpartner.nachname}`,
+            email: quoteRequestData.ansprechpartner.email,
+            firma: quoteRequestData.adresse.firma,
+            teilnehmerzahl: quoteRequestData.teilnehmerzahl,
+            confirmationLink: `${process.env.NEXT_PUBLIC_BASE_URL}/offer-requests/${quoteRequestId}/confirm?token=${confirmationToken}`,
+        });
+        */
+       
+        // Benachrichtigung mit Bestätigungslink per E-Mail versenden
+        
         return {
             quoteRequestId,
+            emailId: response,
             confirmationEmailSent: true,
         };
 
     } catch (error) {
+
+        throw new Error("Fehler beim Versenden der Bestätigungs-E-Mail: " + (error as Error).message);
         
         return {
             quoteRequestId,

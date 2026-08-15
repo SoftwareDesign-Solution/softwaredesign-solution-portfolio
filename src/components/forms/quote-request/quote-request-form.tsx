@@ -4,7 +4,7 @@
 import { SubmitHandler, useForm, useWatch, FormProvider } from "react-hook-form";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { QuoteRequestData, type QuoteRequestFormData, quoteRequestFormSchema } from "@/schemas/forms/quote-request.schema";
+//import { QuoteRequestData, type QuoteRequestFormData, quoteRequestFormSchema } from "@/schemas/forms/quote-request.schema";
 import { useRef, useState } from "react";
 import ContactPersonSection from "../shared/sections/contact-person-section";
 import CompanyAddressSection from "../shared/sections/company-address-section";
@@ -20,6 +20,7 @@ import TurnstileWidgetSection from "../shared/sections/turnstile-widget-section"
 import { TurnstileRef } from "nextjs-turnstile";
 import { createQuoteRequest } from "@/app/actions/create-quote-request";
 import { quoteRequestErrorMessage, quoteRequestSuccessMessage } from "./quote-request-form-status-messages";
+import { type CreateQuoteRequestData, quoteRequestFormSchema, type QuoteRequestFormData } from "@/schemas/quote-request.schema";
 
 export default function QuoteRequestForm({ 
     workshop, 
@@ -56,7 +57,7 @@ export default function QuoteRequestForm({
                 ort: "",
             },
             */
-            notizen: "",
+            nachricht: "",
             consent: false,
             turnstile: {
                 token: "",
@@ -66,7 +67,7 @@ export default function QuoteRequestForm({
 
     const { control, formState, handleSubmit } = methods;
 
-    const [formData, setFormData] = useState<QuoteRequestData | null>(null);
+    const [formData, setFormData] = useState<CreateQuoteRequestData | null>(null);
 
     // 02 - Teilnehmeranzahl
     const participantCount = useWatch({
@@ -94,12 +95,13 @@ export default function QuoteRequestForm({
         //alert("Booking submitted: " + JSON.stringify({ workshop: 'Test', ...data }, null, 2));
 
 
-        const quoteRequestData: QuoteRequestData = {
+        const quoteRequestData: CreateQuoteRequestData = {
             workshop: {
                 id: workshop.id,
                 titel: workshop.titel,
             },
             ...data,
+            /*
             summary: {
                 preis: Number(workshop.preis),
                 teilnehmerzahl: participantCountLabel,
@@ -107,6 +109,7 @@ export default function QuoteRequestForm({
                 umsatzsteuer: vat,
                 gesamtbetrag: total
             }
+            */
         };
 
         setFormData(quoteRequestData);
@@ -116,6 +119,8 @@ export default function QuoteRequestForm({
             const result = await createQuoteRequest(quoteRequestData);
 
             if (result) {
+
+                alert(JSON.stringify(result, null, 2));
 
                 onSuccess(quoteRequestSuccessMessage({
                     vorname: quoteRequestData.ansprechpartner.vorname,
@@ -130,6 +135,10 @@ export default function QuoteRequestForm({
             }
 
         } catch (error) {
+            
+            console.error("Fehler beim Absenden der Angebotsanfrage:", error);
+
+            alert("Fehler beim Absenden der Angebotsanfrage: " + error);
 
             onError(quoteRequestErrorMessage({
                 vorname: quoteRequestData.ansprechpartner.vorname,
