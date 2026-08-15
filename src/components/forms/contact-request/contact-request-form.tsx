@@ -3,7 +3,7 @@
 
 import { useRef, useState } from "react";
 import { SubmitHandler, useForm, useWatch, FormProvider } from "react-hook-form";
-import { type ContactRequestFormData, contactRequestFormSchema } from "@/schemas/forms/contact-request.schema";
+//import { type ContactRequestFormData, contactRequestFormSchema } from "@/schemas/forms/contact-request.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import AddressFields from "../shared/address-fields";
 import Label from "../shared/label";
@@ -16,6 +16,8 @@ import { TurnstileRef } from "nextjs-turnstile";
 import { sendContactRequest } from "@/app/actions/send-contact-request";
 import { contactRequestErrorMessage, contactRequestSuccessMessage } from "./contact-request-form-status-messages";
 import { useModal } from "@/providers/modal-provider";
+import { type ContactRequestFormData, contactRequestFormSchema, type SendContactRequestData } from "@/schemas/contact-request.schema";
+
 
 export default function ContactRequestForm() {
 
@@ -48,7 +50,7 @@ export default function ContactRequestForm() {
 
     const { formState, handleSubmit, register } = methods;
 
-    const [formData, setFormData] = useState<ContactRequestFormData | null>(null);
+    const [formData, setFormData] = useState<SendContactRequestData | null>(null);
 
     const messageLength = useWatch({
         control: methods.control,
@@ -69,13 +71,20 @@ export default function ContactRequestForm() {
         //console.log("Booking submitted:", { workshop: 'Test', ...data });
         //alert("Booking submitted: " + JSON.stringify({ workshop: 'Test', ...data }, null, 2));
 
-        setFormData({...data});
+        const contactRequestData: SendContactRequestData = {
+            ...data
+        }
+
+        setFormData(contactRequestData);
+
         //console.log("Form data:", data);
         //alert("Form data: " + JSON.stringify(data, null, 2));
 
+        
+
         try {
 
-            await sendContactRequest(data);
+            await sendContactRequest(contactRequestData);
 
             showActionStatus(contactRequestSuccessMessage({
                 vorname: data.ansprechpartner.vorname,

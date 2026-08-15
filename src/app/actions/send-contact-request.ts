@@ -1,14 +1,14 @@
 "use server";
 
 import { verifyTurnstileToken } from "@/lib/turnstile";
-import { ContactRequestFormData, contactRequestFormSchema } from "@/schemas/forms/contact-request.schema";
-import { sendContactRequestEmail } from "@/services/emails/send-contact-request-email";
+//import { ContactRequestFormData, contactRequestFormSchema } from "@/schemas/forms/contact-request.schema";
+import { type SendContactRequestData, sendContactRequestEmailSchema, sendContactRequestSchema } from "@/schemas/contact-request.schema";
 
-export async function sendContactRequest(data: ContactRequestFormData): Promise<void> {
+export async function sendContactRequest(data: SendContactRequestData): Promise<void> {
     
     // 1. Server-seitige Zod-Validierung — nie nur auf Client-Validierung verlassen,
     //    da die Server Action theoretisch auch direkt (ohne UI) aufrufbar ist
-    const validationResult = contactRequestFormSchema.safeParse(data);
+    const validationResult = sendContactRequestSchema.safeParse(data);
 
     if (!validationResult.success) {
         console.error(
@@ -39,7 +39,10 @@ export async function sendContactRequest(data: ContactRequestFormData): Promise<
     // 3. E-Mail versenden
     try {
 
-        // E-Mail versenden
+        const emailData = sendContactRequestEmailSchema.parse(contactRequestData);
+        
+        // Kontaktnachricht per E-Mail versenden
+        
 
     } catch (error) {
         throw new Error(
