@@ -3,6 +3,7 @@
 import { verifyTurnstileToken } from "@/lib/turnstile";
 //import { ContactRequestFormData, contactRequestFormSchema } from "@/schemas/forms/contact-request.schema";
 import { type SendContactRequestData, sendContactRequestEmailSchema, sendContactRequestSchema } from "@/schemas/contact-request.schema";
+import { sendContactRequestEmail } from "@/services/emails/send-contact-request-email";
 
 export async function sendContactRequest(data: SendContactRequestData): Promise<void> {
     
@@ -41,8 +42,8 @@ export async function sendContactRequest(data: SendContactRequestData): Promise<
 
         const emailData = sendContactRequestEmailSchema.parse(contactRequestData);
         
-        // Kontaktnachricht per E-Mail versenden
-        
+        // E-Mail versenden
+        const response = await sendContactRequestEmail(emailData);
 
     } catch (error) {
         throw new Error(
