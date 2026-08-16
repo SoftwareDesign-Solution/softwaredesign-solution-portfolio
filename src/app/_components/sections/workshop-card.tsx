@@ -149,7 +149,14 @@ export default function WorkshopCard({ workshop, index, counter }: WorkshopCardP
                     <div>
                         <div className="text-xs text-muted tracking-[0.5px] font-semibold uppercase">ab</div>
                         <div className="text-xl font-bold tracking-[-0.6px] text-foreground">
-                            {formatPrice(workshop.preis)} <span className="text-sm text-muted font-normal">€</span>
+                            {Number(workshop.preis) > 0 ? (
+                                <>
+                                    {formatPrice(workshop.preis)}
+                                </>
+                            ) : (
+                                <span className="text-sm text-muted font-normal">auf Anfrage</span>
+                            )}
+                            
                         </div>
                     </div>
 

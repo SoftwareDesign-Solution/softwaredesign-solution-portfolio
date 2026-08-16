@@ -25,7 +25,7 @@ export function BackToTopButton() {
       type="button"
       aria-label="Nach oben"
       onClick={scrollToTop}
-      className={`fixed bottom-8 right-8 z-40 flex h-[52px] w-[52px] items-center justify-center rounded-full bg-primary-700 text-white shadow-[0_8px_22px_rgba(0,0,0,0.18)] transition-all duration-200 hover:bg-primary-800 ${
+      className={`fixed bottom-8 right-8 z-40 flex h-13 w-13 items-center justify-center rounded-full bg-primary-700 text-white shadow-[0_8px_22px_rgba(0,0,0,0.18)] transition-all duration-200 hover:bg-primary-800 ${
         visible ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-2 opacity-0"
       }`}
     >

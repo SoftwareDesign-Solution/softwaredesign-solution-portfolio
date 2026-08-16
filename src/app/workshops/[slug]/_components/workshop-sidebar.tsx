@@ -25,9 +25,9 @@ export default function WorkshopSidebar(workshop: Workshop) {
             </div>
 
             {/* Preis */}
-            <div className="text-3xl font-bold text-foreground">ab {formatPrice(nettoPrice)} (netto)</div>
+            <div className="text-3xl font-bold text-foreground">{`${nettoPrice > 0 ? `ab ${formatPrice(nettoPrice)} (netto)` : 'Preis auf Anfrage'}`}</div>
             <div className="text-xs text-muted mt-1 mb-5.5">
-              pro Person - zzgl. USt. (brutto {formatPrice(bruttoPrice)})
+              pro Person - zzgl. USt. {`${bruttoPrice > 0 ? `(brutto ${formatPrice(bruttoPrice)})` : ''}`}
             </div>
 
             {/* Nächste Termine */}
@@ -56,13 +56,21 @@ export default function WorkshopSidebar(workshop: Workshop) {
               {/*<ActionButton variant="solid" onClick={() => openBookingModal(workshop)}>
                 Platz reservieren
               </ActionButton>*/}
-              <Button variant="primary" fullWidth onClick={() => openBookingModal(workshop)}>
+              <Button 
+                variant="primary" 
+                fullWidth 
+                disabled={!workshop.termine || workshop.termine.length === 0}
+                onClick={() => openBookingModal(workshop)}>
                 Platz reservieren
               </Button>
 
               {/* Angebot anfordern */}
               {/*<ActionButton variant="outline">Angebot anfordern</ActionButton>*/}
-              <Button variant="outline" fullWidth onClick={() => openQuoteRequestModal(workshop)}>
+              <Button 
+                variant="outline" 
+                fullWidth 
+                disabled={!workshop.termine || workshop.termine.length === 0}
+                onClick={() => openQuoteRequestModal(workshop)}>
                 Angebot anfordern
               </Button>
  

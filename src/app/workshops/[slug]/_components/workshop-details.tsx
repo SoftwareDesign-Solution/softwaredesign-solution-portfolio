@@ -10,8 +10,13 @@ export default function WorkshopDetails(workshop: Workshop) {
                 
                 <SectionHeader title="Beschreibung" size="sm">Über den Workshop</SectionHeader>
 
-                <div id="description" className="text-base max-w-3xl wrap-anywhere hyphens-auto text-foreground">
-                    {workshop.beschreibung}
+                <div 
+                    id="description" 
+                    className="text-base max-w-3xl wrap-anywhere hyphens-auto text-foreground"
+                    dangerouslySetInnerHTML={{
+                        __html: workshop.beschreibung ?? "",
+                    }}
+                    >
                 </div>
 
             </section>
@@ -94,7 +99,7 @@ export default function WorkshopDetails(workshop: Workshop) {
                 
                 <SectionHeader title="Lernziele" size="sm">Was Sie mitnehmen</SectionHeader>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5 grid-flow-row lg:grid-flow-col">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5 grid-flow-row">
 
                     {workshop.lernziele!.map((ziel, index) => (
                         <div key={index} className="flex gap-4 py-5 px-6 items-start border border-solid border-border rounded-lg shadow-md">
