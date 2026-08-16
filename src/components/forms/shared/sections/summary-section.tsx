@@ -1,7 +1,9 @@
 import { useFormContext, useWatch } from "react-hook-form";
-import { formatPrice } from "@/utils/format-price";
-import { formatDateRange } from "@/utils/format-date-range";
+
 import { Workshop } from "@/types/workshop";
+import { formatDateRange } from "@/utils/format-date-range";
+import { formatPrice } from "@/utils/format-price";
+
 
 interface SummarySectionProps {
     title: string;

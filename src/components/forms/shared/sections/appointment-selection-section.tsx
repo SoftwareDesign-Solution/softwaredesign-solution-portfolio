@@ -1,12 +1,18 @@
 "use client";
 
 import { Controller, useFormContext, useFormState } from "react-hook-form";
-import { BookingFormData } from "@/schemas/forms/booking.schema";
+
+import { TerminFormData } from "@/schemas/shared/termin.schema";
 import { Termin } from "@/types/termin";
-import SectionHeading from "../section-heading";
 import { formatDateRange } from "@/utils/format-date-range";
 import { formatTerminStatus } from "@/utils/format-termin-status";
 
+import SectionHeading from "../section-heading";
+
+
+type AppointmentSelectionFormData = {
+    termin?: TerminFormData;
+};
 
 interface AppointmentSelectionSectionProps {
     num: string;
@@ -20,7 +26,7 @@ export default function AppointmentSelectionSection({
 
     const {
         control,
-    } = useFormContext<BookingFormData>();
+    } = useFormContext<AppointmentSelectionFormData>();
 
     const { errors } = useFormState({ control });
 

@@ -6,8 +6,6 @@ type FocusArea = {
   skills: string[];
 }
 
-// Einziger Konsument dieser Daten ist diese Komponente — deshalb hier co-located.
-// Beschreibungstexte sind Entwürfe (ihr hattet nur die Stichpunkte geliefert) — bitte prüfen/anpassen.
 const FOCUS_AREAS: FocusArea[] = [
   {
     title: ".NET-Entwicklung",

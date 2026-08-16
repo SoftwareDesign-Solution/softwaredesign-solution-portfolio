@@ -1,6 +1,5 @@
 import { confirmQuoteRequest } from "@/app/actions/confirm-quote-request";
 import { formatDateRange, isSameDay } from "@/utils/format-date-range";
-import { type QuoteRequestConfirmedData } from "@/schemas/quote-request.schema";
 
 interface OfferRequestConfirmationPageProps {
     params: Promise<{
@@ -17,17 +16,6 @@ export default async function OfferRequestConfirmationPage({
 
     const { id } = await params;
     const { token } = await searchParams;
-
-    /*
-    let confirmationData: Awaited<ReturnType<typeof getQuoteRequestConfirmation>> = null;
-    try {
-        confirmationData = await getQuoteRequestConfirmation({ id, token: token ?? '' });
-    } catch (error) {
-        console.error('Fehler beim Abrufen der Angebotsanfrage-Bestätigung:', error);
-    }
-    */
-
-    // http://localhost:3000/offers-request/56809ea2-1103-4a15-97d0-955b5be15e52/confirm?token=38c8903b-fb0c-4dc8-bdb9-2e84a22dacb6
 
     const result = await confirmQuoteRequest({ id, token: token ?? '' });
 

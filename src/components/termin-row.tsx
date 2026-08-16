@@ -1,6 +1,8 @@
-import { formatTerminStatus } from "@/utils/format-termin-status";
 import type { Termin } from "@/types/termin";
+
 import { formatDateRange } from "@/utils/format-date-range";
+import { formatTerminStatus } from "@/utils/format-termin-status";
+
 
 interface TerminRowProps {
   termin: Termin;

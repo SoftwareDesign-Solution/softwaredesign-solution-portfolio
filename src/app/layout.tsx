@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
+
 import "./globals.css";
+
+import ModalProvider from "@/providers/modal-provider";
+
+import { BackToTopButton } from "./_components/back-to-top-button";
 import Footer from "./_components/footer";
 import Header from "./_components/header";
-import { BackToTopButton } from "./_components/back-to-top-button";
-import ModalProvider from "@/providers/modal-provider";
 
 
 export const metadata: Metadata = {

@@ -1,4 +1,5 @@
 import { Body, Container, Head, Html, Link, Section, Tailwind, Text } from "react-email";
+
 import { config } from "../lib/tailwind.config";
 import Footer from "./footer";
 import Header from "./header";

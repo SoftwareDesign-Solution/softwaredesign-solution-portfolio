@@ -1,8 +1,9 @@
 import {
+    Link,
     Section,
     Text,
-    Link,
 } from "react-email";
+
 
 export default function Footer() {
     return (

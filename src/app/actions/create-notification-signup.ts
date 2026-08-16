@@ -122,7 +122,7 @@ export async function createNotificationSignup(data: CreateNotificationSignupDat
         });
 
         // Benachrichtigung mit Bestätigungslink per E-Mail versenden
-        const result = await sendNotificationSignupOptInEmail(emailData);
+        await sendNotificationSignupOptInEmail(emailData);
 
         return {
             notificationSignupId,
@@ -130,6 +130,8 @@ export async function createNotificationSignup(data: CreateNotificationSignupDat
         };
 
     } catch (error) {
+
+        console.error(`Fehler beim Versenden der Bestätigungs-E-Mail: ${(error as Error).message}`);
         
         return {
             notificationSignupId,

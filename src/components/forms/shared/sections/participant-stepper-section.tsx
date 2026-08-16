@@ -1,10 +1,16 @@
 "use client";
 
 import { useFormContext } from "react-hook-form";
-import { BookingFormData } from "@/schemas/forms/booking.schema";
+
+import Button from "@/components/ui/button";
+
 import SectionHeading from "../section-heading";
 import TextField from "../text-field";
-import Button from "@/components/ui/button";
+
+
+type TeilnehmerzahlFormData = {
+    teilnehmerzahl?: number;
+};
 
 interface ParticipantStepperSectionProps {
     num: string;
@@ -19,7 +25,7 @@ export default function ParticipantStepperSection({
         getValues,
         register,
         setValue,
-    } = useFormContext<BookingFormData>();
+    } = useFormContext<TeilnehmerzahlFormData>();
 
     const stepParticipants = (delta: number) => {
     const current = Math.min(
@@ -45,16 +51,6 @@ export default function ParticipantStepperSection({
 
             <div className="flex flex-wrap items-center gap-3.5">
 
-                {/*}
-                <button
-                    type="button"
-                    onClick={() => stepParticipants(-1)}
-                    className="flex h-9 w-9 items-center justify-center rounded-md border border-border-strong text-lg font-semibold text-neutral-700 transition bg-surface hover:bg-neutral-100"
-                >
-                    -
-                </button>
-                */}
-
                 <Button type="button" variant="muted" size="icon" onClick={() => stepParticipants(-1)}>
                     -
                 </Button>
@@ -69,16 +65,6 @@ export default function ParticipantStepperSection({
                     {...register("teilnehmerzahl", { required: true, min: 1, max: 20, valueAsNumber: true })}
                 />
                 
-                {/*
-                <button
-                    type="button"
-                    onClick={() => stepParticipants(1)}
-                    className="flex h-9 w-9 items-center justify-center rounded-md border border-border-strong text-lg font-semibold text-neutral-700 transition bg-surface hover:bg-neutral-100"
-                >
-                    +
-                </button>
-                */}
-
                 <Button type="button" variant="muted" size="icon" onClick={() => stepParticipants(1)}>
                     +
                 </Button>

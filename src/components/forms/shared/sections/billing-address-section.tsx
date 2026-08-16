@@ -1,7 +1,10 @@
-import { AddressFormData } from "@/schemas/shared/address.schema";
 import { useFormContext, useWatch } from "react-hook-form";
-import SectionHeading from "../section-heading";
+
+import { AddressFormData } from "@/schemas/shared/address.schema";
+
 import AddressFields from "../address-fields";
+import SectionHeading from "../section-heading";
+
 
 type BillingAddressFormData = {
     abweichendeRechnungsadresse: boolean;

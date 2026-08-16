@@ -338,14 +338,13 @@ chore: email:dev Script in package.json ergänzt
 
 ## Phase 7.5 – Repository/Service-Trennung nachziehen (Refactoring)
 
-*(Erst wenn die Anwendung grundlegend läuft: DB-Zugriff aus den Server Actions in eine eigene Abstraktionsschicht extrahieren.)*
+*(Eigener Feature-Branch, zeitlich unabhängig von der linearen Phasen-Reihenfolge – wird irgendwann angegangen, sobald Zeit dafür ist, nicht zwingend direkt im Anschluss an Phase 7. Phase 7.6 (Code-Cleanup) wartet nicht darauf und kann vorher stattfinden.)*
 
 - [ ] `src/services/workshop-service.ts` (kapselt `get-workshops`/`get-workshop`)
 - [ ] `src/services/booking-service.ts`, `quote-request-service.ts`, `notification-service.ts`
 - [ ] `src/services/email-service.ts` (Resend-Wrapper)
 - [ ] Server Actions refaktorieren: rufen nur noch Services auf, kein direkter `sql`-Zugriff mehr in `src/app/actions/`
 - [ ] Optional: Repository-Schicht darunter, falls Trennung Service/DB-Zugriff zusätzlich sinnvoll erscheint
-
 **Commits:**
 
 ```text
@@ -353,6 +352,21 @@ refactor: workshop-service.ts eingeführt, get-workshops/get-workshop nutzen Ser
 refactor: booking-, quote-request- und notification-service.ts eingeführt
 refactor: email-service.ts eingeführt, Resend-Aufrufe zentralisiert
 refactor: Server Actions greifen nur noch über Services auf Daten zu
+```
+
+---
+
+## Phase 7.6 – Code-Cleanup & Import-Struktur
+
+*(Zeitpunkt: wenn die Anwendung grundlegend läuft, unabhängig von Phase 7.5 – kann auf `main` durchgeführt werden, während die Repository/Service-Trennung als eigener Feature-Branch parallel oder später läuft. Sollte 7.5 doch vor dem Cleanup gemergt werden, lohnt sich ein zweiter, kurzer Cleanup-Durchlauf für die dabei neu entstandenen Imports.)*
+
+- [ ] Ungenutzte Imports entfernt, Import-Reihenfolge konsistent (ESLint `eslint-plugin-perfectionist`), toter/auskommentierter Code entfernt
+- [ ] `index.ts` Barrel-Exports für Verzeichnisse mit vielen Importen pro Datei: `src/components/forms/shared/`, `src/components/ui/`, `src/components/modals/` — gezielt, nicht pauschal überall (Next.js Tree-Shaking-/Build-Performance-Tradeoff bei großen Re-Export-Ketten beachten)
+**Commits:**
+
+```text
+chore: Ungenutzte Imports entfernt, Import-Reihenfolge vereinheitlicht, toter/auskommentierter Code entfernt
+feat: index.ts Barrel-Exports für forms/shared, ui, modals ergänzt
 ```
 
 ---

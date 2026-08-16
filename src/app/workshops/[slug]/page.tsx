@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
+
 import { getWorkshop } from "@/app/actions/get-workshop";
-import WorkshopHeader from "./_components/workshop-header";
+
 import WorkshopDetails from "./_components/workshop-details";
+import WorkshopHeader from "./_components/workshop-header";
 import WorkshopSidebar from "./_components/workshop-sidebar";
 
 interface WorkshopDetailsPageProps {

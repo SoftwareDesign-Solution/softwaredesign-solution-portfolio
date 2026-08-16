@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
-import { Section, Heading as EmailHeading, Text } from "react-email";
+import { Heading as EmailHeading, Section, Text } from "react-email";
+
 
 type KickerVariant = "primary" | "success" | "error";
 

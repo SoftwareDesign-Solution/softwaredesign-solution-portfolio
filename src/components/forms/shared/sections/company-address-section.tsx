@@ -1,9 +1,12 @@
-import type { AddressFormData } from "@/schemas/shared/address.schema";
 import { useFormContext } from "react-hook-form";
+
+import type { AddressFormData } from "@/schemas/shared/address.schema";
+
+import AddressFields from "../address-fields";
+import Label from "../label";
 import SectionHeading from "../section-heading";
 import TextField from "../text-field";
-import Label from "../label";
-import AddressFields from "../address-fields";
+
 
 type CompanyAddressFormData = {
     adresse?: AddressFormData;

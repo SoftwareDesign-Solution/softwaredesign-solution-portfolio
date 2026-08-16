@@ -1,24 +1,12 @@
 import { Section, Text } from "react-email";
+
 import Heading from "@/emails/components/heading";
 import Layout from "@/emails/components/layout";
-import { Table } from "./components/table";
-import { formatDateRange } from "@/utils/format-date-range";
 import { type SendQuoteRequestEmailData } from '@/schemas/quote-request.schema';
+import { formatDateRange } from "@/utils/format-date-range";
 
-/*
-interface QuoteRequestNotificationEmailProps {
-    name: string;
-    email: string;
-    firma: string;
-    termin: {
-        datumVon: string;
-        datumBis: string;
-    },
-    teilnehmerzahl: number;
-    workshopTitel: string;
-    nachricht: string;
-};
-*/
+import { Table } from "./components/table";
+
 
 export default function QuoteRequestNotificationEmail(props: SendQuoteRequestEmailData) {
     return (
@@ -52,7 +40,7 @@ export default function QuoteRequestNotificationEmail(props: SendQuoteRequestEma
                 </Text>
 
                 <Text className="m-0 mb-4 font-sans text-[15px] leading-[1.6] text-foreground">
-                    {props.notizen || "Keine Nachricht hinterlassen."}
+                    {props.nachricht || "Keine Nachricht hinterlassen."}
                 </Text>
 
             </Section>

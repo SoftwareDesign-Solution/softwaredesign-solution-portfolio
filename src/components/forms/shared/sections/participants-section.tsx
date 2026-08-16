@@ -1,9 +1,12 @@
-import { useFormContext, useFieldArray, useFormState, useWatch } from "react-hook-form";
+import { useEffect } from "react";
+import { useFieldArray, useFormContext, useFormState, useWatch } from "react-hook-form";
+
 import { TeilnehmerFormData } from "@/schemas/shared/teilnehmer.schema";
+
+import ErrorMessage from "../error-message";
 import SectionHeading from "../section-heading";
 import TextField from "../text-field";
-import ErrorMessage from "../error-message";
-import { useEffect } from "react";
+
 
 interface ParticipantsSectionProps {
     num: string;
@@ -16,7 +19,6 @@ export default function ParticipantsSection({
     const { 
         register, 
         control, 
-        //formState: { errors } 
     } = useFormContext<{
         teilnehmerzahl: number;
         teilnehmer: TeilnehmerFormData[];

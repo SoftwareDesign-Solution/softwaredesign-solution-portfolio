@@ -1,6 +1,8 @@
 import { WorkshopModalProps } from "@/types/workshop-props";
-import Modal from "./modal";
+
 import NotificationSignupForm from "../forms/notification-signup/notification-signup-form";
+import Modal from "./modal";
+
 
 export default function NotificationSignupModal({ open, onClose, workshop, onSuccess, onError } : WorkshopModalProps) {
     return (

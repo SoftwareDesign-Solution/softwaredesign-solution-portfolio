@@ -1,22 +1,23 @@
 /* eslint-disable react-hooks/refs */
 "use client";
 
-import { useRef, useState } from "react";
-import { SubmitHandler, useForm, useWatch, FormProvider } from "react-hook-form";
-//import { type ContactRequestFormData, contactRequestFormSchema } from "@/schemas/forms/contact-request.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import AddressFields from "../shared/address-fields";
-import Label from "../shared/label";
-import TextField from "../shared/text-field";
-import SelectField from "../shared/select-field";
-import ErrorMessage from "../shared/error-message";
 import Link from "next/dist/client/link";
-import TurnstileWidgetSection from "../shared/sections/turnstile-widget-section";
 import { TurnstileRef } from "nextjs-turnstile";
+import { useRef } from "react";
+import { FormProvider, SubmitHandler, useForm, useWatch } from "react-hook-form";
+
 import { sendContactRequest } from "@/app/actions/send-contact-request";
-import { contactRequestErrorMessage, contactRequestSuccessMessage } from "./contact-request-form-status-messages";
 import { useModal } from "@/providers/modal-provider";
 import { type ContactRequestFormData, contactRequestFormSchema, type SendContactRequestData } from "@/schemas/contact-request.schema";
+
+import AddressFields from "../shared/address-fields";
+import ErrorMessage from "../shared/error-message";
+import Label from "../shared/label";
+import TurnstileWidgetSection from "../shared/sections/turnstile-widget-section";
+import SelectField from "../shared/select-field";
+import TextField from "../shared/text-field";
+import { contactRequestErrorMessage, contactRequestSuccessMessage } from "./contact-request-form-status-messages";
 
 
 export default function ContactRequestForm() {
@@ -50,8 +51,6 @@ export default function ContactRequestForm() {
 
     const { formState, handleSubmit, register } = methods;
 
-    const [formData, setFormData] = useState<SendContactRequestData | null>(null);
-
     const messageLength = useWatch({
         control: methods.control,
         name: "nachricht",
@@ -67,20 +66,10 @@ export default function ContactRequestForm() {
     };
     
     const onSubmit: SubmitHandler<ContactRequestFormData> = async (data) => {
-        //console.log(methods.formState.errors);
-        //console.log("Booking submitted:", { workshop: 'Test', ...data });
-        //alert("Booking submitted: " + JSON.stringify({ workshop: 'Test', ...data }, null, 2));
-
+        
         const contactRequestData: SendContactRequestData = {
             ...data
         }
-
-        setFormData(contactRequestData);
-
-        //console.log("Form data:", data);
-        //alert("Form data: " + JSON.stringify(data, null, 2));
-
-        
 
         try {
 
@@ -95,6 +84,8 @@ export default function ContactRequestForm() {
             resetTurnstile();
             
         } catch (error) {
+            
+            console.error("Fehler beim Absenden der Kontaktanfrage:", error);
             
             showActionStatus(contactRequestErrorMessage({
                 vorname: data.ansprechpartner.vorname,
@@ -285,11 +276,10 @@ export default function ContactRequestForm() {
                                 <SelectField 
                                     options={[
                                         { value: "None", label: "Nicht angegeben" },
-                                        { value: "Magazine", label: "Magazin" },
                                         { value: "Conference", label: "Konferenz" },
-                                        { value: "Youtube", label: "YouTube" },
+                                        { value: "Meetup", label: "Meetup" },
                                         { value: "PersonalRecommendation", label: "Persönliche Empfehlung" },
-                                        { value: "SocialMedia", label: "Social Media" },
+                                        { value: "LinkedIn", label: "LinkedIn" },
                                     ]}
                                     {...register("source", { required: "Bitte wählen Sie eine Option aus." })}
                                 />

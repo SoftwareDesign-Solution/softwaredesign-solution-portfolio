@@ -1,6 +1,8 @@
+import type { WorkshopModalProps } from "../../types/workshop-props";
+
 import BookingForm from "../forms/booking/booking-form";
 import Modal from "./modal";
-import type { WorkshopModalProps } from "../../types/workshop-props";
+
 
 export default function BookingModal({ open, onClose, workshop, onSuccess, onError }: WorkshopModalProps) {
     return (

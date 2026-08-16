@@ -1,9 +1,11 @@
 "use server";
 
 import { z } from "zod";
+
 import { db } from "@/lib/db";
-import { sendNotificationSignupConfirmedEmail } from "@/services/emails/send-notification-signup-confirmed-email";
 import { sendNotificationSignupConfirmedEmailSchema } from "@/schemas/notification-signup.schema";
+import { sendNotificationSignupConfirmedEmail } from "@/services/emails/send-notification-signup-confirmed-email";
+
 
 const inputSchema = z.object({
     id: z.uuid(),
@@ -13,7 +15,10 @@ const inputSchema = z.object({
 type InputData = z.infer<typeof inputSchema>;
 
 interface NotificationSignupConfirmationData {
-    workshopTitel: string;
+    workshop: {
+        id: string;
+        titel: string;
+    };
     vorname: string;
     nachname: string;
     email: string;
@@ -83,7 +88,7 @@ export async function confirmNotificationSignup(props: InputData): Promise<Confi
             });
 
             // notification-signup-confirmed-email.tsx per E-Mail versenden
-            const result = await sendNotificationSignupConfirmedEmail(emailData);
+            await sendNotificationSignupConfirmedEmail(emailData);
 
         } catch (error) {
             console.error("Fehler beim Versenden der Bestätigungs-E-Mail: " + (error as Error).message);
@@ -99,7 +104,10 @@ export async function confirmNotificationSignup(props: InputData): Promise<Confi
     const existingRows = await db`
         SELECT
             id,
-            workshop_titel AS "workshopTitel",
+            jsonb_build_object(
+                'id', workshop_id,
+                'titel', workshop_titel
+            ) AS workshop,
             vorname,
             nachname,
             email

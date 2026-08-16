@@ -10,7 +10,6 @@ interface ErrorPageProps {
 
 export default function Error({ error, reset }: ErrorPageProps) {
   useEffect(() => {
-    // Hier könntet ihr den Fehler an ein Monitoring-Tool schicken (z.B. Sentry).
     console.error(error);
   }, [error]);
 

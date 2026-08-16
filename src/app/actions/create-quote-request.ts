@@ -1,12 +1,14 @@
 "use server";
 
+import { getClientIp } from "nextjs-turnstile";
+
 import { db } from "@/lib/db";
 import { verifyTurnstileToken } from "@/lib/turnstile";
-//import { QuoteRequestData, quoteRequestSchema } from "@/schemas/forms/quote-request.schema";
-import { getClientIp } from "nextjs-turnstile";
-import { generateSecureToken } from "@/utils/generate-secure-token";
 import { type CreateQuoteRequestData, createQuoteRequestSchema, sendQuoteRequestOptInEmailSchema } from "@/schemas/quote-request.schema";
 import { sendQuoteRequestOptInEmail } from "@/services/emails/send-quote-request-optin-email";
+import { generateSecureToken } from "@/utils/generate-secure-token";
+
+
 export interface CreateQuoteRequestResult {
     quoteRequestId: string;
     emailId?: string;
@@ -189,22 +191,6 @@ export async function createQuoteRequest(data: CreateQuoteRequestData): Promise<
 
         
         // Benachrichtigung mit Bestätigungslink per E-Mail versenden
-        // quote-request-optin-email.tsx per E-Mail versenden
-        /*
-        const response = await sendQuoteRequestOptInEmail({
-            workshopTitel: workshopTermin.workshop_titel,
-            termin: {
-                datumVon: workshopTermin.datum_von,
-                datumBis: workshopTermin.datum_bis,
-            },
-            salutation: `${quoteRequestData.ansprechpartner.anrede} ${quoteRequestData.ansprechpartner.nachname}`,
-            email: quoteRequestData.ansprechpartner.email,
-            firma: quoteRequestData.adresse.firma,
-            teilnehmerzahl: quoteRequestData.teilnehmerzahl,
-            confirmationLink: `${process.env.NEXT_PUBLIC_BASE_URL}/offer-requests/${quoteRequestId}/confirm?token=${confirmationToken}`,
-        });
-        */
-       
         const response = await sendQuoteRequestOptInEmail(emailData);
 
         return {

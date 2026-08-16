@@ -1,36 +1,17 @@
+import { ReactNode } from "react";
 import { Section, Text } from "react-email";
-import Heading from "./components/heading";
-import Layout from "./components/layout";
-import { Table } from "./components/table";
+
+import { SendBookingConfirmationEmailData } from "@/schemas/booking.schema";
 import { formatDateRange } from "@/utils/format-date-range";
 import { formatPrice } from "@/utils/format-price";
+
+import Heading from "./components/heading";
+import Layout from "./components/layout";
 import ParticipantList from "./components/participant-list";
-import { ReactNode } from "react";
-import { SendBookingConfirmationEMailData } from "@/schemas/booking.schema";
-//import { BookingConfirmationEmailProps } from "@/schemas/emails/booking-confirmation-email.schema";
+import { Table } from "./components/table";
 
-/*
-export interface BookingConfirmationEmailProps {
-    salutation: string;
-    workshopTitel: string;
-    datumVon: string;
-    datumBis: string;
-    firma: string;
-    rechnungsadresse: {
-        firma: string;
-        strasse: string;
-        plz: string;
-        ort: string;
-    } | null;
-    gesamtpreis: number;
-    teilnehmer: {
-        vorname: string;
-        nachname: string;
-    }[];
-}
-*/
 
-export default function BookingConfirmationEmail(props: SendBookingConfirmationEMailData) {
+export default function BookingConfirmationEmail(props: SendBookingConfirmationEmailData) {
 
     const rechnungsAdresseString: ReactNode = (
         <>

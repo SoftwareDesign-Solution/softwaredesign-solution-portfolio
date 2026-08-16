@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
-import "./globals.css";
 import Link from "next/link";
+
+import "./globals.css";
+
+import { useEffect } from "react";
 
 interface GlobalErrorProps {
   error: Error & { digest?: string };

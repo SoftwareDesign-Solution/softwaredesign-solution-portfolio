@@ -1,6 +1,8 @@
 import { WorkshopModalProps } from "@/types/workshop-props";
+
 import QuoteRequestForm from "../forms/quote-request/quote-request-form";
 import Modal from "./modal";
+
 
 export default function QuoteRequestModal({ open, onClose, workshop, onSuccess, onError } : WorkshopModalProps) {
     return (

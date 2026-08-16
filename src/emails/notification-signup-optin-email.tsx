@@ -1,20 +1,14 @@
 import { Link, Section, Text } from "react-email";
+
+import type { SendNotificationSignupOptInEmailData } from "@/schemas/notification-signup.schema";
+
+import Button from "./components/button";
 import Heading from "./components/heading";
 import Layout from "./components/layout";
 import { Table } from "./components/table";
-import Button from "./components/button";
-import type { SendNotificationSignupOptinEMailData } from "@/schemas/notification-signup.schema";
 
-/*
-interface NotificationSignupOptinEmailProps {
-    vorname: string;
-    workshopTitel: string;
-    confirmationLink: string;
-    expiresInDay: number;
-};
-*/
 
-export default function NotificationSignupOptinEmail(props: SendNotificationSignupOptinEMailData) {
+export default function NotificationSignupOptInEmail(props: SendNotificationSignupOptInEmailData) {
     return (
         <Layout>
             
@@ -102,11 +96,13 @@ export default function NotificationSignupOptinEmail(props: SendNotificationSign
 
         </Layout>
     );
-};
+}
 
-NotificationSignupOptinEmail.PreviewProps = {
+NotificationSignupOptInEmail.PreviewProps = {
     vorname: "Manuel",
-    workshopTitel: "Beispiel-Workshop",
+    workshop: {
+        titel: "Beispiel-Workshop"
+    },
     confirmationLink: "https://www.softwaredesign-solution.de/notifications/confirm/1234567890abcdef",
     expiresInDay: 3,
 };

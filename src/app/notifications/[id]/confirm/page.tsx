@@ -61,7 +61,7 @@ export default async function NotificationConfirmationPage({
                 </h1>
 
                 <p className="text-xl leading-[1.55] text-gray-700 max-w-205 mt-4">
-                    Sie haben sich für Benachrichtigungen über neue Termine zum Workshop <strong>{confirmationData?.workshopTitel}</strong> registriert.
+                    Sie haben sich für Benachrichtigungen über neue Termine zum Workshop <strong>{confirmationData?.workshop.titel}</strong> registriert.
                 </p>
 
                 <div className="mt-10 py-5.5 px-5.5 bg-gray-100 rounded-lg">

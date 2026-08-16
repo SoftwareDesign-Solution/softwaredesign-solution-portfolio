@@ -1,5 +1,7 @@
-import Link from "next/link";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
+
+import Link from "next/link";
+
 
 type ButtonVariant = "primary" | "secondary" | "dark" | "muted" | "outline" | "dashed";
 type ButtonSize = "xs" |"sm" | "lg" | "icon";

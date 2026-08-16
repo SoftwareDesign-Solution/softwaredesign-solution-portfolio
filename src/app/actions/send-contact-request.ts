@@ -43,11 +43,11 @@ export async function sendContactRequest(data: SendContactRequestData): Promise<
         const emailData = sendContactRequestEmailSchema.parse(contactRequestData);
         
         // E-Mail versenden
-        const response = await sendContactRequestEmail(emailData);
+        await sendContactRequestEmail(emailData);
 
     } catch (error) {
         throw new Error(
-            "Ihre Nachricht konnte nicht versendet werden. Bitte versuchen Sie es erneut."
+            `Ihre Nachricht konnte nicht versendet werden. Bitte versuchen Sie es erneut. Fehler: ${(error as Error).message}`
         );
     }
 

@@ -1,11 +1,12 @@
 "use server";
 
+import { getClientIp } from "nextjs-turnstile";
+
 import { db } from "@/lib/db";
 import { verifyTurnstileToken } from "@/lib/turnstile";
 import { CreateBookingData, createBookingSchema, sendBookingConfirmationEmailSchema } from "@/schemas/booking.schema";
-//import { BookingData, bookingSchema } from "@/schemas/forms/booking.schema";
 import { sendBookingConfirmationEmail } from "@/services/emails/send-booking-confirmation-email";
-import { getClientIp } from "nextjs-turnstile";
+
 
 export interface CreateBookingResult {
     bookingId: string;
@@ -180,9 +181,6 @@ export async function createBooking(data: CreateBookingData): Promise<CreateBook
      */
     try {
 
-        // Buchungsbestätigung per E-Mail versenden
-        // booking-confirmation-email.tsx per E-Mail versenden
-
         const emailData = sendBookingConfirmationEmailSchema.parse({
             ...bookingData,
             workshop: {
@@ -191,13 +189,14 @@ export async function createBooking(data: CreateBookingData): Promise<CreateBook
             },
             termin: {
                 id: workshopTermin.termin_id,
-                datumVon: String(workshopTermin.datum_von),
-                datumBis: String(workshopTermin.datum_bis),
+                datumVon: String(workshopTermin.datumVon),
+                datumBis: String(workshopTermin.datumBis),
             },
             salutation: `Hallo ${bookingData.ansprechpartner.vorname}`,
             gesamtpreis: gesamtbetrag
         })
 
+        // Buchungsbestätigung per E-Mail versenden
         const emailId = await sendBookingConfirmationEmail(emailData);
 
         return {

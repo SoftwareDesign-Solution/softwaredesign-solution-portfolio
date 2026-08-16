@@ -2,20 +2,6 @@ import QuoteRequestOptinEmail from '@/emails/quote-request-optin-email';
 import { resend } from '@/lib/resend';
 import { type SendQuoteRequestOptInEmailData } from '@/schemas/quote-request.schema';
 
-/*
-interface SendQuoteRequestOptinEmailProps {
-    workshopTitel: string;
-    salutation: string;
-    email: string;
-    firma: string;
-    teilnehmerzahl: number;
-    termin: {
-        datumVon: string;
-        datumBis: string;
-    }
-    confirmationLink: string;
-}
-*/
 
 export async function sendQuoteRequestOptInEmail(props: SendQuoteRequestOptInEmailData): Promise<string> {
     

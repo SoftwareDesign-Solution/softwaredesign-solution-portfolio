@@ -1,16 +1,11 @@
 import { Section, Text } from "react-email";
+
 import type { SendNotificationSignupConfirmedEmailData } from "@/schemas/notification-signup.schema";
+
 import Heading from "./components/heading";
 import Layout from "./components/layout";
 import { Table } from "./components/table";
 
-/*
-interface NotificationSignupConfirmedEmailProps {
-    vorname: string;
-    workshopTitel: string;
-    unsubscribeLink: string;
-};
-*/
 
 export default function NotificationSignupConfirmedEmail(props: SendNotificationSignupConfirmedEmailData) {
     return (

@@ -1,6 +1,8 @@
 import { ActionStatusContent, ActionStatusRenderContext, ActionStatusVariant } from "@/types/action-status-content";
-import Modal from "./modal";
+
 import Button from "../ui/button";
+import Modal from "./modal";
+
 
 const VARIANT_STYLES: Record<ActionStatusVariant, { dot: string; text: string }> = {
   success: { dot: "bg-success-500", text: "text-success-600" },
@@ -57,15 +59,7 @@ export default function ActionStatusModal({
                 )}
 
                 <div className="flex justify-end">
-                    {/*
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="rounded-md bg-foreground px-6.5 py-3.5 text-[14px] font-semibold text-white transition hover:bg-foreground/90"
-                    >
-                        Schließen
-                    </button>
-                    */}
+                    
                     <Button type="button" variant="dark" className="px-6.5 py-3.5 text-[14px]" onClick={onClose}>
                         Schließen
                     </Button>

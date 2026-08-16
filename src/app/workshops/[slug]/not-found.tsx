@@ -25,7 +25,7 @@ export default function WorkshopNotFound() {
             Workshop-Thema vorschlagen
           </Link>
           <Link
-            href="/workshops"
+            href="/#workshops"
             className="rounded-full border-[1.5px] border-border px-7 py-3.5 text-[15px] font-semibold text-foreground transition hover:bg-surface"
           >
             Alle Workshops ansehen

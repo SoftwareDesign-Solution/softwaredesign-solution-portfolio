@@ -1,6 +1,8 @@
 import { Workshop } from "@/types/workshop";
+
 import Breadcrumbs from "./breadcrumbs";
 import StatItem from "./stat-item";
+
 
 export default function WorkshopHeader(workshop: Workshop) {
     return (

@@ -3,20 +3,6 @@ import { resend } from '@/lib/resend';
 import { type SendQuoteRequestEmailData } from '@/schemas/quote-request.schema';
 import { formatDate } from '@/utils/format-date';
 
-/*
-interface SendQuoteRequestConfirmationEmailProps {
-    workshopTitel: string;
-    termin: {
-        datumVon: string;
-        datumBis: string;
-    },
-    teilnehmerzahl: number;
-    firma: string;
-    name: string;
-    email: string;
-    nachricht: string;
-}
-*/
 
 export async function sendQuoteRequestConfirmationEmail(props: SendQuoteRequestEmailData): Promise<string> {
 

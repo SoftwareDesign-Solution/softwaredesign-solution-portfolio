@@ -1,9 +1,11 @@
 "use server";
 
 import { z } from "zod";
+
 import { db } from "@/lib/db";
-import { sendQuoteRequestConfirmationEmail } from "@/services/emails/send-quote-request-confirmation-email";
 import { QuoteRequestConfirmedData, quoteRequestConfirmedSchema, sendQuoteRequestEmailSchema } from "@/schemas/quote-request.schema";
+import { sendQuoteRequestConfirmationEmail } from "@/services/emails/send-quote-request-confirmation-email";
+
 
 const inputSchema = z.object({
     id: z.uuid(),
@@ -11,19 +13,6 @@ const inputSchema = z.object({
 });
 
 type InputData = z.infer<typeof inputSchema>;
-
-/*
-export interface QuoteRequestConfirmationData {
-    workshopTitel: string;
-    datumVon: string;
-    datumBis: string;
-    firma: string;
-    vorname: string;
-    nachname: string;
-    email: string;
-    teilnehmerzahl: number;
-}
-*/
 
 export type ConfirmationResult =
     | {
@@ -51,28 +40,6 @@ export async function confirmQuoteRequest(props: InputData): Promise<Confirmatio
     const { id, token } = validationResult.data;
 
     // 1. Angebotsanfrage anhand der ID und des Tokens bestätigen
-
-    /*
-    const confirmedRows = await db`
-        UPDATE angebotsanfrage
-        SET confirmed_at = NOW()
-        WHERE id = ${id}
-          AND confirmation_token = ${token}
-          AND confirmed_at IS NULL
-          AND confirmation_expires_at > NOW()
-        RETURNING 
-            workshop_id,
-            workshop_titel,
-            datum_von,
-            datum_bis,
-            firma,
-            vorname,
-            nachname,
-            email,
-            teilnehmerzahl,
-            notizen
-    `;
-    */
 
     const confirmedRows = await db`
         UPDATE angebotsanfrage
@@ -112,7 +79,7 @@ export async function confirmQuoteRequest(props: InputData): Promise<Confirmatio
                 'ort', COALESCE(rechnung_ort, '')
             ) AS rechnungsadresse,
             CAST(teilnehmerzahl AS INTEGER) AS teilnehmerzahl,
-            notizen
+            notizen AS "nachricht"
     `;
 
     if (confirmedRows.length > 0) {
@@ -130,62 +97,10 @@ export async function confirmQuoteRequest(props: InputData): Promise<Confirmatio
          */
         try {
 
-            /*
-            const emailData = sendQuoteRequestEmailSchema.parse({
-                workshop: {
-                    id: confirmedRow.workshop.id,
-                    titel: confirmedRow.workshop.titel,
-                },
-                termin: {
-                    id: 1,
-                    datumVon: String(confirmedRow.termin.datumVon),
-                    datumBis: String(confirmedRow.termin.datumBis),
-                },
-                teilnehmerzahl: Number(confirmedRow.teilnehmerzahl),
-                adresse: {
-                    firma: confirmedRow.adresse.firma,
-                    strasse: confirmedRow.adresse.strasse,
-                    plz: confirmedRow.adresse.plz,
-                    ort: confirmedRow.adresse.ort
-                },
-                webseite: confirmedRow.webseite || "",
-                ansprechpartner: {
-                    anrede: confirmedRow.ansprechpartner.anrede,
-                    vorname: confirmedRow.ansprechpartner.vorname,
-                    nachname: confirmedRow.ansprechpartner.nachname,
-                    email: confirmedRow.ansprechpartner.email,
-                    telefon: confirmedRow.ansprechpartner.telefon,
-                },
-                rechnungsadresse: {
-                    firma: confirmedRow.rechnungsadresse.firma || "",
-                    strasse: confirmedRow.rechnungsadresse.strasse || "",
-                    plz: confirmedRow.rechnungsadresse.plz || "",
-                    ort: confirmedRow.rechnungsadresse.ort || ""
-                },
-                notizen: confirmedRow.notizen || "",
-                salutation: `Sehr geehrte${confirmedRow.ansprechpartner.anrede === 'Herr' ? 'r Herr' : ' Frau'} ${confirmedRow.ansprechpartner.nachname},`,
-            });
-            */
-
             const emailData = sendQuoteRequestEmailSchema.parse(data);
 
             // quote-request-notification-email.tsx per E-Mail versenden
-            const response = await sendQuoteRequestConfirmationEmail(emailData);
-
-            /*
-            const response = await sendQuoteRequestConfirmationEmail({
-                workshopTitel: confirmedRows[0].workshopTitel,
-                termin: {
-                    datumVon: confirmedRows[0].datumVon,
-                    datumBis: confirmedRows[0].datumBis,
-                },
-                teilnehmerzahl: confirmedRows[0].teilnehmerzahl,
-                firma: confirmedRows[0].firma,
-                name: `${confirmedRows[0].vorname} ${confirmedRows[0].nachname}`,
-                email: confirmedRows[0].email,
-                nachricht: confirmedRows[0].notizen || ""
-            });
-            */
+            await sendQuoteRequestConfirmationEmail(emailData);
 
         } catch (error) {
             console.error("Fehler beim Versenden der Bestätigungs-E-Mail: " + (error as Error).message);
@@ -199,26 +114,6 @@ export async function confirmQuoteRequest(props: InputData): Promise<Confirmatio
     }
 
     // Prüfen, ob der Link zu einer bereits bestätigten Anfrage gehört
-    /*
-    const existingRows = await db`
-        SELECT
-            id,
-            workshop_titel AS "workshopTitel",
-            datum_von AS "datumVon",
-            datum_bis AS "datumBis",
-            firma,
-            vorname,
-            nachname,
-            email,
-            teilnehmerzahl,
-            confirmed_at
-        FROM angebotsanfrage
-        WHERE id = ${id}
-          AND confirmation_token = ${token}
-        LIMIT 1
-    `;
-    */
-
     const existingRows = await db`
         SELECT
             jsonb_build_object(

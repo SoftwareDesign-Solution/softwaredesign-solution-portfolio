@@ -1,5 +1,7 @@
 import { getWorkshops } from "@/app/actions/get-workshops";
+
 import WorkshopCard from "./workshop-card";
+
 
 export default async function WorkshopList() {
 

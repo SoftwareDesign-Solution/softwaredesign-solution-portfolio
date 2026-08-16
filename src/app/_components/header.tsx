@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from 'react';
+
 import DesktopNavbar from "./desktop-navbar";
 import HamburgerButton from './hamburger-button';
 import MobileMenu from './mobile-menu';

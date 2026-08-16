@@ -1,31 +1,11 @@
 import { Section, Text } from "react-email"
-//import type { ContactRequestEmailProps } from "../schemas/emails/contact-request-email.schema";
+
 import type { SendContactRequestEmailData } from "@/schemas/contact-request.schema";
+
 import Heading from "./components/heading";
 import Layout from "./components/layout";
 import { Table } from "./components/table";
 
-/*
-interface ContactRequestEmailProps {
-    adresse: {
-        firma: string;
-        strasse: string;
-        plz: string;
-        ort: string;
-    };
-    webseite: string | null;
-    bereitsKunde: boolean | null;
-    ansprechpartner: {
-        anrede: string;
-        vorname: string;
-        nachname: string;
-        email: string;
-        telefon: string | null;
-    };
-    nachricht: string;
-    source: string | null;
-}
-*/
 
 export default function ContactRequestEmail(props: SendContactRequestEmailData) {
     return (

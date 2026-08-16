@@ -1,41 +1,18 @@
 "use client";
 
+import TerminRow from "@/components/termin-row";
+import Button from "@/components/ui/button";
+import { useModal } from "@/providers/modal-provider";
 import { Workshop } from "@/types/workshop";
 import { formatPrice } from "@/utils/format-price";
-import TerminRow from "@/components/termin-row";
-
-import { useState } from "react";
-import Modal from "@/components/modals/modal";
-import ActionStatusModal from "@/components/modals/action-status-modal";
-import { useModal } from "@/providers/modal-provider";
-import Button from "@/components/ui/button";
 
 
 export default function WorkshopSidebar(workshop: Workshop) {
 
     const nettoPrice = Number(workshop.preis);
     const bruttoPrice = nettoPrice * 1.19; // Assuming a 19% VAT rate
-    
-    const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const { showActionStatus, openBookingModal, openNotificationSignupModal, openQuoteRequestModal } = useModal();
-    
-    const showModal = () => {
-      
-      showActionStatus({
-        variant: "success",
-        kicker: "Platz reservieren2",
-        heading: () => "Platz reserviert!",
-        body: () => "Vielen Dank für Ihre Reservierung. Wir haben Ihnen eine Bestätigung per E-Mail gesendet."
-      });
-
-    };
-
-    const closeModal = () => {
-      
-      
-
-    };
+    const { openBookingModal, openNotificationSignupModal, openQuoteRequestModal } = useModal();
 
     return (
         <aside className="self-start sticky top-24">
@@ -119,15 +96,6 @@ export default function WorkshopSidebar(workshop: Workshop) {
                 <span className="text-success-600">✓</span> Bei Absage durch uns: keine Kosten
               </div>
             </div>
-            
-            <ActionStatusModal 
-              open={isModalOpen} 
-              onClose={closeModal} 
-              variant="success" 
-              kicker="Platz reservieren" 
-              heading={() => "Platz reserviert!"} 
-              body={() => "Vielen Dank für Ihre Reservierung. Wir haben Ihnen eine Bestätigung per E-Mail gesendet."}
-            />
 
           </div>
             

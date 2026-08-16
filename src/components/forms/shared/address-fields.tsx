@@ -1,8 +1,10 @@
 import { useFormContext, useFormState } from "react-hook-form";
+
 import type { AddressFormData } from "@/schemas/shared/address.schema";
+
+import ErrorMessage from "./error-message";
 import Label from "./label";
 import TextField from "./text-field";
-import ErrorMessage from "./error-message";
 
 
 type AddressFieldName =
@@ -24,7 +26,6 @@ export default function AddressFields({
     const {
         register,
         control,
-        //formState: { errors },
     } = useFormContext<FormWithAddresses>();
 
     const { errors } = useFormState({ control });
@@ -36,7 +37,6 @@ export default function AddressFields({
         
             <div className="col-span-3 mb-4">
 
-                {/* Label.tsx */}
                 <Label>Firmenname (Rechnung)</Label>
 
                 {/* Firma */}
@@ -44,7 +44,6 @@ export default function AddressFields({
                     {...register(`${name}.firma`, { required: "Bitte geben Sie den Firmennamen an." })}
                 />
                 
-                {/* ErrorMessage.tsx */}
                 {addressErrors?.firma && (
                     <ErrorMessage message={addressErrors.firma.message} />
                 )}
@@ -53,7 +52,6 @@ export default function AddressFields({
 
             <div className="col-span-3 mb-4">
 
-                {/* Label.tsx */}
                 <Label>Straße (inkl. Hausnummer)</Label>
 
                 {/* Straße */}
@@ -61,7 +59,6 @@ export default function AddressFields({
                     {...register(`${name}.strasse`, { required: "Bitte geben Sie die Straße an." })}
                 />
 
-                {/* ErrorMessage.tsx */}
                 {addressErrors?.strasse && (
                     <ErrorMessage message={addressErrors.strasse.message} />
                 )}
@@ -70,7 +67,6 @@ export default function AddressFields({
 
             <div className="col-span-1 mb-4">
 
-                {/* Label.tsx */}
                 <Label>PLZ</Label>
 
                 {/* PLZ */}
@@ -78,7 +74,6 @@ export default function AddressFields({
                     {...register(`${name}.plz`, { required: "Bitte geben Sie die PLZ an." })}
                 />
 
-                {/* ErrorMessage.tsx */}
                 {addressErrors?.plz && (
                     <ErrorMessage message={addressErrors.plz.message} />
                 )}
@@ -87,7 +82,6 @@ export default function AddressFields({
 
             <div className="col-span-2 mb-4">
                 
-                {/* Label.tsx */}
                 <Label>Ort</Label>
 
                 {/* Ort */}
@@ -95,7 +89,6 @@ export default function AddressFields({
                     {...register(`${name}.ort`, { required: "Bitte geben Sie den Ort an." })}
                 />
 
-                {/* ErrorMessage.tsx */}
                 {addressErrors?.ort && (
                     <ErrorMessage message={addressErrors.ort.message} />
                 )}

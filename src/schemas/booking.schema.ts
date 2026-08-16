@@ -1,10 +1,11 @@
 import { z } from "zod";
-import { workshopSchema } from "./shared/workshop.schema";
+
+import { addressSchema, optionalAddressSchema } from "./shared/address.schema";
+import { contactPersonSchema } from "./shared/contact-person.schema";
+import { teilnehmerSchema } from "./shared/teilnehmer.schema";
 import { terminSchema } from "./shared/termin.schema";
 import { turnstileSchema } from "./shared/turnstile-schema";
-import { contactPersonSchema } from "./shared/contact-person.schema";
-import { addressSchema, optionalAddressSchema } from "./shared/address.schema";
-import { teilnehmerSchema } from "./shared/teilnehmer.schema";
+import { workshopSchema } from "./shared/workshop.schema";
 
 
 type BillingAddressData = {

@@ -1,6 +1,8 @@
 import Link from "next/link";
+
 import SectionHeader from "../section-header";
 import WorkshopList from "./workshop-list";
+
 
 export default function WorkshopsSection() {
     return (

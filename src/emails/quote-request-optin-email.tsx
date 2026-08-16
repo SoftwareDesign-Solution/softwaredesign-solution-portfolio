@@ -1,26 +1,15 @@
 import { Section, Text } from "react-email";
+
+import { type SendQuoteRequestOptInEmailData } from "@/schemas/quote-request.schema";
+import { formatDateRange } from "@/utils/format-date-range";
+
+import Button from "./components/button";
 import Heading from "./components/heading";
 import Layout from "./components/layout";
 import { Table } from "./components/table";
-import { formatDateRange } from "@/utils/format-date-range";
-import Button from "./components/button";
-import { type SendQuoteRequestOptinEmailData } from "@/schemas/quote-request.schema";
 
-/*
-interface QuoteRequestOptinEmailProps {
-    salutation: string;
-    workshopTitel: string;
-    termin: {
-        datumVon: string;
-        datumBis: string;
-    }
-    firma: string;
-    teilnehmerzahl: number;
-    confirmationLink: string;
-};
-*/
 
-export default function QuoteRequestOptinEmail(props: SendQuoteRequestOptinEmailData) {
+export default function QuoteRequestOptInEmail(props: SendQuoteRequestOptInEmailData) {
     return (
         <Layout>
 
@@ -75,9 +64,9 @@ export default function QuoteRequestOptinEmail(props: SendQuoteRequestOptinEmail
 
         </Layout>
     );
-};
+}
 
-QuoteRequestOptinEmail.PreviewProps = {
+QuoteRequestOptInEmail.PreviewProps = {
     salutation: "Sehr geehrte Frau Mustermann",
     workshop: {
         id: 1,

@@ -1,11 +1,13 @@
 "use client";
 
+import Link from "next/link";
+
 import TerminRow from "@/components/termin-row";
 import { useModal } from "@/providers/modal-provider";
 import { Termin } from "@/types/termin";
 import { Workshop } from "@/types/workshop";
 import { formatPrice } from "@/utils/format-price";
-import Link from "next/link";
+
 
 interface WorkshopCardProps {
     workshop: Workshop;
@@ -17,7 +19,7 @@ const MAX_VISIBLE_TERMINE = 3;
 
 export default function WorkshopCard({ workshop, index, counter }: WorkshopCardProps) {
 
-    const { openNotificationSignupModal, openQuoteRequestModal } = useModal(); // This line seems to be incomplete or unnecessary, consider removing it if not used.
+    const { openNotificationSignupModal, openQuoteRequestModal } = useModal();
 
     const visibleTermine: Termin[] = workshop.termine ? workshop.termine.slice(0, MAX_VISIBLE_TERMINE): [];
     const remainingCount: number = workshop.termine ? workshop.termine.length - visibleTermine.length : 0;

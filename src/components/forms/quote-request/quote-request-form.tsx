@@ -1,26 +1,28 @@
  /* eslint-disable react-hooks/refs */
 "use client";
 
-import { SubmitHandler, useForm, useWatch, FormProvider } from "react-hook-form";
-import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
-//import { QuoteRequestData, type QuoteRequestFormData, quoteRequestFormSchema } from "@/schemas/forms/quote-request.schema";
-import { useRef, useState } from "react";
-import ContactPersonSection from "../shared/sections/contact-person-section";
-import CompanyAddressSection from "../shared/sections/company-address-section";
-import ParticipantStepperSection from "../shared/sections/participant-stepper-section";
+import Link from "next/link";
+import { TurnstileRef } from "nextjs-turnstile";
+import { useRef } from "react";
+import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
+
+import { createQuoteRequest } from "@/app/actions/create-quote-request";
+import { type CreateQuoteRequestData, type QuoteRequestFormData, quoteRequestFormSchema } from "@/schemas/quote-request.schema";
+import { WorkshopFormProps } from "@/types/workshop-props";
+
 import AppointmentSelectionSection from "../shared/sections/appointment-selection-section";
 import BillingAddressSection from "../shared/sections/billing-address-section";
+import CompanyAddressSection from "../shared/sections/company-address-section";
 import ConsentSection from "../shared/sections/consent-section";
-import SummarySection from "../shared/sections/summary-section";
+import ContactPersonSection from "../shared/sections/contact-person-section";
 import ExtrasSection from "../shared/sections/extras-section";
-import SubmitFooter from "../shared/submit-footer";
-import { WorkshopFormProps } from "@/types/workshop-props";
+import ParticipantStepperSection from "../shared/sections/participant-stepper-section";
+import SummarySection from "../shared/sections/summary-section";
 import TurnstileWidgetSection from "../shared/sections/turnstile-widget-section";
-import { TurnstileRef } from "nextjs-turnstile";
-import { createQuoteRequest } from "@/app/actions/create-quote-request";
+import SubmitFooter from "../shared/submit-footer";
 import { quoteRequestErrorMessage, quoteRequestSuccessMessage } from "./quote-request-form-status-messages";
-import { type CreateQuoteRequestData, quoteRequestFormSchema, type QuoteRequestFormData } from "@/schemas/quote-request.schema";
+
 
 export default function QuoteRequestForm({ 
     workshop, 
@@ -49,37 +51,14 @@ export default function QuoteRequestForm({
                 telefon: "",
             },
             abweichendeRechnungsadresse: false,
-            /*
-            rechnungsadresse: {
-                firma: "",
-                strasse: "",
-                plz: "",
-                ort: "",
-            },
-            */
             nachricht: "",
-            consent: false,
             turnstile: {
                 token: "",
             },
         },
     });
 
-    const { control, formState, handleSubmit } = methods;
-
-    const [formData, setFormData] = useState<CreateQuoteRequestData | null>(null);
-
-    // 02 - Teilnehmeranzahl
-    const participantCount = useWatch({
-        control,
-        name: "teilnehmerzahl",
-    });
-
-    // Zusammenfassung
-    const participantCountLabel = Math.min(Math.max(Number(participantCount) || 1, 1), 20);
-    const subtotal = Number(workshop.preis) * participantCountLabel;
-    const vat = Math.round(subtotal * 0.19);
-    const total = subtotal + vat;
+    const { handleSubmit } = methods;
 
     // Datenschutzerklärung & Sicherheitsabfrage (Turnstile)
     const turnstileRef = useRef<TurnstileRef>(null);
@@ -90,37 +69,20 @@ export default function QuoteRequestForm({
     };
 
     const onSubmit: SubmitHandler<QuoteRequestFormData> = async (data) => {
-        //console.log(methods.formState.errors);
-        //console.log("Booking submitted:", { workshop: 'Test', ...data });
-        //alert("Booking submitted: " + JSON.stringify({ workshop: 'Test', ...data }, null, 2));
-
-
+        
         const quoteRequestData: CreateQuoteRequestData = {
             workshop: {
                 id: workshop.id,
                 titel: workshop.titel,
             },
             ...data,
-            /*
-            summary: {
-                preis: Number(workshop.preis),
-                teilnehmerzahl: participantCountLabel,
-                zwischensumme: subtotal,
-                umsatzsteuer: vat,
-                gesamtbetrag: total
-            }
-            */
         };
-
-        setFormData(quoteRequestData);
 
         try {
 
             const result = await createQuoteRequest(quoteRequestData);
 
             if (result) {
-
-                alert(JSON.stringify(result, null, 2));
 
                 onSuccess(quoteRequestSuccessMessage({
                     vorname: quoteRequestData.ansprechpartner.vorname,
@@ -137,8 +99,6 @@ export default function QuoteRequestForm({
         } catch (error) {
             
             console.error("Fehler beim Absenden der Angebotsanfrage:", error);
-
-            alert("Fehler beim Absenden der Angebotsanfrage: " + error);
 
             onError(quoteRequestErrorMessage({
                 vorname: quoteRequestData.ansprechpartner.vorname,
@@ -198,12 +158,6 @@ export default function QuoteRequestForm({
                             buttonLabel="Angebot anfordern"
                         />
                         
-                    </div>
-
-                    <div className="mt-8 rounded-lg border border-border bg-surface p-4 text-[13px] text-foreground">
-                        <pre className="whitespace-pre-wrap">
-                            {JSON.stringify(formData, null, 2)}
-                        </pre>
                     </div>
 
                 </form>

@@ -19,7 +19,7 @@ export default function AnfragePage() {
             </div>
 
             <div className="mx-auto max-w-290 px-12 py-14 pb-30">
-            <ContactRequestForm />
+                <ContactRequestForm />
             </div>
 
         </article>

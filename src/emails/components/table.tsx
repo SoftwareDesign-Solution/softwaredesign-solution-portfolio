@@ -1,5 +1,6 @@
-import { Section, Text } from "react-email";
 import * as React from "react";
+import { Section, Text } from "react-email";
+
 
 type TableVariant = "framed" | "numbered" | "list";
 

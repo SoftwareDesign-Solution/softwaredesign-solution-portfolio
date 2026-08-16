@@ -1,9 +1,10 @@
 import "server-only";
-import { resend } from "@/lib/resend";
-import { ContactRequestData } from "@/schemas/forms/contact-request.schema";
-import ContactRequestEmail from "@/emails/contact-request-email";
-//import type { ContactRequestEmailProps } from "@/schemas/emails/contact-request-email.schema";
+
 import type { SendContactRequestEmailData } from "@/schemas/contact-request.schema";
+
+import ContactRequestEmail from "@/emails/contact-request-email";
+import { resend } from "@/lib/resend";
+
 
 export async function sendContactRequestEmail(data: SendContactRequestEmailData): Promise<string> {
 

@@ -1,12 +1,14 @@
 "use client";
 
-import { createContext, useContext, useState, type ReactNode } from "react";
-import { ActionStatusContent } from "@/types/action-status-content";
+import { createContext, type ReactNode, useContext, useState } from "react";
+
 import ActionStatusModal from "@/components/modals/action-status-modal";
-import { Workshop } from "@/types/workshop";
 import BookingModal from "@/components/modals/booking-modal";
 import NotificationSignupModal from "@/components/modals/notification-signup-modal";
 import QuoteRequestModal from "@/components/modals/quote-request-modal";
+import { ActionStatusContent } from "@/types/action-status-content";
+import { Workshop } from "@/types/workshop";
+
 
 type ModalType = "booking" | "notification-signup" | "quote-request" | null;
 

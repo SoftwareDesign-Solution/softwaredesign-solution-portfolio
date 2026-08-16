@@ -1,4 +1,5 @@
-import { Section, Img } from "react-email";
+import { Img, Section } from "react-email";
+
 
 export default function Header() {
     return (
