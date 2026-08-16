@@ -6,7 +6,7 @@ export default function Header() {
         <Section className="border-b border-border px-8 pb-5 pt-6">
             <Img
                 className="center mx-auto block"
-                src="http://localhost:3000/assets/softwaredesign-solution.png"
+                src={`${process.env.APP_BASE_URL}/assets/SoftwareDesign-Solution.png`}
                 alt="Softwaredesign Solution"
                 width="176"
                 height="56"
