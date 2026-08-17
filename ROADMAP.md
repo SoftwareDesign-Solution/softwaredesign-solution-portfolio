@@ -445,7 +445,7 @@ feat: Seed-Datei vuejs-advanced.sql ergänzt
 
 *(Fokus auf E2E, da die Anwendung überwiegend aus Seiten & Formularen besteht, nicht aus komplexer Business-Logik. Ergänzend gezielte Unit-Tests für Schemas, Utils und Preisberechnung.)*
 
-- [ ] Cypress Setup
+- [x] Cypress Setup
 - [ ] `.env.test` mit Turnstile-Test-Keys (garantiert bestehend, für automatisierte Test-Suiten):
   
   ```text
