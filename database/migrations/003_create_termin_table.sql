@@ -29,6 +29,7 @@ CREATE TABLE termin (
     datum_von       DATE NOT NULL,
     datum_bis       DATE NOT NULL,
     format          TEXT,
+    max_teilnehmer  INTEGER,
     status          termin_status NOT NULL DEFAULT 'verfuegbar',
     active          BOOLEAN NOT NULL DEFAULT true,
     CONSTRAINT termin_datum_check CHECK (datum_bis >= datum_von)
