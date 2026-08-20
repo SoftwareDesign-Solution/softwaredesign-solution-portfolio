@@ -45,6 +45,7 @@ export async function getWorkshops(): Promise<Workshop[]> {
         LEFT JOIN termin t ON t.workshop_id = w.id
         WHERE (w.active = TRUE)
         GROUP BY w.id, tr.id
+        ORDER BY w.reihenfolge ASC, w.titel ASC
     `) as Workshop[];
 
     return workshops;
