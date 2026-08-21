@@ -1,7 +1,7 @@
 import { neon } from "@neondatabase/serverless";
 import { defineConfig } from "cypress";
 
-import { NotificationSignup } from "./cypress/types/test-notification-signup";
+import { TestNotificationSignup } from "./cypress/types/test-notification-signup";
 import { TestQuoteRequest } from "./cypress/types/test-quote-request";
 
 export default defineConfig({
@@ -47,7 +47,7 @@ export default defineConfig({
           return (rows[0]?.token as string) ?? null;
         },
 
-        async findLatestNotificationSignupByEmail(email: string): Promise<NotificationSignup | null> {
+        async findLatestNotificationSignupByEmail(email: string): Promise<TestNotificationSignup | null> {
           if (!sql) throw new Error("DATABASE_URL ist nicht gesetzt.");
 
           const rows = await sql`
@@ -56,7 +56,7 @@ export default defineConfig({
             WHERE email = ${email}
             ORDER BY created_at DESC
             LIMIT 1
-          ` as NotificationSignup[];
+          ` as TestNotificationSignup[];
 
           return rows[0] ?? null;
         },
