@@ -126,7 +126,7 @@ export default function BookingForm({
     return (
         <>
             <FormProvider {...methods}>
-                <form onSubmit={handleSubmit(onSubmit)} className="px-9 pb-9">
+                <form onSubmit={handleSubmit(onSubmit)} className="px-9 pb-9" noValidate>
 
                     {/* 01 Termin */}
                     <AppointmentSelectionSection num="01" termine={workshop.termine} />

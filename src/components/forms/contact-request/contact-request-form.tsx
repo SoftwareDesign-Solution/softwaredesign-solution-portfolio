@@ -104,7 +104,7 @@ export default function ContactRequestForm() {
     return (
         <>
             <FormProvider {...methods}>
-                <form onSubmit={handleSubmit(onSubmit)}>
+                <form onSubmit={handleSubmit(onSubmit)} noValidate>
 
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 

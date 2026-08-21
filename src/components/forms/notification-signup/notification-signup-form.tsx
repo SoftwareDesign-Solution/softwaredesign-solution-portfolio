@@ -91,7 +91,7 @@ export default function NotificationSignupForm({
 
     return (
         <FormProvider {...methods}>
-            <form onSubmit={handleSubmit(onSubmit)}>
+            <form onSubmit={handleSubmit(onSubmit)} noValidate>
 
                 <div className="pt-7 px-7 pb-7">
 

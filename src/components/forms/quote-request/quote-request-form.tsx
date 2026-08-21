@@ -115,7 +115,7 @@ export default function QuoteRequestForm({
         <>
             <FormProvider {...methods}>
 
-                <form onSubmit={handleSubmit(onSubmit)}>
+                <form onSubmit={handleSubmit(onSubmit)} noValidate>
 
                     <div className="px-9 pb-9 pt-7">
 
