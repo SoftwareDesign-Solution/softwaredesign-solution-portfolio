@@ -29,7 +29,7 @@ export default function SummarySection({ title, workshop }: SummarySectionProps)
     const participantCountLabel = Math.min(Math.max(Number(participantCount) || 1, 1), 20);
     const selectedDateLabel = selectedDate ? formatDateRange(selectedDate.datumVon, selectedDate.datumBis) : "Kein Termin ausgewählt";
     const subtotal = Number(workshop.preis) * participantCountLabel;
-    const vat = Math.round(subtotal * 0.19);
+    const vat = subtotal * 0.19;
     const total = subtotal + vat;
     
     return (
