@@ -456,7 +456,7 @@ feat: Seed-Datei vuejs-advanced.sql ergänzt
 
 **E2E-Testszenarien (Cypress):**
 
-- [ ] Navigation & MobileMenu
+- [x] Navigation & MobileMenu
 - [ ] Workshop-Liste auf Startseite rendert korrekt
 - [ ] WorkshopDetailPage rendert korrekt (Details + Sidebar)
 - [ ] Kontakt-/Anfrageformular (`/anfrage`): Happy Path + Validierungsfehler
