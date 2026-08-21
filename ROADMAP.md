@@ -462,7 +462,7 @@ feat: Seed-Datei vuejs-advanced.sql ergänzt
 - [x] Kontakt-/Anfrageformular (`/anfrage`): Happy Path + Validierungsfehler
 - [x] Booking-Formular: Happy Path (inkl. AppointmentSelection, ParticipantStepper, Adress-Sections) + Validierungsfehler
 - [x] Quote-Request-Formular: Happy Path + Validierungsfehler + Double-Opt-In-Bestätigungslink (`/quote-requests/[id]/confirm?token=...`)
-- [ ] Notification-Signup: Happy Path + Double-Opt-In-Bestätigungslink (`/notifications/[id]/confirm?token=...`)
+- [x] Notification-Signup: Happy Path + Double-Opt-In-Bestätigungslink (`/notifications/[id]/confirm?token=...`)
 - [ ] `ActionStatusModal` zeigt Erfolg/Fehler korrekt an
 - [ ] Rechtsseiten (Impressum, Datenschutz, AGB) erreichbar
 
