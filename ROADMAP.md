@@ -427,7 +427,7 @@ feat: Seed-Datei aspnet-core-basics.sql ergänzt
 feat: Seed-Datei cypress-testing.sql ergänzt
 feat: Seed-Datei laravel.sql ergänzt
 feat: Seed-Datei nestjs.sql ergänzt
-feat: Seed-Datei nextjs-basics.sql ergänzt
+npm
 feat: Seed-Datei nextjs-advanced.sql ergänzt
 feat: Seed-Datei react-basics.sql ergänzt
 feat: Seed-Datei react-advanced.sql ergänzt
@@ -446,7 +446,8 @@ feat: Seed-Datei vuejs-advanced.sql ergänzt
 *(Fokus auf E2E, da die Anwendung überwiegend aus Seiten & Formularen besteht, nicht aus komplexer Business-Logik. Ergänzend gezielte Unit-Tests für Schemas, Utils und Preisberechnung.)*
 
 - [x] Cypress Setup
-- [ ] `.env.test` mit Turnstile-Test-Keys (garantiert bestehend, für automatisierte Test-Suiten):
+- [x] Cypress-Grundgerüst: Types (`cypress/support/types/` o. ä.), Hilfsfunktionen (`cypress/support/utils/`), Custom Commands (`cypress/support/commands.ts`), Tasks (`cypress.config.ts`)
+- [x] `.env.test` mit Turnstile-Test-Keys (garantiert bestehend, für automatisierte Test-Suiten):
   
   ```text
   TURNSTILE_SITEKEY=1x00000000000000000000AA
