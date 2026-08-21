@@ -139,7 +139,7 @@ export default function NotificationSignupForm({
 
                     <div className="mt-5.5 flex justify-end gap-2.5">
 
-                        <Button type="button" variant="secondary" size="xs">Abbrechen</Button>
+                        <Button type="button" variant="secondary" size="xs" onClick={() => onClose?.()}>Abbrechen</Button>
                         
                         <Button type="submit" variant="primary" size="sm" isSubmitting={isSubmitting}>
                             Bestätigen
