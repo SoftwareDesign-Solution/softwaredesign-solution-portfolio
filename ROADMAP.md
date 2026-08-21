@@ -457,8 +457,8 @@ feat: Seed-Datei vuejs-advanced.sql ergänzt
 **E2E-Testszenarien (Cypress):**
 
 - [x] Navigation & MobileMenu
-- [ ] Workshop-Liste auf Startseite rendert korrekt
-- [ ] WorkshopDetailPage rendert korrekt (Details + Sidebar)
+- [x] Workshop-Liste auf Startseite rendert korrekt
+- [x] WorkshopDetailPage rendert korrekt (Details + Sidebar)
 - [ ] Kontakt-/Anfrageformular (`/anfrage`): Happy Path + Validierungsfehler
 - [ ] Booking-Formular: Happy Path (inkl. AppointmentSelection, ParticipantStepper, Adress-Sections) + Validierungsfehler
 - [ ] Quote-Request-Formular: Happy Path + Validierungsfehler + Double-Opt-In-Bestätigungslink (`/quote-requests/[id]/confirm?token=...`)
