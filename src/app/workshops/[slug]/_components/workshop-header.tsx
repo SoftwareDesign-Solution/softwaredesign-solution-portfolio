@@ -23,7 +23,7 @@ export default function WorkshopHeader(workshop: Workshop) {
 
             {/* Dauer / Format / Sprache */}
             <div className="flex gap-7 mt-8 flex-wrap">
-                <StatItem label="Dauer" value={workshop.dauer} />
+                <StatItem label="Dauer" value={`${workshop.dauer} Tag${Number(workshop.dauer) > 1 ? "e" : ""}`} />
                 <StatItem label="Format" value={workshop.format} />
                 <StatItem label="Sprache" value={workshop.sprache} />
             </div>

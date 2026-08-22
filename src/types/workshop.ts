@@ -8,7 +8,7 @@ export type Workshop = {
     titel: string;
     kurzbeschreibung?: string;
     beschreibung?: string;
-    dauer?: string;
+    dauer?: number;
     format?: string;
     sprache?: string;
     preis?: number;

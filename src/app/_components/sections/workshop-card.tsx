@@ -44,7 +44,7 @@ export default function WorkshopCard({ workshop, index, counter }: WorkshopCardP
                 {/* Dauer / Sprache */}
                 <div className="inline-flex items-center gap-1.5">
                   <div className="inline-flex items-center gap-1.5 text-sm text-muted bg-surface py-1 px-2.5 rounded-sm">
-                    {workshop.dauer}
+                    {workshop.dauer} Tag{Number(workshop.dauer) > 1 ? "e" : ""}
                   </div>
                   <div className="inline-flex items-center gap-1.5 text-sm text-muted bg-surface py-1 px-2.5 rounded-sm">
                     {workshop.sprache}
