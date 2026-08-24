@@ -113,6 +113,7 @@ export async function createBooking(data: CreateBookingData): Promise<CreateBook
             INSERT INTO buchung (
                 workshop_id,
                 workshop_titel,
+                termin_id,
                 datum_von,
                 datum_bis,
                 teilnehmerzahl,
@@ -139,6 +140,7 @@ export async function createBooking(data: CreateBookingData): Promise<CreateBook
             VALUES (
                 ${workshopTermin.workshop_id},
                 ${workshopTermin.workshop_titel},
+                ${workshopTermin.termin_id},
                 ${workshopTermin.datumVon},
                 ${workshopTermin.datumBis},
                 ${bookingData.teilnehmerzahl},
@@ -188,7 +190,7 @@ export async function createBooking(data: CreateBookingData): Promise<CreateBook
                 titel: workshopTermin.workshop_titel,
             },
             termin: {
-                id: workshopTermin.termin_id,
+                id: workshopTermin.id,
                 datumVon: String(workshopTermin.datumVon),
                 datumBis: String(workshopTermin.datumBis),
             },
