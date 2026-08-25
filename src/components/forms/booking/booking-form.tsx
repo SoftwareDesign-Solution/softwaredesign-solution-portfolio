@@ -95,7 +95,7 @@ export default function BookingForm({
 
                 console.log(result.error)
 
-                alert(result.error ?? "Buchung erfolgreich! Ihre Buchungsreferenz lautet: " + result.bookingId);
+                //alert(result.error ?? "Buchung erfolgreich! Ihre Buchungsreferenz lautet: " + result.bookingId);
 
                 const shortReference = result.bookingId.split("-")[0];
 

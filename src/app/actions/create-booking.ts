@@ -74,10 +74,10 @@ export async function createBooking(data: CreateBookingData): Promise<CreateBook
      */
     const [workshopTermin] = await db`
         SELECT
-            w.id AS workshop_id,
-            w.titel AS workshop_titel,
+            w.id AS "workshopId",
+            w.titel AS "workshopTitel",
             w.preis,
-            t.id AS termin_id,
+            t.id AS "terminId",
             t.datum_von AS "datumVon",
             t.datum_bis AS "datumBis"
         FROM workshop w
@@ -138,9 +138,9 @@ export async function createBooking(data: CreateBookingData): Promise<CreateBook
                 ip_adresse
             )
             VALUES (
-                ${workshopTermin.workshop_id},
-                ${workshopTermin.workshop_titel},
-                ${workshopTermin.termin_id},
+                ${workshopTermin.workshopId},
+                ${workshopTermin.workshopTitel},
+                ${workshopTermin.terminId},
                 ${workshopTermin.datumVon},
                 ${workshopTermin.datumBis},
                 ${bookingData.teilnehmerzahl},
@@ -186,11 +186,11 @@ export async function createBooking(data: CreateBookingData): Promise<CreateBook
         const emailData = sendBookingConfirmationEmailSchema.parse({
             ...bookingData,
             workshop: {
-                id: workshopTermin.workshop_id,
-                titel: workshopTermin.workshop_titel,
+                id: workshopTermin.workshopId,
+                titel: workshopTermin.workshopTitel,
             },
             termin: {
-                id: workshopTermin.id,
+                id: workshopTermin.terminId,
                 datumVon: String(workshopTermin.datumVon),
                 datumBis: String(workshopTermin.datumBis),
             },
