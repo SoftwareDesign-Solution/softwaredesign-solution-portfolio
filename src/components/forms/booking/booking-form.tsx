@@ -93,6 +93,10 @@ export default function BookingForm({
 
             if (result.bookingId) {
 
+                console.log(result.error)
+
+                alert(result.error ?? "Buchung erfolgreich! Ihre Buchungsreferenz lautet: " + result.bookingId);
+
                 const shortReference = result.bookingId.split("-")[0];
 
                 onSuccess(bookingSuccessMessage({
