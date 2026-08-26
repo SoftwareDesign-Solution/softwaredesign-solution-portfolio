@@ -6,6 +6,7 @@ import TerminRow from "@/components/termin-row";
 import { useModal } from "@/providers/modal-provider";
 import { Termin } from "@/types/termin";
 import { Workshop } from "@/types/workshop";
+import { formatDay } from "@/utils/format-day";
 import { formatPrice } from "@/utils/format-price";
 
 
@@ -44,7 +45,7 @@ export default function WorkshopCard({ workshop, index, counter }: WorkshopCardP
                 {/* Dauer / Sprache */}
                 <div className="inline-flex items-center gap-1.5">
                   <div className="inline-flex items-center gap-1.5 text-sm text-muted bg-surface py-1 px-2.5 rounded-sm">
-                    {workshop.dauer} Tag{Number(workshop.dauer) > 1 ? "e" : ""}
+                    {formatDay(workshop.dauer ?? 3)}
                   </div>
                   <div className="inline-flex items-center gap-1.5 text-sm text-muted bg-surface py-1 px-2.5 rounded-sm">
                     {workshop.sprache}
@@ -121,7 +122,8 @@ export default function WorkshopCard({ workshop, index, counter }: WorkshopCardP
                     </svg>
                     <span className="border-b border-dashed pb-px">Bei neuen Terminen benachrichtigen</span>
                 </button>
-
+                
+                {visibleTermine.length > 0 && (
                 <button
                     className="relative z-2 flex items-center gap-2 text-sm text-muted cursor-pointer pb-2.5 px-0.5 mb-1"
                     onClick={() => openQuoteRequestModal(workshop)}
@@ -142,6 +144,8 @@ export default function WorkshopCard({ workshop, index, counter }: WorkshopCardP
                     </svg>
                     <span className="border-b border-dashed pb-px">Angebot anfordern</span>
                 </button>
+
+                )}
 
                 <div className="flex justify-between items-center pt-4 border-t border-dashed border-border">
 

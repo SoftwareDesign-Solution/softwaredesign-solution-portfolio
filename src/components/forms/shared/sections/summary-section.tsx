@@ -2,6 +2,7 @@ import { useFormContext, useWatch } from "react-hook-form";
 
 import { Workshop } from "@/types/workshop";
 import { formatDateRange } from "@/utils/format-date-range";
+import { formatDay } from "@/utils/format-day";
 import { formatPrice } from "@/utils/format-price";
 
 
@@ -41,7 +42,7 @@ export default function SummarySection({ title, workshop }: SummarySectionProps)
             
             {/* Workshop Titel, Dauer, Preis, Teilnehmeranzahl */}
             <div className="flex items-baseline justify-between py-1.5 text-[14px] text-foreground">
-                <span>{workshop.titel} · {workshop.dauer} Tag{Number(workshop.dauer) > 1 ? "e" : ""}</span>
+                <span>{workshop.titel} · {formatDay(workshop.dauer ?? 3)}</span>
                 <span className="font-mono text-[13.5px]">
                     {formatPrice(workshop.preis)} x {participantCountLabel}
                 </span>

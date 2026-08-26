@@ -1,4 +1,5 @@
 import { Workshop } from "@/types/workshop";
+import { formatDay } from "@/utils/format-day";
 
 import Breadcrumbs from "./breadcrumbs";
 import StatItem from "./stat-item";
@@ -23,7 +24,7 @@ export default function WorkshopHeader(workshop: Workshop) {
 
             {/* Dauer / Format / Sprache */}
             <div className="flex gap-7 mt-8 flex-wrap">
-                <StatItem label="Dauer" value={`${workshop.dauer} Tag${Number(workshop.dauer) > 1 ? "e" : ""}`} />
+                <StatItem label="Dauer" value={formatDay(workshop.dauer ?? 3)} />
                 <StatItem label="Format" value={workshop.format} />
                 <StatItem label="Sprache" value={workshop.sprache} />
             </div>
