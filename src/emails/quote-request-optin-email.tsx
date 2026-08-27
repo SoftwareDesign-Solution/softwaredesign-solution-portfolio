@@ -31,7 +31,8 @@ export default function QuoteRequestOptInEmail(props: SendQuoteRequestOptInEmail
 
             <Table>
                 <Table.Row label="Workshop" value={props.workshop.titel} />
-                <Table.Row label="Termin" value={formatDateRange(props.termin!.datumVon, props.termin!.datumBis)} />
+                {/*<Table.Row label="Termin" value={formatDateRange(props.termin!.datumVon, props.termin!.datumBis)} />*/}
+                <Table.Row label="Termin" value={props.termin ? formatDateRange(props.termin.datumVon, props.termin.datumBis) : "Nach Absprache"} />
                 <Table.Row label="Teilnehmerzahl" value={props.teilnehmerzahl} />
                 <Table.Row label="Firma" value={props.abweichendeRechnungsadresse ? props.rechnungsadresse!.firma : props.adresse.firma} />
             </Table>

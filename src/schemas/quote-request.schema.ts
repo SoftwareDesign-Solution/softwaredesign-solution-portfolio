@@ -41,10 +41,14 @@ export const quoteRequestBaseSchema = z.object({
     // Workshop
     workshop: workshopSchema,
 
+    /*
     // Termin
     termin: terminSchema
         .nullable()
         .refine((termin): boolean => termin !== null, "Bitte wählen Sie einen Termin aus"),
+    */
+
+    termin: terminSchema.nullable(),
 
     // Teilnehmeranzahl
     teilnehmerzahl: z.number().min(1, "Bitte geben Sie die Teilnehmeranzahl an"),
@@ -70,6 +74,7 @@ export const quoteRequestBaseSchema = z.object({
 
 export const quoteRequestConfirmedSchema = quoteRequestBaseSchema;
 
+/*
 // Form data schema for quote request
 export const quoteRequestFormSchema = quoteRequestBaseSchema
     .omit({
@@ -84,6 +89,45 @@ export const quoteRequestFormSchema = quoteRequestBaseSchema
 
     })
     .superRefine(validateBillingAddress);
+*/
+
+// Form data schema for quote request
+//
+// `hasTermine` steuert, ob ein Termin verpflichtend ausgewählt werden muss:
+// Ist der Workshop aktuell ohne Termine, kann das Angebot auch ohne
+// Termin-Auswahl angefordert werden (Termin wird dann später abgestimmt).
+// Sobald Termine verfügbar sind, bleibt die Auswahl Pflicht.
+export function createQuoteRequestFormSchema(hasTermine: boolean) {
+    return quoteRequestBaseSchema
+        .omit({
+            workshop: true
+        }).extend({
+
+            // Consent
+            consent: z.literal(true, { message: "Bitte bestätigen Sie die Datenschutzerklärung." }),
+
+            // Turnstile token
+            turnstile: turnstileSchema,
+
+        })
+        .superRefine((data, ctx) => {
+
+            validateBillingAddress(data, ctx);
+
+            if (hasTermine && data.termin === null) {
+                ctx.addIssue({
+                    code: "custom",
+                    path: ["termin"],
+                    message: "Bitte wählen Sie einen Termin aus",
+                });
+            }
+
+        });
+}
+
+// Standard-Export für Typinferenz und Stellen ohne Kenntnis der Termin-Verfügbarkeit
+// (Struktur ist in beiden Fällen identisch, nur die Pflicht-Prüfung unterscheidet sich zur Laufzeit).
+export const quoteRequestFormSchema = createQuoteRequestFormSchema(true);
 
 
 // Server Action data schema for quote request

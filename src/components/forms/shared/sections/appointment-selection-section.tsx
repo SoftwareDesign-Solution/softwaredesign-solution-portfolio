@@ -35,6 +35,14 @@ export default function AppointmentSelectionSection({
 
             <SectionHeading num={num} title="Termin" />
 
+            {(!termine || termine.length === 0) && (
+                <div className="text-[13px] text-muted py-2.5 px-3 bg-surface rounded-md mb-2.5">
+                    Aktuell sind keine Termine geplant — Sie können das Angebot trotzdem
+                    unverbindlich anfordern, einen passenden Termin stimmen wir anschließend
+                    gemeinsam ab.
+                </div>
+            )}
+
             <Controller 
                 name="termin"
                 control={control}

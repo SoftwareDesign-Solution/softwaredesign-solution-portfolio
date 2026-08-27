@@ -123,7 +123,7 @@ export default function WorkshopCard({ workshop, index, counter }: WorkshopCardP
                     <span className="border-b border-dashed pb-px">Bei neuen Terminen benachrichtigen</span>
                 </button>
                 
-                {visibleTermine.length > 0 && (
+                {/*visibleTermine.length > 0 && (
                 <button
                     className="relative z-2 flex items-center gap-2 text-sm text-muted cursor-pointer pb-2.5 px-0.5 mb-1"
                     onClick={() => openQuoteRequestModal(workshop)}
@@ -145,7 +145,32 @@ export default function WorkshopCard({ workshop, index, counter }: WorkshopCardP
                     <span className="border-b border-dashed pb-px">Angebot anfordern</span>
                 </button>
 
-                )}
+                )*/}
+
+                {/* Angebot anfordern ist bewusst unabhängig von visibleTermine.length:
+                    auch ohne geplante Termine kann ein Angebot unverbindlich
+                    angefordert werden, der Termin wird dann per E-mail/Telefon
+                    gemeinsam abgestimmt. */}
+                <button
+                    className="relative z-2 flex items-center gap-2 text-sm text-muted cursor-pointer pb-2.5 px-0.5 mb-1"
+                    onClick={() => openQuoteRequestModal(workshop)}
+                >
+                    <svg
+                        width="13"
+                        height="13"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    >
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <path d="M14 2v6h6"></path>
+                        <path d="M8 13h8M8 17h5"></path>
+                    </svg>
+                    <span className="border-b border-dashed pb-px">Angebot anfordern</span>
+                </button>
 
                 <div className="flex justify-between items-center pt-4 border-t border-dashed border-border">
 

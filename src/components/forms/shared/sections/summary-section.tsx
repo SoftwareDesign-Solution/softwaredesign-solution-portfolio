@@ -9,9 +9,18 @@ import { formatPrice } from "@/utils/format-price";
 interface SummarySectionProps {
     title: string;
     workshop: Workshop;
+
+    /**
+     * Text, wenn (noch) kein Termin ausgewählt ist. Standardmäßig
+     * "Kein Termin ausgewählt" (Buchung braucht immer ein festes Datum) —
+     * die Angebotsanfrage übergibt hier "Nach Absprache", weil dort auch
+     * ganz ohne Termin angefragt werden kann.
+     */
+    noTerminLabel?: string;
+
 };
 
-export default function SummarySection({ title, workshop }: SummarySectionProps) {
+export default function SummarySection({ title, workshop, noTerminLabel = "Kein Termin ausgewählt" }: SummarySectionProps) {
 
     const { 
         control,
@@ -28,7 +37,7 @@ export default function SummarySection({ title, workshop }: SummarySectionProps)
     });
 
     const participantCountLabel = Math.min(Math.max(Number(participantCount) || 1, 1), 20);
-    const selectedDateLabel = selectedDate ? formatDateRange(selectedDate.datumVon, selectedDate.datumBis) : "Kein Termin ausgewählt";
+    const selectedDateLabel = selectedDate ? formatDateRange(selectedDate.datumVon, selectedDate.datumBis) : noTerminLabel;
     const subtotal = Number(workshop.preis) * participantCountLabel;
     const vat = subtotal * 0.19;
     const total = subtotal + vat;

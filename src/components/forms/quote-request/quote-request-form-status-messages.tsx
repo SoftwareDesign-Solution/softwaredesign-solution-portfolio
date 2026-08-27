@@ -5,11 +5,14 @@ interface QuoteRequestSuccessMessageProps {
     vorname: string;
     email: string;
     titel: string;
-    datumVon: string;
-    datumBis: string;
+    datumVon?: string | null;
+    datumBis?: string | null;
 }
 
 export function quoteRequestSuccessMessage(props: QuoteRequestSuccessMessageProps): ActionStatusContent {
+
+    const hasTermin = Boolean(props.datumVon && props.datumBis);
+
     return {
             variant: "success",
             kicker: "Angebotsanfrage eingegangen",
@@ -17,12 +20,28 @@ export function quoteRequestSuccessMessage(props: QuoteRequestSuccessMessageProp
             body: () => (
                 <>
                     Ich habe Ihnen eine Bestätigungsmail an <strong>{props.email}</strong> geschickt.
-                    Bitte klicken Sie auf den Link in der Mail — danach erstelle ich Ihr unverbindliches Angebot für <strong>{props.titel}</strong> {isSameDay(props.datumVon, props.datumBis) ? "am" : "vom"} <strong>{formatDateRange(props.datumVon, props.datumBis)}</strong> und sende es
+                    Bitte klicken Sie auf den Link in der Mail — danach erstelle ich Ihr unverbindliches Angebot für <strong>{props.titel}</strong>{" "}
+                    {hasTermin ? (
+                        <>
+                            {isSameDay(props.datumVon!, props.datumBis!) ? "am" : "vom"} <strong>{formatDateRange(props.datumVon!, props.datumBis!)}</strong>{" "}
+                        </>
+                    ) : null}
+                    und sende es
                     Ihnen in Kürze per E-Mail zu.
                 </>
             ),
             maxWidth: "max-w-130",
         };
+
+        {/*
+            body: () => (
+                <>
+                    Ich habe Ihnen eine Bestätigungsmail an <strong>{props.email}</strong> geschickt.
+                    Bitte klicken Sie auf den Link in der Mail — danach erstelle ich Ihr unverbindliches Angebot für <strong>{props.titel}</strong> {isSameDay(props.datumVon, props.datumBis) ? "am" : "vom"} <strong>{formatDateRange(props.datumVon, props.datumBis)}</strong> und sende es
+                    Ihnen in Kürze per E-Mail zu.
+                </>
+            ),
+            */}
 };
 
 interface QuoteRequestErrorMessageProps {

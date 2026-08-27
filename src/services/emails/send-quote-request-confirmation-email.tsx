@@ -6,10 +6,15 @@ import { formatDate } from '@/utils/format-date';
 
 export async function sendQuoteRequestConfirmationEmail(props: SendQuoteRequestEmailData): Promise<string> {
 
+    const terminLabel = props.termin
+        ? ` (${formatDate(props.termin.datumVon)} - ${formatDate(props.termin.datumBis)})`
+        : " (ohne festen Termin)";
+
     const response = await resend.emails.send({
         from: process.env.EMAIL_FROM_ADDRESS as string,
         to: process.env.EMAIL_TO_ADDRESS as string,
-        subject: `Neue Angebotsanfrage · ${props.workshop.titel} (${formatDate(props.termin!.datumVon)} - ${formatDate(props.termin!.datumBis)})`,
+        //subject: `Neue Angebotsanfrage · ${props.workshop.titel} (${formatDate(props.termin!.datumVon)} - ${formatDate(props.termin!.datumBis)})`,
+        subject: `Neue Angebotsanfrage · ${props.workshop.titel}${terminLabel}`,
         react: <QuoteRequestNotificationEmail {...props} />
     });
 

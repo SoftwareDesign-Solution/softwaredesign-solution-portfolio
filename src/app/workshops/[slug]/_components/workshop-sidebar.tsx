@@ -69,10 +69,12 @@ export default function WorkshopSidebar(workshop: Workshop) {
               <Button 
                 variant="outline" 
                 fullWidth 
-                disabled={!workshop.termine || workshop.termine.length === 0}
+                
                 onClick={() => openQuoteRequestModal(workshop)}>
                 Angebot anfordern
               </Button>
+
+              {/* disabled={!workshop.termine || workshop.termine.length === 0} */}
  
               {/* Inhouse-Angebot anfordern */}
               {/*<ActionButton variant="outline" href="/anfrage">

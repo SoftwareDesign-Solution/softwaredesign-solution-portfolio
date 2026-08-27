@@ -60,9 +60,21 @@ export default async function OfferRequestConfirmationPage({
                     Anfrage bestätigen
                 </h1>
 
+                {/*
                 <p className="text-xl leading-[1.55] text-foreground max-w-205 mt-4">
                     Sie haben ein unverbindliches Angebot für den Workshop <strong>{confirmationData?.workshop.titel}</strong>{" "}
                     {isSameDay(String(confirmationData?.termin!.datumVon), String(confirmationData?.termin!.datumBis)) ? 'am' : 'vom'} <strong>{formatDateRange(String(confirmationData?.termin!.datumVon), String(confirmationData?.termin!.datumBis))}</strong> angefordert.
+                </p>
+                */}
+
+                <p className="text-xl leading-[1.55] text-foreground max-w-205 mt-4">
+                    Sie haben ein unverbindliches Angebot für den Workshop <strong>{confirmationData?.workshop.titel}</strong>{" "}
+                    {confirmationData?.termin ? (
+                        <>
+                            {isSameDay(confirmationData.termin.datumVon, confirmationData.termin.datumBis) ? 'am' : 'vom'} <strong>{formatDateRange(confirmationData.termin.datumVon, confirmationData.termin.datumBis)}</strong>{" "}
+                        </>
+                    ) : null}
+                    angefordert.
                 </p>
 
                 <div className="mt-10 py-5.5 px-5.5 bg-surface rounded-lg">

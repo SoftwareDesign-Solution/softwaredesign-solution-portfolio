@@ -58,10 +58,37 @@ export async function createQuoteRequest(data: CreateQuoteRequestData): Promise<
 
     const confirmationToken = generateSecureToken();
 
+
+    /*
+     * Server-seitige Pflicht-Prüfung für den Termin, analog zur
+     * `hasTermine`-Logik im Formular (superRefine in createQuoteRequestFormSchema):
+     * Ohne Termin-Auswahl nur zulässig, wenn der Workshop aktuell wirklich
+     * keine buchbaren Termine hat — sonst wäre der Client-Check umgehbar,
+     * da die Server Action theoretisch auch direkt (ohne UI) aufrufbar ist.
+     */
+    if (!quoteRequestData.termin) {
+
+        const [{ count: bookableTerminCount }] = await db`
+            SELECT COUNT(*)::int AS count
+            FROM termin
+            WHERE workshop_id = ${quoteRequestData.workshop.id}
+                AND active = TRUE
+                AND status <> 'ausgebucht'
+        `;
+
+        if (bookableTerminCount > 0) {
+            throw new Error(
+                "Bitte wählen Sie einen Termin aus."
+            );
+        }
+
+    }
+
     /*
      * Workshop, Termin und Preis anhand der IDs serverseitig laden.
      * Idealerweise liefert die Abfrage nur aktive und buchbare Termine.
      */
+    /*
     const [workshopTermin] = await db`
         SELECT
             w.id AS workshop_id,
@@ -83,6 +110,56 @@ export async function createQuoteRequest(data: CreateQuoteRequestData): Promise<
     if (!workshopTermin) {
         throw new Error(
             "Der ausgewählte Workshop oder Termin ist nicht verfügbar."
+        );
+    }
+    */
+
+    /*
+     * Workshop, Termin und Preis anhand der IDs serverseitig laden.
+     * Idealerweise liefert die Abfrage nur aktive und buchbare Termine.
+     *
+     * Ein Termin ist optional: Ein Angebot kann auch ohne festen Termin
+     * angefordert werden (z. B. wenn aktuell keine Termine geplant sind).
+     * In dem Fall wird nur der Workshop geladen, datum_von/datum_bis
+     * bleiben NULL.
+     */
+    const workshopTermin = quoteRequestData.termin
+        ? (await db`
+            SELECT
+                w.id AS workshop_id,
+                w.titel AS workshop_titel,
+                w.preis,
+                t.id AS termin_id,
+                t.datum_von,
+                t.datum_bis
+            FROM workshop w
+            INNER JOIN termin t ON t.workshop_id = w.id
+            WHERE w.id = ${quoteRequestData.workshop.id}
+                AND t.id = ${quoteRequestData.termin.id}
+                AND w.active = TRUE
+                AND t.active = TRUE
+                AND t.status <> 'ausgebucht'
+            LIMIT 1
+        `)[0]
+        : (await db`
+            SELECT
+                w.id AS workshop_id,
+                w.titel AS workshop_titel,
+                w.preis,
+                NULL::INTEGER AS termin_id,
+                NULL::DATE AS datum_von,
+                NULL::DATE AS datum_bis
+            FROM workshop w
+            WHERE w.id = ${quoteRequestData.workshop.id}
+                AND w.active = TRUE
+            LIMIT 1
+        `)[0];
+
+    if (!workshopTermin) {
+        throw new Error(
+            quoteRequestData.termin
+                ? "Der ausgewählte Workshop oder Termin ist nicht verfügbar."
+                : "Der ausgewählte Workshop ist nicht verfügbar."
         );
     }
 
@@ -178,11 +255,20 @@ export async function createQuoteRequest(data: CreateQuoteRequestData): Promise<
                 id: workshopTermin.workshop_id,
                 titel: workshopTermin.workshop_titel,
             },
+            /*
             termin: {
                 id: workshopTermin.termin_id,
                 datumVon: String(workshopTermin.datum_von),
                 datumBis: String(workshopTermin.datum_bis),
             },
+            */
+            termin: workshopTermin.termin_id
+                ? {
+                    id: workshopTermin.termin_id,
+                    datumVon: String(workshopTermin.datum_von),
+                    datumBis: String(workshopTermin.datum_bis),
+                }
+                : null,
             salutation: `Sehr geehrte${quoteRequestData.ansprechpartner.anrede === 'Herr' ? 'r Herr' : ' Frau'} ${quoteRequestData.ansprechpartner.nachname},`,
             confirmationLink: `${process.env.NEXT_PUBLIC_BASE_URL}/offer-requests/${quoteRequestId}/confirm?token=${confirmationToken}`,
         });

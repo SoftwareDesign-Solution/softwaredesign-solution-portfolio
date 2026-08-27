@@ -8,7 +8,7 @@ import { useRef } from "react";
 import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
 
 import { createQuoteRequest } from "@/app/actions/create-quote-request";
-import { type CreateQuoteRequestData, type QuoteRequestFormData, quoteRequestFormSchema } from "@/schemas/quote-request.schema";
+import { type CreateQuoteRequestData, createQuoteRequestFormSchema, type QuoteRequestFormData } from "@/schemas/quote-request.schema";
 import { WorkshopFormProps } from "@/types/workshop-props";
 
 import AppointmentSelectionSection from "../shared/sections/appointment-selection-section";
@@ -31,8 +31,11 @@ export default function QuoteRequestForm({
     onError 
 }: WorkshopFormProps) {
 
+    const hasTermine = Boolean(workshop.termine && workshop.termine.length > 0);
+
     const methods = useForm<QuoteRequestFormData>({
-        resolver: zodResolver(quoteRequestFormSchema),
+        //resolver: zodResolver(quoteRequestFormSchema),
+        resolver: zodResolver(createQuoteRequestFormSchema(hasTermine)),
         defaultValues: {
             termin: null,
             teilnehmerzahl: 1,
@@ -88,8 +91,8 @@ export default function QuoteRequestForm({
                     vorname: quoteRequestData.ansprechpartner.vorname,
                     email: quoteRequestData.ansprechpartner.email,
                     titel: quoteRequestData.workshop.titel,
-                    datumVon: String(quoteRequestData.termin?.datumVon),
-                    datumBis: String(quoteRequestData.termin?.datumBis),
+                    datumVon: quoteRequestData.termin?.datumVon ?? null,
+                    datumBis: quoteRequestData.termin?.datumBis ?? null,
                 }));
 
                 onClose?.();
@@ -138,7 +141,7 @@ export default function QuoteRequestForm({
                         <ExtrasSection num="06" />
                         
                         {/* Zusammenfassung */}
-                        <SummarySection title="Voraussichtliche Angebotssumme" workshop={workshop} />
+                        <SummarySection title="Voraussichtliche Angebotssumme" workshop={workshop} noTerminLabel={hasTermine ? undefined : "Nach Absprache"} />
 
                         {/* Consent */}
                         <ConsentSection>

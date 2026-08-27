@@ -41,6 +41,7 @@ export async function confirmQuoteRequest(props: InputData): Promise<Confirmatio
 
     // 1. Angebotsanfrage anhand der ID und des Tokens bestätigen
 
+    /*
     const confirmedRows = await db`
         UPDATE angebotsanfrage
         SET confirmed_at = NOW()
@@ -58,6 +59,50 @@ export async function confirmQuoteRequest(props: InputData): Promise<Confirmatio
                 'datumVon', datum_von,
                 'datumBis', datum_bis
             ) AS termin,
+            jsonb_build_object(
+                'firma', firma,
+                'strasse', strasse,
+                'plz', plz,
+                'ort', ort
+            ) AS adresse,
+            website,
+            jsonb_build_object(
+                'anrede', anrede,
+                'vorname', vorname,
+                'nachname', nachname,
+                'email', email,
+                'telefon', telefon
+            ) AS ansprechpartner,
+            jsonb_build_object(
+                'firma', COALESCE(rechnung_firma, ''),
+                'strasse', COALESCE(rechnung_strasse, ''),
+                'plz', COALESCE(rechnung_plz, ''),
+                'ort', COALESCE(rechnung_ort, '')
+            ) AS rechnungsadresse,
+            CAST(teilnehmerzahl AS INTEGER) AS teilnehmerzahl,
+            notizen AS "nachricht"
+    `;
+    */
+
+    const confirmedRows = await db`
+        UPDATE angebotsanfrage
+        SET confirmed_at = NOW()
+        WHERE id = ${id}
+          AND confirmation_token = ${token}
+          AND confirmed_at IS NULL
+          AND confirmation_expires_at > NOW()
+        RETURNING 
+            jsonb_build_object(
+                'id', workshop_id,
+                'titel', workshop_titel
+            ) AS workshop,
+            CASE WHEN datum_von IS NOT NULL AND datum_bis IS NOT NULL THEN
+                jsonb_build_object(
+                    'id', 1,
+                    'datumVon', datum_von,
+                    'datumBis', datum_bis
+                )
+            ELSE NULL END AS termin,
             jsonb_build_object(
                 'firma', firma,
                 'strasse', strasse,
@@ -114,6 +159,7 @@ export async function confirmQuoteRequest(props: InputData): Promise<Confirmatio
     }
 
     // Prüfen, ob der Link zu einer bereits bestätigten Anfrage gehört
+    /*
     const existingRows = await db`
         SELECT
             jsonb_build_object(
@@ -153,7 +199,50 @@ export async function confirmQuoteRequest(props: InputData): Promise<Confirmatio
           AND confirmation_token = ${token}
         LIMIT 1
     `;
+    */
 
+    const existingRows = await db`
+        SELECT
+            jsonb_build_object(
+                'id', workshop_id,
+                'titel', workshop_titel
+            ) AS workshop,
+            CASE WHEN datum_von IS NOT NULL AND datum_bis IS NOT NULL THEN
+                jsonb_build_object(
+                    'id', 1,
+                    'datumVon', datum_von,
+                    'datumBis', datum_bis
+                )
+            ELSE NULL END AS termin,
+            jsonb_build_object(
+                'firma', firma,
+                'strasse', strasse,
+                'plz', plz,
+                'ort', ort
+            ) AS adresse,
+            website,
+            jsonb_build_object(
+                'anrede', anrede,
+                'vorname', vorname,
+                'nachname', nachname,
+                'email', email,
+                'telefon', telefon
+            ) AS ansprechpartner,
+            jsonb_build_object(
+                'firma', COALESCE(rechnung_firma, ''),
+                'strasse', COALESCE(rechnung_strasse, ''),
+                'plz', COALESCE(rechnung_plz, ''),
+                'ort', COALESCE(rechnung_ort, '')
+            ) AS rechnungsadresse,
+            CAST(teilnehmerzahl AS INTEGER) AS teilnehmerzahl,
+            notizen,
+            confirmed_at
+        FROM angebotsanfrage
+        WHERE id = ${id}
+          AND confirmation_token = ${token}
+        LIMIT 1
+    `;
+    
     if (existingRows.length > 0 && existingRows[0]?.confirmed_at) {
 
         const data = quoteRequestConfirmedSchema.parse(existingRows[0]);
