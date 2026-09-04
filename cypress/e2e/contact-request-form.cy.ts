@@ -63,7 +63,7 @@ describe('Kontakt-/Anfrageformular (/anfrage) - Happy Path + Validierungsfehler'
             });
 
             // Beschreibung
-            cy.contains('Bitte geben Sie eine Beschreibung an.').should('be.visible');
+            cy.contains('Die Beschreibung muss mindestens 20 Zeichen enthalten.').should('be.visible');
 
             cy.contains('Bitte stimmen Sie der Verarbeitung Ihrer Daten zu.').should('be.visible');
 

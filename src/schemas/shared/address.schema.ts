@@ -14,5 +14,28 @@ export const addressSchema = optionalAddressSchema.extend({
     ort: z.string().min(1, "Bitte geben Sie den Ort ein."),
 });
 
+export const billingAddressSchema = z.discriminatedUnion(
+    "abweichendeRechnungsadresse",
+    [
+        z.object({
+            abweichendeRechnungsadresse:
+                z.literal(false),
+
+            rechnungsadresse:
+                optionalAddressSchema
+                    .partial()
+                    .optional(),
+        }),
+
+        z.object({
+            abweichendeRechnungsadresse:
+                z.literal(true),
+
+            rechnungsadresse:
+                addressSchema,
+        }),
+    ],
+);
+
 export type AddressFormData = z.infer<typeof addressSchema>;
 export type OptionalAddressFormData = z.infer<typeof optionalAddressSchema>;

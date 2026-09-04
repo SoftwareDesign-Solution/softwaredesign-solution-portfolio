@@ -1,178 +1,244 @@
 "use server";
 
-import { getClientIp } from "nextjs-turnstile";
-
 import { db } from "@/lib/db";
+import getClientIp from "@/lib/get-client-ip";
 import { verifyTurnstileToken } from "@/lib/turnstile";
-import { type CreateQuoteRequestData, createQuoteRequestSchema, sendQuoteRequestOptInEmailSchema } from "@/schemas/quote-request.schema";
+import {
+    type CreateQuoteRequestData,
+    createQuoteRequestSchema,
+    sendQuoteRequestOptInEmailSchema,
+} from "@/schemas/quote-request.schema";
 import { sendQuoteRequestOptInEmail } from "@/services/emails/send-quote-request-optin-email";
 import { generateSecureToken } from "@/utils/generate-secure-token";
 
+const CONFIRMATION_EXPIRATION_DAYS = 3;
 
-export interface CreateQuoteRequestResult {
-    quoteRequestId: string;
-    emailId?: string;
-    confirmationEmailSent: boolean;
+interface WorkshopAppointmentData {
+    datumBis: string | Date | null;
+    datumVon: string | Date | null;
+    preis: number | string | null;
+    terminId: number | null;
+    workshopId: number;
+    workshopTitel: string;
 }
 
-export async function createQuoteRequest(data: CreateQuoteRequestData): Promise<CreateQuoteRequestResult> {
-    
-    // 1. Server-seitige Zod-Validierung — nie nur auf Client-Validierung verlassen,
-    //    da die Server Action theoretisch auch direkt (ohne UI) aufrufbar ist
-    const validationResult = createQuoteRequestSchema.safeParse(data);
+interface InsertQuoteRequestOptions {
+    confirmationToken: string;
+    ipAddress: string | null;
+    quoteRequestData: CreateQuoteRequestData;
+    totalPrice: number;
+    workshopAppointment:
+        WorkshopAppointmentData;
+}
+
+interface SendQuoteRequestEmailOptions {
+    confirmationToken: string;
+    quoteRequestData: CreateQuoteRequestData;
+    quoteRequestId: string;
+    workshopAppointment:
+        WorkshopAppointmentData;
+}
+
+interface SendQuoteRequestEmailResult {
+    emailId?: string;
+    sent: boolean;
+}
+
+export interface CreateQuoteRequestResult {
+    confirmationEmailSent: boolean;
+    emailId?: string;
+    quoteRequestId: string;
+}
+
+export async function createQuoteRequest(
+    data: CreateQuoteRequestData,
+): Promise<CreateQuoteRequestResult> {
+    const validationResult =
+        createQuoteRequestSchema.safeParse(data);
 
     if (!validationResult.success) {
         console.error(
-            "Ungültige Angebotsanfragedaten",
-            validationResult.error.flatten()
+            "Invalid quote request data.",
+            validationResult.error.flatten(),
         );
 
         throw new Error(
-            "Die eingegebenen Angebotsanfragedaten sind ungültig."
+            "Die eingegebenen Daten der Angebotsanfrage sind ungültig.",
         );
     }
 
+    const quoteRequestData =
+        validationResult.data;
 
-    const quoteRequestData = validationResult.data;
-
-
-    // 2. Turnstile-Verifizierung — IMMER zuerst, vor jedem DB-Zugriff.
     const isHuman = await verifyTurnstileToken(
-        quoteRequestData.turnstile.token
+        quoteRequestData.turnstile.token,
     );
 
     if (!isHuman) {
         throw new Error(
-            "Sicherheitsabfrage fehlgeschlagen. Bitte versuchen Sie es erneut."
+            "Die Sicherheitsabfrage ist fehlgeschlagen.",
         );
     }
 
+    await validateAppointmentRequirement(
+        quoteRequestData,
+    );
 
-    let ipAddress: string | null = null;
-
-    try {
-        ipAddress = (await getClientIp()) ?? null;
-    } catch (error) {
-        console.error("Fehler beim Ermitteln der Client-IP-Adresse:", error);
-    }
-
-    const confirmationToken = generateSecureToken();
-
-
-    /*
-     * Server-seitige Pflicht-Prüfung für den Termin, analog zur
-     * `hasTermine`-Logik im Formular (superRefine in createQuoteRequestFormSchema):
-     * Ohne Termin-Auswahl nur zulässig, wenn der Workshop aktuell wirklich
-     * keine buchbaren Termine hat — sonst wäre der Client-Check umgehbar,
-     * da die Server Action theoretisch auch direkt (ohne UI) aufrufbar ist.
-     */
-    if (!quoteRequestData.termin) {
-
-        const [{ count: bookableTerminCount }] = await db`
-            SELECT COUNT(*)::int AS count
-            FROM termin
-            WHERE workshop_id = ${quoteRequestData.workshop.id}
-                AND active = TRUE
-                AND status <> 'ausgebucht'
-        `;
-
-        if (bookableTerminCount > 0) {
-            throw new Error(
-                "Bitte wählen Sie einen Termin aus."
-            );
-        }
-
-    }
-
-    /*
-     * Workshop, Termin und Preis anhand der IDs serverseitig laden.
-     * Idealerweise liefert die Abfrage nur aktive und buchbare Termine.
-     */
-    /*
-    const [workshopTermin] = await db`
-        SELECT
-            w.id AS workshop_id,
-            w.titel AS workshop_titel,
-            w.preis,
-            t.id AS termin_id,
-            t.datum_von,
-            t.datum_bis
-        FROM workshop w
-        INNER JOIN termin t ON t.workshop_id = w.id
-        WHERE w.id = ${quoteRequestData.workshop.id}
-            AND t.id = ${quoteRequestData.termin?.id}
-            AND w.active = TRUE
-            AND t.active = TRUE
-            AND t.status <> 'ausgebucht'
-        LIMIT 1
-    `;
-
-    if (!workshopTermin) {
-        throw new Error(
-            "Der ausgewählte Workshop oder Termin ist nicht verfügbar."
+    const workshopAppointment =
+        await getWorkshopAppointment(
+            quoteRequestData,
         );
-    }
-    */
 
-    /*
-     * Workshop, Termin und Preis anhand der IDs serverseitig laden.
-     * Idealerweise liefert die Abfrage nur aktive und buchbare Termine.
-     *
-     * Ein Termin ist optional: Ein Angebot kann auch ohne festen Termin
-     * angefordert werden (z. B. wenn aktuell keine Termine geplant sind).
-     * In dem Fall wird nur der Workshop geladen, datum_von/datum_bis
-     * bleiben NULL.
-     */
-    const workshopTermin = quoteRequestData.termin
-        ? (await db`
-            SELECT
-                w.id AS workshop_id,
-                w.titel AS workshop_titel,
-                w.preis,
-                t.id AS termin_id,
-                t.datum_von,
-                t.datum_bis
-            FROM workshop w
-            INNER JOIN termin t ON t.workshop_id = w.id
-            WHERE w.id = ${quoteRequestData.workshop.id}
-                AND t.id = ${quoteRequestData.termin.id}
-                AND w.active = TRUE
-                AND t.active = TRUE
-                AND t.status <> 'ausgebucht'
-            LIMIT 1
-        `)[0]
-        : (await db`
-            SELECT
-                w.id AS workshop_id,
-                w.titel AS workshop_titel,
-                w.preis,
-                NULL::INTEGER AS termin_id,
-                NULL::DATE AS datum_von,
-                NULL::DATE AS datum_bis
-            FROM workshop w
-            WHERE w.id = ${quoteRequestData.workshop.id}
-                AND w.active = TRUE
-            LIMIT 1
-        `)[0];
-
-    if (!workshopTermin) {
+    if (!workshopAppointment) {
         throw new Error(
             quoteRequestData.termin
                 ? "Der ausgewählte Workshop oder Termin ist nicht verfügbar."
-                : "Der ausgewählte Workshop ist nicht verfügbar."
+                : "Der ausgewählte Workshop ist nicht verfügbar.",
         );
     }
 
-    let quoteRequestId: string;
+    const totalPrice = calculateTotalPrice(
+        workshopAppointment.preis,
+        quoteRequestData.teilnehmerzahl,
+    );
 
-    // 3. DB-Insert + E-Mail-Versand — in try/catch, aber OHNE redirect() darin!
-    //    redirect() wirft intern einen speziellen Error (NEXT_REDIRECT), der sonst
-    //    versehentlich vom catch-Block abgefangen würde.
+    const ipAddress = await getClientIpSafely();
+    const confirmationToken = generateSecureToken();
+
+    const quoteRequestId =
+        await insertQuoteRequest({
+            confirmationToken,
+            ipAddress,
+            quoteRequestData,
+            totalPrice,
+            workshopAppointment,
+        });
+
+    const emailResult =
+        await sendQuoteRequestEmailSafely({
+            confirmationToken,
+            quoteRequestData,
+            quoteRequestId,
+            workshopAppointment,
+        });
+
+    return {
+        confirmationEmailSent: emailResult.sent,
+        emailId: emailResult.emailId,
+        quoteRequestId,
+    };
+}
+
+async function validateAppointmentRequirement(
+    quoteRequestData: CreateQuoteRequestData,
+): Promise<void> {
+    if (quoteRequestData.termin) {
+        return;
+    }
+
+    const [result] = await db`
+        SELECT COUNT(*)::int AS "appointmentCount"
+        FROM termin
+        WHERE workshop_id = ${
+            quoteRequestData.workshop.id
+        }
+          AND active = TRUE
+          AND status <> 'ausgebucht'
+    `;
+
+    const appointmentCount = Number(
+        result?.appointmentCount ?? 0,
+    );
+
+    if (appointmentCount > 0) {
+        throw new Error(
+            "Bitte wählen Sie einen Termin aus.",
+        );
+    }
+}
+
+async function getWorkshopAppointment(
+    quoteRequestData: CreateQuoteRequestData,
+): Promise<WorkshopAppointmentData | null> {
+    if (quoteRequestData.termin) {
+        const [workshopAppointment] = await db`
+            SELECT
+                w.id AS "workshopId",
+                w.titel AS "workshopTitel",
+                w.preis,
+                t.id AS "terminId",
+                t.datum_von AS "datumVon",
+                t.datum_bis AS "datumBis"
+            FROM workshop w
+            INNER JOIN termin t
+                ON t.workshop_id = w.id
+            WHERE w.id = ${
+                quoteRequestData.workshop.id
+            }
+              AND t.id = ${
+                  quoteRequestData.termin.id
+              }
+              AND w.active = TRUE
+              AND t.active = TRUE
+              AND t.status <> 'ausgebucht'
+            LIMIT 1
+        `;
+
+        return workshopAppointment
+            ? workshopAppointment as
+                WorkshopAppointmentData
+            : null;
+    }
+
+    const [workshop] = await db`
+        SELECT
+            w.id AS "workshopId",
+            w.titel AS "workshopTitel",
+            w.preis,
+            NULL::INTEGER AS "terminId",
+            NULL::DATE AS "datumVon",
+            NULL::DATE AS "datumBis"
+        FROM workshop w
+        WHERE w.id = ${
+            quoteRequestData.workshop.id
+        }
+          AND w.active = TRUE
+        LIMIT 1
+    `;
+
+    return workshop
+        ? workshop as WorkshopAppointmentData
+        : null;
+}
+
+function calculateTotalPrice(
+    price: number | string | null,
+    participantCount: number,
+): number {
+    const numericPrice = Number(price);
+
+    if (!Number.isFinite(numericPrice)) {
+        throw new Error(
+            "Für den Workshop ist kein gültiger Preis hinterlegt.",
+        );
+    }
+
+    return numericPrice * participantCount;
+}
+
+async function insertQuoteRequest({
+    confirmationToken,
+    ipAddress,
+    quoteRequestData,
+    totalPrice,
+    workshopAppointment,
+}: InsertQuoteRequestOptions): Promise<string> {
+    const billingAddress =
+        quoteRequestData.abweichendeRechnungsadresse
+            ? quoteRequestData.rechnungsadresse
+            : null;
+
     try {
-
-        const gesamtbetrag = 
-            Number(workshopTermin.preis) * Number(quoteRequestData.teilnehmerzahl);
-
         const [quoteRequest] = await db`
             INSERT INTO angebotsanfrage (
                 workshop_id,
@@ -202,98 +268,171 @@ export async function createQuoteRequest(data: CreateQuoteRequestData): Promise<
                 confirmation_expires_at
             )
             VALUES (
-                ${workshopTermin.workshop_id},
-                ${workshopTermin.workshop_titel},
-                ${workshopTermin.datum_von},
-                ${workshopTermin.datum_bis},
+                ${workshopAppointment.workshopId},
+                ${workshopAppointment.workshopTitel},
+                ${workshopAppointment.datumVon},
+                ${workshopAppointment.datumBis},
                 ${quoteRequestData.teilnehmerzahl},
                 ${quoteRequestData.adresse.firma},
                 ${quoteRequestData.adresse.strasse},
                 ${quoteRequestData.adresse.plz},
                 ${quoteRequestData.adresse.ort},
                 ${quoteRequestData.webseite ?? null},
-                ${quoteRequestData.ansprechpartner.anrede},
-                ${quoteRequestData.ansprechpartner.vorname},
-                ${quoteRequestData.ansprechpartner.nachname},
-                ${quoteRequestData.ansprechpartner.email},
-                ${quoteRequestData.ansprechpartner.telefon ?? null},
-                ${quoteRequestData.rechnungsadresse?.firma ?? null},
-                ${quoteRequestData.rechnungsadresse?.strasse ?? null},
-                ${quoteRequestData.rechnungsadresse?.plz ?? null},
-                ${quoteRequestData.rechnungsadresse?.ort ?? null},
+                ${
+                    quoteRequestData.ansprechpartner
+                        .anrede
+                },
+                ${
+                    quoteRequestData.ansprechpartner
+                        .vorname
+                },
+                ${
+                    quoteRequestData.ansprechpartner
+                        .nachname
+                },
+                ${
+                    quoteRequestData.ansprechpartner
+                        .email
+                },
+                ${
+                    quoteRequestData.ansprechpartner
+                        .telefon ?? null
+                },
+                ${billingAddress?.firma ?? null},
+                ${billingAddress?.strasse ?? null},
+                ${billingAddress?.plz ?? null},
+                ${billingAddress?.ort ?? null},
                 ${quoteRequestData.nachricht ?? null},
-                ${workshopTermin.preis},
-                ${gesamtbetrag},
-                ${ipAddress ?? null}, -- TODO: IP-Adresse aus Request-Context ermitteln
+                ${workshopAppointment.preis},
+                ${totalPrice},
+                ${ipAddress},
                 ${confirmationToken},
-                now() + interval '3 DAY' -- confirmation_expires_at
+                NOW() + INTERVAL '3 DAY'
             )
-            RETURNING id;
+            RETURNING id
         `;
-        
-        quoteRequestId = String(quoteRequest.id);
 
-    } catch (error) {
-        throw new Error("Fehler beim Erstellen der Angebotsanfrage: " + (error as Error).message);
+        if (!quoteRequest) {
+            throw new Error(
+                "No quote request row was returned.",
+            );
+        }
+
+        return String(quoteRequest.id);
+    } catch (error: unknown) {
+        console.error(
+            "Failed to insert quote request.",
+            error,
+        );
+
+        throw new Error(
+            "Die Angebotsanfrage konnte nicht gespeichert werden.",
+        );
     }
+}
 
-    /*
-     * Ab hier ist die Buchung definitiv gespeichert.
-     *
-     * Ein E-Mail-Fehler darf deshalb nicht mehr dazu führen,
-     * dass der Client die gesamte Buchung als fehlgeschlagen
-     * behandelt.
-     */
+async function sendQuoteRequestEmailSafely({
+    confirmationToken,
+    quoteRequestData,
+    quoteRequestId,
+    workshopAppointment,
+}: SendQuoteRequestEmailOptions): Promise<SendQuoteRequestEmailResult> {
     try {
+        const baseUrl = getBaseUrl();
 
-        console.log("QuoteRequestData:", quoteRequestData);
-        console.log("WorkshopTermin:", workshopTermin);
+        const emailData =
+            sendQuoteRequestOptInEmailSchema.parse({
+                ...quoteRequestData,
 
-        const emailData = sendQuoteRequestOptInEmailSchema.parse({
-            ...quoteRequestData,
-            workshop: {
-                id: workshopTermin.workshop_id,
-                titel: workshopTermin.workshop_titel,
-            },
-            /*
-            termin: {
-                id: workshopTermin.termin_id,
-                datumVon: String(workshopTermin.datum_von),
-                datumBis: String(workshopTermin.datum_bis),
-            },
-            */
-            termin: workshopTermin.termin_id
-                ? {
-                    id: workshopTermin.termin_id,
-                    datumVon: String(workshopTermin.datum_von),
-                    datumBis: String(workshopTermin.datum_bis),
-                }
-                : null,
-            salutation: `Sehr geehrte${quoteRequestData.ansprechpartner.anrede === 'Herr' ? 'r Herr' : ' Frau'} ${quoteRequestData.ansprechpartner.nachname},`,
-            confirmationLink: `${process.env.NEXT_PUBLIC_BASE_URL}/offer-requests/${quoteRequestId}/confirm?token=${confirmationToken}`,
-        });
+                confirmationLink:
+                    `${baseUrl}/offer-requests/` +
+                    `${quoteRequestId}/confirm` +
+                    `?token=${confirmationToken}`,
 
-        console.log("EmailData:", emailData);
+                salutation:
+                    createFormalSalutation(
+                        quoteRequestData.ansprechpartner,
+                    ),
 
-        
-        // Benachrichtigung mit Bestätigungslink per E-Mail versenden
-        const response = await sendQuoteRequestOptInEmail(emailData);
+                termin: workshopAppointment.terminId
+                    ? {
+                          datumBis: String(
+                              workshopAppointment.datumBis,
+                          ),
+                          datumVon: String(
+                              workshopAppointment.datumVon,
+                          ),
+                          id: workshopAppointment.terminId,
+                      }
+                    : null,
+
+                workshop: {
+                    id: workshopAppointment.workshopId,
+                    titel:
+                        workshopAppointment.workshopTitel,
+                },
+            });
+
+        const emailId =
+            await sendQuoteRequestOptInEmail(
+                emailData,
+            );
 
         return {
-            quoteRequestId,
-            emailId: response,
-            confirmationEmailSent: true,
+            emailId,
+            sent: true,
         };
+    } catch (error: unknown) {
+        console.error(
+            "Quote request was created, but its opt-in email could not be sent.",
+            error,
+        );
 
-    } catch (error) {
-
-        throw new Error("Fehler beim Versenden der Bestätigungs-E-Mail: " + (error as Error).message);
-        
         return {
-            quoteRequestId,
-            confirmationEmailSent: false,
+            sent: false,
         };
+    }
+}
 
+function createFormalSalutation(
+    contactPerson:
+        CreateQuoteRequestData["ansprechpartner"],
+): string {
+    switch (contactPerson.anrede) {
+        case "Frau":
+            return `Sehr geehrte Frau ${contactPerson.nachname},`;
+
+        case "Herr":
+            return `Sehr geehrter Herr ${contactPerson.nachname},`;
+
+        default:
+            return `Guten Tag ${contactPerson.vorname} ${contactPerson.nachname},`;
+    }
+}
+
+function getBaseUrl(): string {
+    const baseUrl =
+        process.env.NEXT_PUBLIC_BASE_URL;
+
+    if (!baseUrl) {
+        throw new Error(
+            "NEXT_PUBLIC_BASE_URL is not configured.",
+        );
     }
 
+    return baseUrl.replace(/\/$/, "");
+}
+
+async function getClientIpSafely():
+    Promise<string | null> {
+    try {
+        return (await getClientIp()) ?? null;
+    } catch (error: unknown) {
+        console.error(
+            "Failed to determine client IP address.",
+            error,
+        );
+
+        return null;
+    }
 }

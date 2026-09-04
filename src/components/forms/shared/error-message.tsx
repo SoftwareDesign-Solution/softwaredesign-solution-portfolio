@@ -6,6 +6,7 @@ export default function ErrorMessage({ message, className, ...props }: ErrorMess
     return (
         <p
             className={`mt-2 text-[12.5px] text-error-600 ${className}`}
+            role="alert"
             {...props}
         >
             {message}

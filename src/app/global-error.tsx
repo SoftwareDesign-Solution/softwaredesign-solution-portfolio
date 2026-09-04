@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import "./globals.css";
 
-import { useEffect } from "react";
+//import { useEffect } from "react";
 
 interface GlobalErrorProps {
   error: Error & { digest?: string };
@@ -18,9 +18,12 @@ interface GlobalErrorProps {
  * Provider aus dem Layout verlassen (kein ActionStatusProvider/ModalProvider etc.).
  */
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
+
+  /*
   useEffect(() => {
     console.error(error);
   }, [error]);
+  */
 
   return (
     <html lang="de">

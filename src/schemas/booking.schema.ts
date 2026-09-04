@@ -1,123 +1,149 @@
 import { z } from "zod";
 
-import { addressSchema, optionalAddressSchema } from "./shared/address.schema";
+import {
+    addressSchema,
+    billingAddressSchema,
+} from "./shared/address.schema";
 import { contactPersonSchema } from "./shared/contact-person.schema";
 import { teilnehmerSchema } from "./shared/teilnehmer.schema";
 import { terminSchema } from "./shared/termin.schema";
 import { turnstileSchema } from "./shared/turnstile-schema";
 import { workshopSchema } from "./shared/workshop.schema";
 
+const consentSchema = z
+    .boolean()
+    .refine((value) => value, {
+        message:
+            "Bitte bestätigen Sie die Datenschutzerklärung.",
+    });
 
-type BillingAddressData = {
-    abweichendeRechnungsadresse?: boolean;
-    rechnungsadresse?: unknown;
-};
+const bookingAppointmentSchema = terminSchema
+    .nullable()
+    .transform((termin, ctx) => {
+        if (termin === null) {
+            ctx.addIssue({
+                code: "custom",
+                message:
+                    "Bitte wählen Sie einen Termin aus.",
+            });
 
-function validateBillingAddress(
-    data: BillingAddressData,
-    ctx: z.RefinementCtx
-) {
-    if (!data.abweichendeRechnungsadresse) {
-        return;
-    }
+            return z.NEVER;
+        }
 
-    const result = addressSchema.safeParse(data.rechnungsadresse);
+        return termin;
+    });
 
-    if (result.success) {
-        return;
-    }
+const participantCountSchema = z
+    .number()
+    .int(
+        "Die Teilnehmeranzahl muss eine ganze Zahl sein.",
+    )
+    .positive(
+        "Bitte geben Sie die Teilnehmeranzahl an.",
+    );
 
-    for (const issue of result.error.issues) {
-        ctx.addIssue({
-            ...issue,
-            path: ["rechnungsadresse", ...issue.path],
-        });
-    }
-}
+const totalPriceSchema = z
+    .number()
+    .nonnegative(
+        "Der Gesamtpreis darf nicht negativ sein.",
+    );
 
-// Base schema for workshop booking
-const bookingBaseSchema = z.object({
-
-    // Workshop
-    workshop: workshopSchema,
-
-    // Termin
-    termin: terminSchema
-        .nullable()
-        .refine((termin): boolean => termin !== null, "Bitte wählen Sie einen Termin aus"),
-
-    // Teilnehmeranzahl
-    teilnehmerzahl: z.number().min(1, "Bitte geben Sie die Teilnehmeranzahl an"),
-
-    // Adresse
+const bookingFields = {
     adresse: addressSchema,
 
-    // Webseite
-    webseite: z.string().trim().optional(),
+    ansprechpartner:
+        contactPersonSchema,
 
-    // Ansprechpartner
-    ansprechpartner: contactPersonSchema,
+    gutscheinCode: z
+        .string()
+        .trim()
+        .optional(),
 
-    // Teilnehmerliste
-    teilnehmer: z.array(
-        teilnehmerSchema
-    ),
+    nachricht: z
+        .string()
+        .trim()
+        .optional(),
 
-    // Rechnungsadresse
-    abweichendeRechnungsadresse: z.boolean().optional(),
-    rechnungsadresse: optionalAddressSchema.partial().optional(),
+    teilnehmer: z
+        .array(teilnehmerSchema)
+        .min(
+            1,
+            "Bitte geben Sie mindestens einen Teilnehmer an.",
+        ),
 
-    // Weiteres
-    gutscheinCode: z.string().trim().optional(),
-    nachricht: z.string().trim().optional(),
+    teilnehmerzahl:
+        participantCountSchema,
 
+    termin:
+        bookingAppointmentSchema,
+
+    webseite: z
+        .string()
+        .trim()
+        .optional(),
+};
+
+const verificationFields = {
+    consent:
+        consentSchema,
+
+    turnstile:
+        turnstileSchema,
+};
+
+const bookingFormBaseSchema = z.object({
+    ...bookingFields,
+    ...verificationFields,
 });
 
-
-// Form data schema for workshop booking
-export const bookingFormSchema = bookingBaseSchema
-    .omit({
-        workshop: true
-    })
-    .extend({
-
-        // Consent
-        consent: z.literal(true, { message: "Bitte bestätigen Sie die Datenschutzerklärung." }),
-
-        // Turnstile token
-        turnstile: turnstileSchema,
-
-    })
-    .superRefine(validateBillingAddress);
-
-
-// Server Action data schema for workshop booking
-export const createBookingSchema = bookingBaseSchema
-    .extend({
-
-        // Consent
-        consent: z.literal(true, { message: "Bitte bestätigen Sie die Datenschutzerklärung." }),
-
-        // Turnstile token
-        turnstile: turnstileSchema,
-
-    })
-    .superRefine(validateBillingAddress);
-
-
-// E-Mail data schema for workshop booking
-export const sendBookingConfirmationEmailSchema = bookingBaseSchema.extend({
-
-    // Anrede
-    salutation: z.string().trim().optional(),
-    
-    // Gesamtpreis
-    gesamtpreis: z.number().min(0, "Der Gesamtpreis muss eine positive Zahl sein."),
-
+const createBookingBaseSchema = z.object({
+    workshop: workshopSchema,
+    ...bookingFields,
+    ...verificationFields,
 });
 
+const bookingConfirmationEmailBaseSchema =
+    z.object({
+        workshop: workshopSchema,
+        ...bookingFields,
 
-// TypeScript types for the schemas
-export type BookingFormData = z.infer<typeof bookingFormSchema>;
-export type CreateBookingData = z.infer<typeof createBookingSchema>;
-export type SendBookingConfirmationEmailData = z.infer<typeof sendBookingConfirmationEmailSchema>;
+        gesamtpreis:
+            totalPriceSchema,
+
+        salutation: z
+            .string()
+            .trim()
+            .optional(),
+    });
+
+export const bookingFormSchema =
+    bookingFormBaseSchema.and(
+        billingAddressSchema,
+    );
+
+export const createBookingSchema =
+    createBookingBaseSchema.and(
+        billingAddressSchema,
+    );
+
+export const sendBookingConfirmationEmailSchema =
+    bookingConfirmationEmailBaseSchema.and(
+        billingAddressSchema,
+    );
+
+export type BookingFormInput = z.input<
+    typeof bookingFormSchema
+>;
+
+export type BookingFormData = z.output<
+    typeof bookingFormSchema
+>;
+
+export type CreateBookingData = z.output<
+    typeof createBookingSchema
+>;
+
+export type SendBookingConfirmationEmailData =
+    z.output<
+        typeof sendBookingConfirmationEmailSchema
+    >;

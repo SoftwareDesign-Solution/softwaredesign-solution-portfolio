@@ -4,6 +4,8 @@ import LeistungenSection from "./_components/sections/leistungen-section";
 import SchwerpunkteSection from "./_components/sections/schwerpunkte-section";
 import WorkshopsSection from "./_components/sections/workshops-section";
 
+export const dynamic = "force-dynamic";
+
 export default function Home() {
   return (
     <article>

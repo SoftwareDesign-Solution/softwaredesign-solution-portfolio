@@ -3,258 +3,276 @@
 import { z } from "zod";
 
 import { db } from "@/lib/db";
-import { QuoteRequestConfirmedData, quoteRequestConfirmedSchema, sendQuoteRequestEmailSchema } from "@/schemas/quote-request.schema";
+import {
+    type QuoteRequestConfirmedData,
+    quoteRequestConfirmedSchema,
+    sendQuoteRequestEmailSchema,
+} from "@/schemas/quote-request.schema";
 import { sendQuoteRequestConfirmationEmail } from "@/services/emails/send-quote-request-confirmation-email";
-
 
 const inputSchema = z.object({
     id: z.uuid(),
-    token: z.string().min(1)
+    token: z
+        .string()
+        .trim()
+        .min(1),
 });
 
-type InputData = z.infer<typeof inputSchema>;
+type ConfirmQuoteRequestInput = z.output<
+    typeof inputSchema
+>;
 
-export type ConfirmationResult =
+type QuoteRequestDatabaseRow =
+    Record<string, unknown>;
+
+export type ConfirmQuoteRequestResult =
     | {
-          status: "confirmed";
-          data: QuoteRequestConfirmedData | null;
-      }
-    | {
-          status: "already-confirmed";
-          data: QuoteRequestConfirmedData | null;
+          data: QuoteRequestConfirmedData;
+          status:
+              | "confirmed"
+              | "already-confirmed";
       }
     | {
           status: "invalid-or-expired";
       };
 
-export async function confirmQuoteRequest(props: InputData): Promise<ConfirmationResult | null> {
-
-    const validationResult = inputSchema.safeParse(props);
+export async function confirmQuoteRequest(
+    input: ConfirmQuoteRequestInput,
+): Promise<ConfirmQuoteRequestResult> {
+    const validationResult =
+        inputSchema.safeParse(input);
 
     if (!validationResult.success) {
         return {
-            status: "invalid-or-expired"
+            status: "invalid-or-expired",
         };
     }
 
     const { id, token } = validationResult.data;
 
-    // 1. Angebotsanfrage anhand der ID und des Tokens bestätigen
+    const confirmedRow =
+        await confirmQuoteRequestInDatabase(
+            id,
+            token,
+        );
 
-    /*
-    const confirmedRows = await db`
-        UPDATE angebotsanfrage
-        SET confirmed_at = NOW()
-        WHERE id = ${id}
-          AND confirmation_token = ${token}
-          AND confirmed_at IS NULL
-          AND confirmation_expires_at > NOW()
-        RETURNING 
-            jsonb_build_object(
-                'id', workshop_id,
-                'titel', workshop_titel
-            ) AS workshop,
-            jsonb_build_object(
-                'id', 1,
-                'datumVon', datum_von,
-                'datumBis', datum_bis
-            ) AS termin,
-            jsonb_build_object(
-                'firma', firma,
-                'strasse', strasse,
-                'plz', plz,
-                'ort', ort
-            ) AS adresse,
-            website,
-            jsonb_build_object(
-                'anrede', anrede,
-                'vorname', vorname,
-                'nachname', nachname,
-                'email', email,
-                'telefon', telefon
-            ) AS ansprechpartner,
-            jsonb_build_object(
-                'firma', COALESCE(rechnung_firma, ''),
-                'strasse', COALESCE(rechnung_strasse, ''),
-                'plz', COALESCE(rechnung_plz, ''),
-                'ort', COALESCE(rechnung_ort, '')
-            ) AS rechnungsadresse,
-            CAST(teilnehmerzahl AS INTEGER) AS teilnehmerzahl,
-            notizen AS "nachricht"
-    `;
-    */
+    if (confirmedRow) {
+        const data =
+            quoteRequestConfirmedSchema.parse(
+                confirmedRow,
+            );
 
-    const confirmedRows = await db`
-        UPDATE angebotsanfrage
-        SET confirmed_at = NOW()
-        WHERE id = ${id}
-          AND confirmation_token = ${token}
-          AND confirmed_at IS NULL
-          AND confirmation_expires_at > NOW()
-        RETURNING 
-            jsonb_build_object(
-                'id', workshop_id,
-                'titel', workshop_titel
-            ) AS workshop,
-            CASE WHEN datum_von IS NOT NULL AND datum_bis IS NOT NULL THEN
-                jsonb_build_object(
-                    'id', 1,
-                    'datumVon', datum_von,
-                    'datumBis', datum_bis
-                )
-            ELSE NULL END AS termin,
-            jsonb_build_object(
-                'firma', firma,
-                'strasse', strasse,
-                'plz', plz,
-                'ort', ort
-            ) AS adresse,
-            website,
-            jsonb_build_object(
-                'anrede', anrede,
-                'vorname', vorname,
-                'nachname', nachname,
-                'email', email,
-                'telefon', telefon
-            ) AS ansprechpartner,
-            jsonb_build_object(
-                'firma', COALESCE(rechnung_firma, ''),
-                'strasse', COALESCE(rechnung_strasse, ''),
-                'plz', COALESCE(rechnung_plz, ''),
-                'ort', COALESCE(rechnung_ort, '')
-            ) AS rechnungsadresse,
-            CAST(teilnehmerzahl AS INTEGER) AS teilnehmerzahl,
-            notizen AS "nachricht"
-    `;
-
-    if (confirmedRows.length > 0) {
-
-        const confirmedRow = confirmedRows[0];
-
-        const data = quoteRequestConfirmedSchema.parse(confirmedRow);
-        
-        /*
-         * Ab hier ist die Angebotsanfrage definitiv bestätigt.
-         *
-         * Ein E-Mail-Fehler darf deshalb nicht mehr dazu führen,
-         * dass der Client die gesamte Buchung als fehlgeschlagen
-         * behandelt.
-         */
-        try {
-
-            const emailData = sendQuoteRequestEmailSchema.parse(data);
-
-            // quote-request-notification-email.tsx per E-Mail versenden
-            await sendQuoteRequestConfirmationEmail(emailData);
-
-        } catch (error) {
-            console.error("Fehler beim Versenden der Bestätigungs-E-Mail: " + (error as Error).message);
-        }
+        await sendConfirmationEmailSafely(data);
 
         return {
+            data,
             status: "confirmed",
-            data: data
         };
-
     }
 
-    // Prüfen, ob der Link zu einer bereits bestätigten Anfrage gehört
-    /*
-    const existingRows = await db`
-        SELECT
-            jsonb_build_object(
-                'id', workshop_id,
-                'titel', workshop_titel
-            ) AS workshop,
-            jsonb_build_object(
-                'id', 1,
-                'datumVon', datum_von,
-                'datumBis', datum_bis
-            ) AS termin,
-            jsonb_build_object(
-                'firma', firma,
-                'strasse', strasse,
-                'plz', plz,
-                'ort', ort
-            ) AS adresse,
-            website,
-            jsonb_build_object(
-                'anrede', anrede,
-                'vorname', vorname,
-                'nachname', nachname,
-                'email', email,
-                'telefon', telefon
-            ) AS ansprechpartner,
-            jsonb_build_object(
-                'firma', COALESCE(rechnung_firma, ''),
-                'strasse', COALESCE(rechnung_strasse, ''),
-                'plz', COALESCE(rechnung_plz, ''),
-                'ort', COALESCE(rechnung_ort, '')
-            ) AS rechnungsadresse,
-            CAST(teilnehmerzahl AS INTEGER) AS teilnehmerzahl,
-            notizen,
-            confirmed_at
-        FROM angebotsanfrage
-        WHERE id = ${id}
-          AND confirmation_token = ${token}
-        LIMIT 1
-    `;
-    */
+    const existingRow =
+        await getExistingQuoteRequest(
+            id,
+            token,
+        );
 
-    const existingRows = await db`
-        SELECT
-            jsonb_build_object(
-                'id', workshop_id,
-                'titel', workshop_titel
-            ) AS workshop,
-            CASE WHEN datum_von IS NOT NULL AND datum_bis IS NOT NULL THEN
-                jsonb_build_object(
-                    'id', 1,
-                    'datumVon', datum_von,
-                    'datumBis', datum_bis
-                )
-            ELSE NULL END AS termin,
-            jsonb_build_object(
-                'firma', firma,
-                'strasse', strasse,
-                'plz', plz,
-                'ort', ort
-            ) AS adresse,
-            website,
-            jsonb_build_object(
-                'anrede', anrede,
-                'vorname', vorname,
-                'nachname', nachname,
-                'email', email,
-                'telefon', telefon
-            ) AS ansprechpartner,
-            jsonb_build_object(
-                'firma', COALESCE(rechnung_firma, ''),
-                'strasse', COALESCE(rechnung_strasse, ''),
-                'plz', COALESCE(rechnung_plz, ''),
-                'ort', COALESCE(rechnung_ort, '')
-            ) AS rechnungsadresse,
-            CAST(teilnehmerzahl AS INTEGER) AS teilnehmerzahl,
-            notizen,
-            confirmed_at
-        FROM angebotsanfrage
-        WHERE id = ${id}
-          AND confirmation_token = ${token}
-        LIMIT 1
-    `;
-    
-    if (existingRows.length > 0 && existingRows[0]?.confirmed_at) {
+    if (existingRow?.confirmedAt) {
+        const data =
+            quoteRequestConfirmedSchema.parse(
+                existingRow,
+            );
 
-        const data = quoteRequestConfirmedSchema.parse(existingRows[0]);
-        
         return {
+            data,
             status: "already-confirmed",
-            data: data,
         };
     }
 
     return {
-        status: "invalid-or-expired"
+        status: "invalid-or-expired",
     };
+}
 
+async function confirmQuoteRequestInDatabase(
+    id: string,
+    token: string,
+): Promise<QuoteRequestDatabaseRow | null> {
+    const [confirmedRow] = await db`
+        UPDATE angebotsanfrage
+        SET confirmed_at = NOW()
+        WHERE id = ${id}
+          AND confirmation_token = ${token}
+          AND confirmed_at IS NULL
+          AND confirmation_expires_at > NOW()
+        RETURNING
+            jsonb_build_object(
+                'id', workshop_id,
+                'titel', workshop_titel
+            ) AS workshop,
+
+            CASE
+                WHEN datum_von IS NOT NULL
+                 AND datum_bis IS NOT NULL
+                THEN jsonb_build_object(
+                    'id', 1,
+                    'datumVon', datum_von,
+                    'datumBis', datum_bis
+                )
+                ELSE NULL
+            END AS termin,
+
+            jsonb_build_object(
+                'firma', firma,
+                'strasse', strasse,
+                'plz', plz,
+                'ort', ort
+            ) AS adresse,
+
+            website AS webseite,
+
+            jsonb_build_object(
+                'anrede', anrede,
+                'vorname', vorname,
+                'nachname', nachname,
+                'email', email,
+                'telefon', telefon
+            ) AS ansprechpartner,
+
+            (
+                NULLIF(TRIM(rechnung_firma), '') IS NOT NULL
+                OR NULLIF(TRIM(rechnung_strasse), '') IS NOT NULL
+                OR NULLIF(TRIM(rechnung_plz), '') IS NOT NULL
+                OR NULLIF(TRIM(rechnung_ort), '') IS NOT NULL
+            ) AS "abweichendeRechnungsadresse",
+
+            CASE
+                WHEN NULLIF(TRIM(rechnung_firma), '') IS NOT NULL
+                    OR NULLIF(TRIM(rechnung_strasse), '') IS NOT NULL
+                    OR NULLIF(TRIM(rechnung_plz), '') IS NOT NULL
+                    OR NULLIF(TRIM(rechnung_ort), '') IS NOT NULL
+                THEN jsonb_build_object(
+                    'firma',
+                        COALESCE(rechnung_firma, ''),
+                    'strasse',
+                        COALESCE(rechnung_strasse, ''),
+                    'plz',
+                        COALESCE(rechnung_plz, ''),
+                    'ort',
+                        COALESCE(rechnung_ort, '')
+                )
+                ELSE NULL
+            END AS rechnungsadresse,
+
+            CAST(
+                teilnehmerzahl AS INTEGER
+            ) AS teilnehmerzahl,
+
+            notizen AS nachricht,
+
+            confirmed_at AS "confirmedAt"
+    `;
+
+    return confirmedRow
+        ? confirmedRow as QuoteRequestDatabaseRow
+        : null;
+}
+
+async function getExistingQuoteRequest(
+    id: string,
+    token: string,
+): Promise<QuoteRequestDatabaseRow | null> {
+    const [existingRow] = await db`
+        SELECT
+            jsonb_build_object(
+                'id', workshop_id,
+                'titel', workshop_titel
+            ) AS workshop,
+
+            CASE
+                WHEN datum_von IS NOT NULL
+                 AND datum_bis IS NOT NULL
+                THEN jsonb_build_object(
+                    'id', 1,
+                    'datumVon', datum_von,
+                    'datumBis', datum_bis
+                )
+                ELSE NULL
+            END AS termin,
+
+            jsonb_build_object(
+                'firma', firma,
+                'strasse', strasse,
+                'plz', plz,
+                'ort', ort
+            ) AS adresse,
+
+            website AS webseite,
+
+            jsonb_build_object(
+                'anrede', anrede,
+                'vorname', vorname,
+                'nachname', nachname,
+                'email', email,
+                'telefon', telefon
+            ) AS ansprechpartner,
+
+            (
+                NULLIF(TRIM(rechnung_firma), '') IS NOT NULL
+                OR NULLIF(TRIM(rechnung_strasse), '') IS NOT NULL
+                OR NULLIF(TRIM(rechnung_plz), '') IS NOT NULL
+                OR NULLIF(TRIM(rechnung_ort), '') IS NOT NULL
+            ) AS "abweichendeRechnungsadresse",
+
+            CASE
+                WHEN NULLIF(TRIM(rechnung_firma), '') IS NOT NULL
+                    OR NULLIF(TRIM(rechnung_strasse), '') IS NOT NULL
+                    OR NULLIF(TRIM(rechnung_plz), '') IS NOT NULL
+                    OR NULLIF(TRIM(rechnung_ort), '') IS NOT NULL
+                THEN jsonb_build_object(
+                    'firma',
+                        COALESCE(rechnung_firma, ''),
+                    'strasse',
+                        COALESCE(rechnung_strasse, ''),
+                    'plz',
+                        COALESCE(rechnung_plz, ''),
+                    'ort',
+                        COALESCE(rechnung_ort, '')
+                )
+                ELSE NULL
+            END AS rechnungsadresse,
+
+            CAST(
+                teilnehmerzahl AS INTEGER
+            ) AS teilnehmerzahl,
+
+            notizen AS nachricht,
+
+            confirmed_at AS "confirmedAt"
+        FROM angebotsanfrage
+        WHERE id = ${id}
+          AND confirmation_token = ${token}
+        LIMIT 1
+    `;
+
+    return existingRow
+        ? existingRow as QuoteRequestDatabaseRow
+        : null;
+}
+
+async function sendConfirmationEmailSafely(
+    data: QuoteRequestConfirmedData,
+): Promise<void> {
+    try {
+        const emailData =
+            sendQuoteRequestEmailSchema.parse(data);
+
+        await sendQuoteRequestConfirmationEmail(
+            emailData,
+        );
+    } catch (error: unknown) {
+        console.error(
+            "Quote request was confirmed, but its confirmation email could not be sent.",
+            error,
+        );
+    }
 }

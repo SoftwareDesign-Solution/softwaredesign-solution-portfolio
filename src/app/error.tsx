@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
+//import { useEffect } from "react";
 
 interface ErrorPageProps {
   error: Error & { digest?: string };
@@ -9,9 +9,12 @@ interface ErrorPageProps {
 }
 
 export default function Error({ error, reset }: ErrorPageProps) {
+
+  /*
   useEffect(() => {
     console.error(error);
   }, [error]);
+  */
 
   return (
     <div className="px-12 pt-30 pb-35 text-center">

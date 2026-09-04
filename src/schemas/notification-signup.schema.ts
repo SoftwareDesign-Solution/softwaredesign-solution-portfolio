@@ -3,61 +3,105 @@ import { z } from "zod";
 import { turnstileSchema } from "./shared/turnstile-schema";
 import { workshopSchema } from "./shared/workshop.schema";
 
+const firstNameSchema = z
+    .string()
+    .trim()
+    .min(1, {
+        message:
+            "Bitte geben Sie Ihren Vornamen ein.",
+    });
 
-// Base schema for notification signup
+const lastNameSchema = z
+    .string()
+    .trim()
+    .min(1, {
+        message:
+            "Bitte geben Sie Ihren Nachnamen ein.",
+    });
+
+const emailSchema = z
+    .string()
+    .trim()
+    .pipe(
+        z.email({
+            message:
+                "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
+        }),
+    );
+
+const expirationDaysSchema = z
+    .number()
+    .int()
+    .positive({
+        message:
+            "Die Anzahl der Tage muss eine positive ganze Zahl sein.",
+    });
+
+const confirmationLinkSchema = z.url({
+    message:
+        "Bitte geben Sie einen gültigen Bestätigungslink ein.",
+});
+
+const unsubscribeLinkSchema = z.url({
+    message:
+        "Bitte geben Sie einen gültigen Abmeldelink ein.",
+});
+
+const notificationSignupFields = {
+    email: emailSchema,
+    nachname: lastNameSchema,
+    vorname: firstNameSchema,
+};
+
+const verificationFields = {
+    turnstile: turnstileSchema,
+};
+
 export const notificationSignupBaseSchema = z.object({
-
-    // Additional fields for the notification signup schema
     workshop: workshopSchema,
-
-    vorname: z.string().trim().min(1, { message: "Bitte geben Sie Ihren Vornamen ein." }),
-    nachname: z.string().trim().min(1, { message: "Bitte geben Sie Ihren Nachnamen ein." }),
-    email: z.email({ message: "Bitte geben Sie eine gültige E-Mail-Adresse ein." }),
-
+    ...notificationSignupFields,
 });
 
-
-// Form data schema for notification signup
-export const notificationSignupFormSchema = notificationSignupBaseSchema.omit({
-    workshop: true
-}).extend({
-    
-    // Turnstile token
-    turnstile: turnstileSchema,
-    
+export const notificationSignupFormSchema = z.object({
+    ...notificationSignupFields,
+    ...verificationFields,
 });
 
-
-// Server Action data schema for notification signup
-export const createNotificationSignupSchema = notificationSignupBaseSchema.extend({
-    turnstile: turnstileSchema,
-});
-
-
-// E-Mail data schema for notification signup
-export const sendNotificationSignupOptInEmailSchema = notificationSignupBaseSchema.extend({
-    
-    // Expiration period
-    expiresInDay: z.number().int().positive({ message: "Die Anzahl der Tage muss eine positive ganze Zahl sein." }),
-    
-    // Confirmation link
-    confirmationLink: z.url({ message: "Bitte geben Sie einen gültigen Bestätigungslink ein." }),
-
-});
-
-export const sendNotificationSignupConfirmedEmailSchema = notificationSignupBaseSchema.extend({
-
-    // Workshop
+export const createNotificationSignupSchema = z.object({
     workshop: workshopSchema,
-
-    // Unsubscribe link
-    unsubscribeLink: z.url({ message: "Bitte geben Sie einen gültigen Abmeldelink ein." }),
-
+    ...notificationSignupFields,
+    ...verificationFields,
 });
 
+export const sendNotificationSignupOptInEmailSchema =
+    notificationSignupBaseSchema.extend({
+        confirmationLink:
+            confirmationLinkSchema,
 
-// TypeScript types for the schemas
-export type NotificationSignupFormData = z.infer<typeof notificationSignupFormSchema>;
-export type CreateNotificationSignupData = z.infer<typeof createNotificationSignupSchema>;
-export type SendNotificationSignupOptInEmailData = z.infer<typeof sendNotificationSignupOptInEmailSchema>;
-export type SendNotificationSignupConfirmedEmailData = z.infer<typeof sendNotificationSignupConfirmedEmailSchema>;
+        expiresInDays:
+            expirationDaysSchema,
+    });
+
+export const sendNotificationSignupConfirmedEmailSchema =
+    notificationSignupBaseSchema.extend({
+        unsubscribeLink:
+            unsubscribeLinkSchema,
+    });
+
+export type NotificationSignupFormData = z.output<
+    typeof notificationSignupFormSchema
+>;
+
+export type CreateNotificationSignupData = z.output<
+    typeof createNotificationSignupSchema
+>;
+
+export type SendNotificationSignupOptInEmailData =
+    z.output<
+        typeof sendNotificationSignupOptInEmailSchema
+    >;
+
+export type SendNotificationSignupConfirmedEmailData =
+    z.output<
+        typeof sendNotificationSignupConfirmedEmailSchema
+    >;

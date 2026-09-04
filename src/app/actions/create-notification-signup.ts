@@ -3,141 +3,251 @@
 import { db } from "@/lib/db";
 import getClientIp from "@/lib/get-client-ip";
 import { verifyTurnstileToken } from "@/lib/turnstile";
-import { CreateNotificationSignupData, createNotificationSignupSchema, sendNotificationSignupOptInEmailSchema } from "@/schemas/notification-signup.schema";
+import {
+    type CreateNotificationSignupData,
+    createNotificationSignupSchema,
+    sendNotificationSignupOptInEmailSchema,
+} from "@/schemas/notification-signup.schema";
 import { sendNotificationSignupOptInEmail } from "@/services/emails/send-notification-signup-optin-email";
 import { generateSecureToken } from "@/utils/generate-secure-token";
 
-export interface CreateNotificationSignupResult {
-    notificationSignupId: string;
-    confirmationEmailSent: boolean;
+const CONFIRMATION_EXPIRATION_DAYS = 3;
+
+interface ActiveWorkshop {
+    id: number;
+    titel: string;
 }
 
-export async function createNotificationSignup(data: CreateNotificationSignupData): Promise<CreateNotificationSignupResult> {
-    
-    // 1. Server-seitige Zod-Validierung — nie nur auf Client-Validierung verlassen,
-    //    da die Server Action theoretisch auch direkt (ohne UI) aufrufbar ist.
-    const validationResult = createNotificationSignupSchema.safeParse(data);
+interface InsertNotificationSignupOptions {
+    confirmationToken: string;
+    ipAddress: string | null;
+    notificationSignupData:
+        CreateNotificationSignupData;
+    unsubscribeToken: string;
+    workshop: ActiveWorkshop;
+}
+
+interface SendOptInEmailOptions {
+    confirmationToken: string;
+    notificationSignupData:
+        CreateNotificationSignupData;
+    notificationSignupId: string;
+    workshop: ActiveWorkshop;
+}
+
+export interface CreateNotificationSignupResult {
+    confirmationEmailSent: boolean;
+    notificationSignupId: string;
+}
+
+export async function createNotificationSignup(
+    data: CreateNotificationSignupData,
+): Promise<CreateNotificationSignupResult> {
+    const validationResult =
+        createNotificationSignupSchema.safeParse(
+            data,
+        );
 
     if (!validationResult.success) {
         console.error(
-            "Ungültige Registrierungsdaten",
-            validationResult.error.flatten()
+            "Invalid notification signup data.",
+            validationResult.error.flatten(),
         );
 
         throw new Error(
-            "Die eingegebenen Registrierungsdaten sind ungültig."
+            "Die eingegebenen Registrierungsdaten sind ungültig.",
         );
     }
 
-    const notificationSignupData = validationResult.data;
+    const notificationSignupData =
+        validationResult.data;
 
-
-    // 2. Turnstile-Verifizierung — IMMER zuerst, vor jedem DB-Zugriff.
     const isHuman = await verifyTurnstileToken(
-        notificationSignupData.turnstile.token
+        notificationSignupData.turnstile.token,
     );
 
     if (!isHuman) {
-        throw new Error("Sicherheitsabfrage fehlgeschlagen. Bitte bestätigen Sie, dass Sie kein Roboter sind.");
-    }
-
-    let ipAddress: string | null = null;
-
-    try {
-        ipAddress = (await getClientIp()) ?? null;
-    } catch (error) {
-        console.error("Fehler beim Ermitteln der Client-IP-Adresse:", error);
-    }
-
-    const confirmationToken = generateSecureToken();
-    const unsubscribeToken = generateSecureToken();
-    
-    /*
-     * Workshop, Termin und Preis anhand der IDs serverseitig laden.
-     * Idealerweise liefert die Abfrage nur aktive und buchbare Termine.
-     */
-    const [workshop] = await db`
-        SELECT
-            w.id AS workshop_id,
-            w.titel AS workshop_titel
-        FROM workshop w
-        WHERE w.id = ${notificationSignupData.workshop.id}
-            AND w.active = TRUE
-        LIMIT 1
-    `;
-
-    if (!workshop) {
         throw new Error(
-            "Der ausgewählte Workshop ist nicht verfügbar."
+            "Die Sicherheitsabfrage ist fehlgeschlagen.",
         );
     }
 
-    let notificationSignupId: string;
+    const workshop = await getActiveWorkshop(
+        notificationSignupData.workshop.id,
+    );
 
-    // 3. DB-Insert + E-Mail-Versand — in try/catch, aber OHNE redirect() darin!
-    //    redirect() wirft intern einen speziellen Error (NEXT_REDIRECT), der sonst
-    //    versehentlich vom catch-Block abgefangen würde.
+    if (!workshop) {
+        throw new Error(
+            "Der ausgewählte Workshop ist nicht verfügbar.",
+        );
+    }
+
+    const ipAddress = await getClientIpSafely();
+    const confirmationToken = generateSecureToken();
+    const unsubscribeToken = generateSecureToken();
+
+    const notificationSignupId =
+        await insertNotificationSignup({
+            confirmationToken,
+            ipAddress,
+            notificationSignupData,
+            unsubscribeToken,
+            workshop,
+        });
+
+    const confirmationEmailSent =
+        await sendOptInEmailSafely({
+            confirmationToken,
+            notificationSignupData,
+            notificationSignupId,
+            workshop,
+        });
+
+    return {
+        confirmationEmailSent,
+        notificationSignupId,
+    };
+}
+
+async function getActiveWorkshop(
+    workshopId: number,
+): Promise<ActiveWorkshop | null> {
+    const [workshop] = await db`
+        SELECT
+            id,
+            titel
+        FROM workshop
+        WHERE id = ${workshopId}
+          AND active = TRUE
+        LIMIT 1
+    `;
+
+    return workshop
+        ? workshop as ActiveWorkshop
+        : null;
+}
+
+async function insertNotificationSignup({
+    confirmationToken,
+    ipAddress,
+    notificationSignupData,
+    unsubscribeToken,
+    workshop,
+}: InsertNotificationSignupOptions): Promise<string> {
     try {
-
         const [notificationSignup] = await db`
             INSERT INTO workshop_benachrichtigung (
-                workshop_id, workshop_titel, vorname, nachname, email, ip_adresse, confirmation_token, confirmation_expires_at, unsubscribe_token
+                workshop_id,
+                workshop_titel,
+                vorname,
+                nachname,
+                email,
+                ip_adresse,
+                confirmation_token,
+                confirmation_expires_at,
+                unsubscribe_token
             )
             VALUES (
-                ${workshop.workshop_id},
-                ${workshop.workshop_titel},
+                ${workshop.id},
+                ${workshop.titel},
                 ${notificationSignupData.vorname},
                 ${notificationSignupData.nachname},
                 ${notificationSignupData.email},
-                ${ipAddress}, -- TODO: IP-Adresse aus Request-Context ermitteln,
+                ${ipAddress},
                 ${confirmationToken},
-                now() + interval '3 DAY',
+                NOW() + (
+                    ${CONFIRMATION_EXPIRATION_DAYS}
+                    * INTERVAL '1 DAY'
+                ),
                 ${unsubscribeToken}
             )
-            RETURNING id;
+            RETURNING id
         `;
 
-        notificationSignupId = String(notificationSignup.id);
-       
-    } catch (error) {
-        throw new Error("Fehler beim Erstellen der Benachrichtigungsanmeldung: " + (error as Error).message);
+        if (!notificationSignup) {
+            throw new Error(
+                "No notification signup row was returned.",
+            );
+        }
+
+        return String(notificationSignup.id);
+    } catch (error: unknown) {
+        console.error(
+            "Failed to insert notification signup.",
+            error,
+        );
+
+        throw new Error(
+            "Die Benachrichtigungsanmeldung konnte nicht gespeichert werden.",
+        );
     }
+}
 
-
-    /*
-     * Ab hier ist die Benachrichtigung definitiv gespeichert.
-     *
-     * Ein E-Mail-Fehler darf deshalb nicht mehr dazu führen,
-     * dass der Client die gesamte Buchung als fehlgeschlagen
-     * behandelt.
-     */
-
+async function sendOptInEmailSafely({
+    confirmationToken,
+    notificationSignupData,
+    notificationSignupId,
+    workshop,
+}: SendOptInEmailOptions): Promise<boolean> {
     try {
+        const baseUrl = getBaseUrl();
 
-        // E-Mail-Daten validieren und ggf. transformieren
-        const emailData = sendNotificationSignupOptInEmailSchema.parse({ 
-            ...notificationSignupData, 
-            expiresInDay: 3,
-            confirmationLink: `http://localhost:3000/notifications/${notificationSignupId}/confirm?token=${confirmationToken}`,
-        });
+        const emailData =
+            sendNotificationSignupOptInEmailSchema.parse({
+                ...notificationSignupData,
 
-        // Benachrichtigung mit Bestätigungslink per E-Mail versenden
-        await sendNotificationSignupOptInEmail(emailData);
+                confirmationLink:
+                    `${baseUrl}/notifications/` +
+                    `${notificationSignupId}/confirm` +
+                    `?token=${confirmationToken}`,
 
-        return {
-            notificationSignupId,
-            confirmationEmailSent: true,
-        };
+                expiresInDays:
+                    CONFIRMATION_EXPIRATION_DAYS,
 
-    } catch (error) {
+                workshop: {
+                    id: workshop.id,
+                    titel: workshop.titel,
+                },
+            });
 
-        console.error(`Fehler beim Versenden der Bestätigungs-E-Mail: ${(error as Error).message}`);
-        
-        return {
-            notificationSignupId,
-            confirmationEmailSent: false,
-        };
+        await sendNotificationSignupOptInEmail(
+            emailData,
+        );
 
+        return true;
+    } catch (error: unknown) {
+        console.error(
+            "Notification signup was created, but its opt-in email could not be sent.",
+            error,
+        );
+
+        return false;
+    }
+}
+
+function getBaseUrl(): string {
+    const baseUrl =
+        process.env.NEXT_PUBLIC_BASE_URL;
+
+    if (!baseUrl) {
+        throw new Error(
+            "NEXT_PUBLIC_BASE_URL is not configured.",
+        );
     }
 
+    return baseUrl.replace(/\/$/, "");
+}
+
+async function getClientIpSafely():
+    Promise<string | null> {
+    try {
+        return (await getClientIp()) ?? null;
+    } catch (error: unknown) {
+        console.error(
+            "Failed to determine client IP address.",
+            error,
+        );
+
+        return null;
+    }
 }

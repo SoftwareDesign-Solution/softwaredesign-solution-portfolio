@@ -125,7 +125,7 @@ describe('Notification-Signup', () => {
 
                     cy.visit(`/notifications/${signup!.id}/confirm?token=${token}`);
 
-                    cy.contains('h1', 'Anmeldung bestätigen').should('be.visible');
+                    cy.contains('h1', 'Anmeldung bestätigt').should('be.visible');
                     cy.contains(person.vorname).should('be.visible');
                     cy.contains(person.nachname).should('be.visible');
                     cy.contains(person.email).should('be.visible');

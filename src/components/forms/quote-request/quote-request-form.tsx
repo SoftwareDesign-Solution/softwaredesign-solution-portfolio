@@ -1,4 +1,4 @@
- /* eslint-disable react-hooks/refs */
+/* eslint-disable react-hooks/refs */
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,8 +21,8 @@ import ParticipantStepperSection from "../shared/sections/participant-stepper-se
 import SummarySection from "../shared/sections/summary-section";
 import TurnstileWidgetSection from "../shared/sections/turnstile-widget-section";
 import SubmitFooter from "../shared/submit-footer";
+import { getQuoteRequestFormDefaultValues } from "./quote-request-form-default-values";
 import { quoteRequestErrorMessage, quoteRequestSuccessMessage } from "./quote-request-form-status-messages";
-
 
 export default function QuoteRequestForm({ 
     workshop, 
@@ -31,94 +31,89 @@ export default function QuoteRequestForm({
     onError 
 }: WorkshopFormProps) {
 
-    const hasTermine = Boolean(workshop.termine && workshop.termine.length > 0);
+    const hasAppointments = Boolean(workshop.termine && workshop.termine.length > 0);
 
     const methods = useForm<QuoteRequestFormData>({
-        //resolver: zodResolver(quoteRequestFormSchema),
-        resolver: zodResolver(createQuoteRequestFormSchema(hasTermine)),
-        defaultValues: {
-            termin: null,
-            teilnehmerzahl: 1,
-            adresse: {
-                firma: "",
-                strasse: "",
-                plz: "",
-                ort: "",
-            },
-            webseite: "",
-            ansprechpartner: {
-                anrede: "Keine Angabe",
-                vorname: "",
-                nachname: "",
-                email: "",
-                telefon: "",
-            },
-            abweichendeRechnungsadresse: false,
-            nachricht: "",
-            turnstile: {
-                token: "",
-            },
-        },
+        defaultValues: getQuoteRequestFormDefaultValues(),
+        resolver: zodResolver(
+            createQuoteRequestFormSchema(
+                hasAppointments,
+            ),
+        ),
     });
 
-    const { handleSubmit } = methods;
+    const { handleSubmit, setValue } = methods;
 
     // Datenschutzerklärung & Sicherheitsabfrage (Turnstile)
     const turnstileRef = useRef<TurnstileRef>(null);
 
     const resetTurnstile = () => {
         turnstileRef.current?.reset();
-        methods.setValue("turnstile.token", "");
+        setValue("turnstile.token", "");
     };
 
-    const onSubmit: SubmitHandler<QuoteRequestFormData> = async (data) => {
-        
-        const quoteRequestData: CreateQuoteRequestData = {
-            workshop: {
-                id: workshop.id,
-                titel: workshop.titel,
-            },
-            ...data,
-        };
+    function handleQuoteRequestError(
+        data: CreateQuoteRequestData,
+    ): void {
+        onError(
+            quoteRequestErrorMessage({
+                titel: data.workshop.titel,
+                vorname: data.ansprechpartner.vorname,
+            }),
+        );
+
+        resetTurnstile();
+    }
+
+    const handleQuoteRequestSubmit: SubmitHandler<
+        QuoteRequestFormData
+    > = async (formData) => {
+        const quoteRequestData =
+            createQuoteRequestData(workshop, formData);
 
         try {
+            const result = await createQuoteRequest(
+                quoteRequestData,
+            );
 
-            const result = await createQuoteRequest(quoteRequestData);
-
-            if (result) {
-
-                onSuccess(quoteRequestSuccessMessage({
-                    vorname: quoteRequestData.ansprechpartner.vorname,
-                    email: quoteRequestData.ansprechpartner.email,
-                    titel: quoteRequestData.workshop.titel,
-                    datumVon: quoteRequestData.termin?.datumVon ?? null,
-                    datumBis: quoteRequestData.termin?.datumBis ?? null,
-                }));
-
-                onClose?.();
-
+            if (!result) {
+                handleQuoteRequestError(quoteRequestData);
+                return;
             }
 
-        } catch (error) {
-            
-            console.error("Fehler beim Absenden der Angebotsanfrage:", error);
+            onSuccess(
+                quoteRequestSuccessMessage({
+                    datumBis:
+                        quoteRequestData.termin?.datumBis ??
+                        null,
+                    datumVon:
+                        quoteRequestData.termin?.datumVon ??
+                        null,
+                    email:
+                        quoteRequestData.ansprechpartner.email,
+                    titel: quoteRequestData.workshop.titel,
+                    vorname:
+                        quoteRequestData.ansprechpartner
+                            .vorname,
+                }),
+            );
 
-            onError(quoteRequestErrorMessage({
-                vorname: quoteRequestData.ansprechpartner.vorname,
-                titel: quoteRequestData.workshop.titel,
-            }));
+            onClose?.();
+        } catch (error: unknown) {
+            console.error(
+                "Unexpected error while creating quote request.",
+                error,
+            );
 
-            resetTurnstile();
-
+            handleQuoteRequestError(quoteRequestData);
         }
-
     };
 
     return (
         <>
             <FormProvider {...methods}>
 
-                <form onSubmit={handleSubmit(onSubmit)} noValidate>
+                <form onSubmit={handleSubmit(handleQuoteRequestSubmit)} noValidate>
 
                     <div className="px-9 pb-9 pt-7">
 
@@ -141,7 +136,7 @@ export default function QuoteRequestForm({
                         <ExtrasSection num="06" />
                         
                         {/* Zusammenfassung */}
-                        <SummarySection title="Voraussichtliche Angebotssumme" workshop={workshop} noTerminLabel={hasTermine ? undefined : "Nach Absprache"} />
+                        <SummarySection title="Voraussichtliche Angebotssumme" workshop={workshop} noTerminLabel={hasAppointments ? undefined : "Nach Absprache"} />
 
                         {/* Consent */}
                         <ConsentSection>
@@ -169,3 +164,16 @@ export default function QuoteRequestForm({
         </>
     );
 };
+
+function createQuoteRequestData(
+    workshop: WorkshopFormProps["workshop"],
+    formData: QuoteRequestFormData,
+): CreateQuoteRequestData {
+    return {
+        ...formData,
+        workshop: {
+            id: workshop.id,
+            titel: workshop.titel,
+        },
+    };
+}

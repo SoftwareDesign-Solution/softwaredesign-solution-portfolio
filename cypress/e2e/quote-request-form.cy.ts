@@ -79,7 +79,7 @@ describe('Quote-Request-Formular', () => {
                     // 1. Bestätigungslink öffnen → bestätigt die Angebotsanfrage
                     cy.visit(`/offer-requests/${quoteRequest.id}/confirm?token=${token}`);
 
-                    cy.contains('h1', 'Anfrage bestätigen').should('be.visible');
+                    cy.contains('h1', 'Anfrage bestätigt').should('be.visible');
                     cy.contains(address.firma).should('be.visible');
                     cy.contains(`${person.vorname} ${person.nachname}`).should('be.visible');
                     cy.contains(person.email).should('be.visible');
@@ -87,7 +87,7 @@ describe('Quote-Request-Formular', () => {
 
                     // 2. Denselben Link erneut öffnen → "bereits bestätigt", kein Fehler
                     cy.visit(`/offer-requests/${quoteRequest.id}/confirm?token=${token}`);
-                    cy.contains('h1', 'Anfrage bestätigen').should('be.visible');
+                    cy.contains('h1', 'Anfrage bestätigt').should('be.visible');
                     cy.contains('Anfrage bestätigt').should('be.visible');
 
                 });
@@ -100,11 +100,43 @@ describe('Quote-Request-Formular', () => {
             cy.visit('/offer-requests/00000000-0000-0000-0000-000000000000/confirm?token=ungueltiges-token');
 
             cy.contains('h1', 'Nicht gefunden').should('be.visible');
-            cy.contains('Diese Angebots-Anfrage wurde nicht gefunden oder der Link ist ungültig.').should(
+            cy.contains('Diese Angebotsanfrage wurde nicht gefunden oder der Link ist ungültig.').should(
                 'be.visible'
             );
         });
 
+    });
+
+});
+
+describe('Quote-Request-Formular — Workshop ohne Termine', () => {
+
+    beforeEach(() => {
+        cy.viewport(1280, 1400);
+        cy.visit('/workshops/cypress-testing');
+        cy.get('aside').contains('button', 'Angebot anfordern').click();
+        cy.get('[role="dialog"]').should('be.visible');
+    });
+
+    it('zeigt einen Hinweis statt der Termin-Auswahl und verlangt keinen Termin', () => {
+        cy.get('[role="dialog"]').within(() => {
+            cy.contains('Aktuell sind keine Termine geplant').should('be.visible');
+            cy.get('input[type="radio"]').should('not.exist');
+
+            const address = createTestAddress();
+            const person = createTestContactPerson();
+
+            cy.fillAddressFields('adresse', address);
+            cy.fillContactPerson('ansprechpartner', person);
+
+            cy.acceptConsent();
+            cy.completeTurnstile();
+
+            cy.contains('button[type="submit"]', 'Angebot anfordern').should('be.enabled').click();
+        });
+
+        cy.contains('Angebotsanfrage eingegangen', { timeout: 20000 }).should('be.visible');
+        cy.contains('Bitte wählen Sie einen Termin aus').should('not.exist');
     });
 
 });

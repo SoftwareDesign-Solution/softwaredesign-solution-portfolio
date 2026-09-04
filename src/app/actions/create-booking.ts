@@ -1,78 +1,141 @@
 "use server";
 
-import { getClientIp } from "nextjs-turnstile";
-
 import { db } from "@/lib/db";
+import getClientIp from "@/lib/get-client-ip";
 import { verifyTurnstileToken } from "@/lib/turnstile";
-import { CreateBookingData, createBookingSchema, sendBookingConfirmationEmailSchema } from "@/schemas/booking.schema";
+import {
+    type CreateBookingData,
+    createBookingSchema,
+    sendBookingConfirmationEmailSchema,
+} from "@/schemas/booking.schema";
 import { sendBookingConfirmationEmail } from "@/services/emails/send-booking-confirmation-email";
 
+interface BookableWorkshopAppointment {
+    datumBis: string | Date;
+    datumVon: string | Date;
+    preis: number | string | null;
+    terminId: number;
+    workshopId: number;
+    workshopTitel: string;
+}
+
+interface InsertBookingOptions {
+    bookingData: CreateBookingData;
+    ipAddress: string | null;
+    totalPrice: number;
+    workshopAppointment:
+        BookableWorkshopAppointment;
+}
+
+interface SendBookingEmailOptions {
+    bookingData: CreateBookingData;
+    bookingId: string;
+    totalPrice: number;
+    workshopAppointment:
+        BookableWorkshopAppointment;
+}
+
+interface SendBookingEmailResult {
+    emailId?: string;
+    sent: boolean;
+}
 
 export interface CreateBookingResult {
     bookingId: string;
-    emailId?: string;
     confirmationEmailSent: boolean;
-    error?: string;
+    emailId?: string;
 }
 
-export async function createBooking(data: CreateBookingData): Promise<CreateBookingResult> {
-    
-    // 1. Server-seitige Zod-Validierung — nie nur auf Client-Validierung verlassen,
-    //    da die Server Action theoretisch auch direkt (ohne UI) aufrufbar ist
-    const validationResult = createBookingSchema.safeParse(data);
+export async function createBooking(
+    data: CreateBookingData,
+): Promise<CreateBookingResult> {
+    const validationResult =
+        createBookingSchema.safeParse(data);
 
     if (!validationResult.success) {
         console.error(
-            "Ungültige Buchungsdaten",
-            validationResult.error.flatten()
+            "Invalid booking data.",
+            validationResult.error.flatten(),
         );
 
         throw new Error(
-            "Die eingegebenen Buchungsdaten sind ungültig."
+            "Die eingegebenen Buchungsdaten sind ungültig.",
         );
     }
 
     const bookingData = validationResult.data;
 
-
-    // 2. Turnstile-Verifizierung — IMMER zuerst, vor jedem DB-Zugriff.
     const isHuman = await verifyTurnstileToken(
-        bookingData.turnstile.token
+        bookingData.turnstile.token,
     );
 
     if (!isHuman) {
         throw new Error(
-            "Sicherheitsabfrage fehlgeschlagen. Bitte versuchen Sie es erneut."
+            "Die Sicherheitsabfrage ist fehlgeschlagen.",
         );
     }
 
+    validateParticipantCount(bookingData);
 
-    // Optional: Konsistenz zwischen angegebener Anzahl und
-    // tatsächlich erfassten Teilnehmern prüfen.
+    const workshopAppointment =
+        await getBookableWorkshopAppointment(
+            bookingData.workshop.id,
+            bookingData.termin.id,
+        );
+
+    if (!workshopAppointment) {
+        throw new Error(
+            "Der ausgewählte Workshop oder Termin ist nicht verfügbar.",
+        );
+    }
+
+    const totalPrice = calculateTotalPrice(
+        workshopAppointment.preis,
+        bookingData.teilnehmerzahl,
+    );
+
+    const ipAddress = await getClientIpSafely();
+
+    const bookingId = await insertBooking({
+        bookingData,
+        ipAddress,
+        totalPrice,
+        workshopAppointment,
+    });
+
+    const emailResult =
+        await sendBookingEmailSafely({
+            bookingData,
+            bookingId,
+            totalPrice,
+            workshopAppointment,
+        });
+
+    return {
+        bookingId,
+        confirmationEmailSent: emailResult.sent,
+        emailId: emailResult.emailId,
+    };
+}
+
+function validateParticipantCount(
+    bookingData: CreateBookingData,
+): void {
     if (
         bookingData.teilnehmer.length !==
         bookingData.teilnehmerzahl
     ) {
         throw new Error(
-            "Die Teilnehmerzahl stimmt nicht mit den erfassten Teilnehmern überein."
+            "Die Teilnehmerzahl stimmt nicht mit den erfassten Teilnehmern überein.",
         );
     }
+}
 
-
-    let ipAddress: string | null = null;
-
-    try {
-        ipAddress = (await getClientIp()) ?? null;
-    } catch (error) {
-        console.error("Fehler beim Ermitteln der Client-IP-Adresse:", error);
-    }
-    
-    
-    /*
-     * Workshop, Termin und Preis anhand der IDs serverseitig laden.
-     * Idealerweise liefert die Abfrage nur aktive und buchbare Termine.
-     */
-    const [workshopTermin] = await db`
+async function getBookableWorkshopAppointment(
+    workshopId: number,
+    appointmentId: number,
+): Promise<BookableWorkshopAppointment | null> {
+    const [workshopAppointment] = await db`
         SELECT
             w.id AS "workshopId",
             w.titel AS "workshopTitel",
@@ -81,34 +144,51 @@ export async function createBooking(data: CreateBookingData): Promise<CreateBook
             t.datum_von AS "datumVon",
             t.datum_bis AS "datumBis"
         FROM workshop w
-        INNER JOIN termin t ON t.workshop_id = w.id
-        WHERE w.id = ${bookingData.workshop.id}
-            AND t.id = ${bookingData.termin?.id}
-            AND w.active = TRUE
-            AND t.active = TRUE
-            AND t.status <> 'ausgebucht'
+        INNER JOIN termin t
+            ON t.workshop_id = w.id
+        WHERE w.id = ${workshopId}
+          AND t.id = ${appointmentId}
+          AND w.active = TRUE
+          AND t.active = TRUE
+          AND t.status <> 'ausgebucht'
         LIMIT 1
     `;
 
-    console.log("Workshop und Termin geladen:", workshopTermin);
+    if (!workshopAppointment) {
+        return null;
+    }
 
-    if (!workshopTermin) {
+    return workshopAppointment as
+        BookableWorkshopAppointment;
+}
+
+function calculateTotalPrice(
+    price: number | string | null,
+    participantCount: number,
+): number {
+    const numericPrice = Number(price);
+
+    if (!Number.isFinite(numericPrice)) {
         throw new Error(
-            "Der ausgewählte Workshop oder Termin ist nicht verfügbar."
+            "Für den Workshop ist kein gültiger Preis hinterlegt.",
         );
     }
 
-    const gesamtbetrag = 
-        Number(workshopTermin.preis) * Number(bookingData.teilnehmerzahl);
+    return numericPrice * participantCount;
+}
 
-        
-    let bookingId: string;
+async function insertBooking({
+    bookingData,
+    ipAddress,
+    totalPrice,
+    workshopAppointment,
+}: InsertBookingOptions): Promise<string> {
+    const billingAddress =
+        bookingData.abweichendeRechnungsadresse
+            ? bookingData.rechnungsadresse
+            : null;
 
-    // 3. DB-Insert + E-Mail-Versand — in try/catch, aber OHNE redirect() darin!
-    //    redirect() wirft intern einen speziellen Error (NEXT_REDIRECT), der sonst
-    //    versehentlich vom catch-Block abgefangen würde.
     try {
-        
         const [booking] = await db`
             INSERT INTO buchung (
                 workshop_id,
@@ -138,11 +218,11 @@ export async function createBooking(data: CreateBookingData): Promise<CreateBook
                 ip_adresse
             )
             VALUES (
-                ${workshopTermin.workshopId},
-                ${workshopTermin.workshopTitel},
-                ${workshopTermin.terminId},
-                ${workshopTermin.datumVon},
-                ${workshopTermin.datumBis},
+                ${workshopAppointment.workshopId},
+                ${workshopAppointment.workshopTitel},
+                ${workshopAppointment.terminId},
+                ${workshopAppointment.datumVon},
+                ${workshopAppointment.datumBis},
                 ${bookingData.teilnehmerzahl},
                 ${bookingData.adresse.firma},
                 ${bookingData.adresse.strasse},
@@ -153,68 +233,118 @@ export async function createBooking(data: CreateBookingData): Promise<CreateBook
                 ${bookingData.ansprechpartner.vorname},
                 ${bookingData.ansprechpartner.nachname},
                 ${bookingData.ansprechpartner.email},
-                ${bookingData.ansprechpartner.telefon ?? null},
-                ${JSON.stringify(bookingData.teilnehmer)},
-                ${bookingData.rechnungsadresse?.firma ?? null},
-                ${bookingData.rechnungsadresse?.strasse ?? null},
-                ${bookingData.rechnungsadresse?.plz ?? null},
-                ${bookingData.rechnungsadresse?.ort ?? null},
+                ${
+                    bookingData.ansprechpartner
+                        .telefon ?? null
+                },
+                ${
+                    JSON.stringify(
+                        bookingData.teilnehmer,
+                    )
+                },
+                ${billingAddress?.firma ?? null},
+                ${billingAddress?.strasse ?? null},
+                ${billingAddress?.plz ?? null},
+                ${billingAddress?.ort ?? null},
                 ${bookingData.nachricht ?? null},
-                ${workshopTermin.preis},
-                ${gesamtbetrag},
-                ${ipAddress ?? null} -- TODO: IP-Adresse aus Request-Context ermitteln
+                ${workshopAppointment.preis},
+                ${totalPrice},
+                ${ipAddress}
             )
-            RETURNING id;
+            RETURNING id
         `;
 
-        bookingId = String(booking.id);
-        
-    } catch (error) {
-        throw new Error("Fehler beim Erstellen der Buchung: " + (error as Error).message);
+        if (!booking) {
+            throw new Error(
+                "No booking row was returned.",
+            );
+        }
+
+        return String(booking.id);
+    } catch (error: unknown) {
+        console.error(
+            "Failed to insert booking.",
+            error,
+        );
+
+        throw new Error(
+            "Die Buchung konnte nicht gespeichert werden.",
+        );
     }
+}
 
-
-    /*
-     * Ab hier ist die Buchung definitiv gespeichert.
-     *
-     * Ein E-Mail-Fehler darf deshalb nicht mehr dazu führen,
-     * dass der Client die gesamte Buchung als fehlgeschlagen
-     * behandelt.
-     */
+async function sendBookingEmailSafely({
+    bookingData,
+    totalPrice,
+    workshopAppointment,
+}: SendBookingEmailOptions): Promise<SendBookingEmailResult> {
     try {
+        const emailData =
+            sendBookingConfirmationEmailSchema.parse({
+                ...bookingData,
 
-        const emailData = sendBookingConfirmationEmailSchema.parse({
-            ...bookingData,
-            workshop: {
-                id: workshopTermin.workshopId,
-                titel: workshopTermin.workshopTitel,
-            },
-            termin: {
-                id: workshopTermin.terminId,
-                datumVon: String(workshopTermin.datumVon),
-                datumBis: String(workshopTermin.datumBis),
-            },
-            salutation: `Hallo ${bookingData.ansprechpartner.vorname}`,
-            gesamtpreis: gesamtbetrag
-        })
+                gesamtpreis: totalPrice,
 
-        // Buchungsbestätigung per E-Mail versenden
-        const emailId = await sendBookingConfirmationEmail(emailData);
+                salutation:
+                    createBookingSalutation(
+                        bookingData.ansprechpartner
+                            .vorname,
+                    ),
+
+                termin: {
+                    datumBis: String(
+                        workshopAppointment.datumBis,
+                    ),
+                    datumVon: String(
+                        workshopAppointment.datumVon,
+                    ),
+                    id: workshopAppointment.terminId,
+                },
+
+                workshop: {
+                    id: workshopAppointment.workshopId,
+                    titel:
+                        workshopAppointment.workshopTitel,
+                },
+            });
+
+        const emailId =
+            await sendBookingConfirmationEmail(
+                emailData,
+            );
 
         return {
-            bookingId,
             emailId,
-            confirmationEmailSent: true,
+            sent: true,
         };
+    } catch (error: unknown) {
+        console.error(
+            "Booking was created, but its confirmation email could not be sent.",
+            error,
+        );
 
-    } catch (error) {
-        
         return {
-            bookingId,
-            error: "Fehler beim Versenden der Bestätigungs-E-Mail: " + (error as Error).message,
-            confirmationEmailSent: false,
+            sent: false,
         };
-
     }
+}
 
-};
+function createBookingSalutation(
+    firstName: string,
+): string {
+    return `Hallo ${firstName}`;
+}
+
+async function getClientIpSafely():
+    Promise<string | null> {
+    try {
+        return (await getClientIp()) ?? null;
+    } catch (error: unknown) {
+        console.error(
+            "Failed to determine client IP address.",
+            error,
+        );
+
+        return null;
+    }
+}

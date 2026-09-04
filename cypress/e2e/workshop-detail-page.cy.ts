@@ -73,13 +73,16 @@ describe('WorkshopDetailPage', () => {
             cy.visit(`/workshops/cypress-testing`);
         });
 
-        it('deaktiviert Buchungs-/Angebots-Buttons in der Sidebar, wenn keine Termine vorhanden sind', () => {
+        it('deaktiviert "Platz reservieren", erlaubt aber "Angebot anfordern" ohne Termine', () => {
             cy.get('h1').should('contain.text', 'Cypress Testing Grundkurs');
 
             cy.get('aside').within(() => {
                 cy.contains('Aktuell keine Termine geplant.').should('be.visible');
                 cy.contains('button', 'Platz reservieren').should('be.disabled');
-                cy.contains('button', 'Angebot anfordern').should('be.disabled');
+                // "Angebot anfordern" bleibt bewusst nutzbar: ein unverbindliches
+                // Angebot kann auch ohne festen Termin angefragt werden, der
+                // Termin wird dann im Formular gemeinsam abgestimmt.
+                cy.contains('button', 'Angebot anfordern').should('be.enabled');
             });
         });
 

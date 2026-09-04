@@ -43,7 +43,7 @@ export default function NotificationSignupOptInEmail(props: SendNotificationSign
             </Section>
 
             <Section className="px-8 pb-4 text-center">
-                <Text className="m-0 font-sans text-[12.5px] text-muted">{props.expiresInDay} Tage gültig · ohne Klick keine Benachrichtigungen</Text>
+                <Text className="m-0 font-sans text-[12.5px] text-muted">{props.expiresInDays} Tage gültig · ohne Klick keine Benachrichtigungen</Text>
             </Section>
 
             <Section className="px-8 pb-2">
@@ -71,7 +71,7 @@ export default function NotificationSignupOptInEmail(props: SendNotificationSign
                     title="Gültigkeitsdauer." 
                     value={
                         <>
-                            Der Link verfällt automatisch nach <strong>{props.expiresInDay} Tagen</strong>. Bestätigst du bis dahin
+                            Der Link verfällt automatisch nach <strong>{props.expiresInDays} Tagen</strong>. Bestätigst du bis dahin
                             nicht, wird die Anmeldung ohne weitere Aktion verworfen.
                         </>
                     }

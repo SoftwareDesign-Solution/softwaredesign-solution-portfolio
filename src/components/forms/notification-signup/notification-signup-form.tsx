@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/refs */
+ /* eslint-disable react-hooks/refs */
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,6 +15,7 @@ import ErrorMessage from "../shared/error-message";
 import Label from "../shared/label";
 import TurnstileWidgetSection from "../shared/sections/turnstile-widget-section";
 import TextField from "../shared/text-field";
+import { getNotificationSignupFormDefaultValues } from "./notification-signup-form-default-values";
 import { notificationSignupErrorMessage, notificationSignupSuccessMessage } from "./notification-signup-form-status-messages";
 
 
@@ -26,72 +27,81 @@ export default function NotificationSignupForm({
 }: WorkshopFormProps) {
 
     const methods = useForm<NotificationSignupFormData>({
+        defaultValues: getNotificationSignupFormDefaultValues(),
         resolver: zodResolver(notificationSignupFormSchema),
-        defaultValues: {
-            vorname: "",
-            nachname: "",
-            email: "",
-            turnstile: {
-                token: "",
-            },
-        },
     });
-
-    const { register, handleSubmit, formState: { errors, isSubmitting } } = methods;
 
     // Datenschutzerklärung & Sicherheitsabfrage (Turnstile)
     const turnstileRef = useRef<TurnstileRef>(null);
 
+    const { 
+        formState: { 
+            errors, 
+            isSubmitting 
+        }, 
+        handleSubmit, 
+        register, 
+        setValue 
+    } = methods;
+
+
     const resetTurnstile = () => {
         turnstileRef.current?.reset();
-        methods.setValue("turnstile.token", "");
+        setValue("turnstile.token", "");
     };
     
-    const onSubmit: SubmitHandler<NotificationSignupFormData> = async (data) => {
+    function handleNotificationSignupError(
+        data: CreateNotificationSignupData,
+    ): void {
+        onError(notificationSignupErrorMessage({
+            vorname: data.vorname,
+        }));
+
+        resetTurnstile();
+    }
+
+    const handleNotificationSignupSubmit: SubmitHandler<NotificationSignupFormData> = async (data) => {
         
-        const notificationSignupData: CreateNotificationSignupData = {
-            workshop: {
-                id: workshop.id,
-                titel: workshop.titel,
-            },
-            ...data,
-        };
+        const notificationSignupData: CreateNotificationSignupData = createNotificationSignupData(workshop, data);
         
         try {
             
             const result = await createNotificationSignup(notificationSignupData);
 
-            if (result.notificationSignupId) {
-                const shortReference = result.notificationSignupId.split("-")[0];
-
-                onSuccess(notificationSignupSuccessMessage({
-                    workshopTitle: workshop.titel,
-                    vorname: notificationSignupData.vorname,
-                    email: notificationSignupData.email,
-                    ref: String(shortReference),
-                    status: "pending",
-                }))
-
-                onClose?.();
-
+            if (!result.notificationSignupId) {
+                handleNotificationSignupError(notificationSignupData);
+                return;
             }
+
+            const notificationSignupReference =
+                getShortNotificationSignupReference(result.notificationSignupId);
+
+            onSuccess(notificationSignupSuccessMessage({
+                workshopTitle: workshop.titel,
+                vorname: notificationSignupData.vorname,
+                email: notificationSignupData.email,
+                ref: notificationSignupReference,
+                status: "pending",
+            }))
+
+            onClose?.();
 
         } catch (error) {
 
-            console.error("Fehler beim Absenden der Benachrichtigungsanmeldung:", error);
-            
-            onError(notificationSignupErrorMessage({
-                vorname: notificationSignupData.vorname,
-            }));
+            console.error(
+                "Unexpected error while creating notification signup.",
+                error,
+            );
 
-            resetTurnstile();
+            handleNotificationSignupError(notificationSignupData);
+
         }
 
     };
 
     return (
         <FormProvider {...methods}>
-            <form onSubmit={handleSubmit(onSubmit)} noValidate>
+            <form onSubmit={handleSubmit(handleNotificationSignupSubmit)} noValidate>
 
                 <div className="pt-7 px-7 pb-7">
 
@@ -99,7 +109,7 @@ export default function NotificationSignupForm({
                         Trag dich kurz ein und wir informieren dich per E-Mail, sobald ein neuer Termin zum Workshop &quot;{workshop.titel}&quot; verfügbar ist.
                     </p>
 
-                    <div className="mb-4 grid grid-cols-2 gap-x-3.5">
+                    <div className="mb-4 grid grid-cols-1 gap-3.5 sm:grid-cols-2">
 
                         <div>
                             <Label>Vorname</Label>
@@ -139,7 +149,7 @@ export default function NotificationSignupForm({
 
                     <div className="mt-5.5 flex justify-end gap-2.5">
 
-                        <Button type="button" variant="secondary" size="xs" onClick={() => onClose?.()}>Abbrechen</Button>
+                        <Button type="button" variant="secondary" size="xs" onClick={onClose}>Abbrechen</Button>
                         
                         <Button type="submit" variant="primary" size="sm" isSubmitting={isSubmitting}>
                             Bestätigen
@@ -158,3 +168,22 @@ export default function NotificationSignupForm({
         </FormProvider>
     );
 };
+
+function createNotificationSignupData(
+    workshop: WorkshopFormProps["workshop"],
+    formData: NotificationSignupFormData,
+): CreateNotificationSignupData {
+    return {
+        ...formData,
+        workshop: {
+            id: workshop.id,
+            titel: workshop.titel,
+        },
+    };
+}
+
+function getShortNotificationSignupReference(
+    notificationSignupId: string,
+): string {
+    return notificationSignupId.split("-")[0];
+}

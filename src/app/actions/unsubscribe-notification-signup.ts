@@ -4,95 +4,154 @@ import { z } from "zod";
 
 import { db } from "@/lib/db";
 
-
 const inputSchema = z.object({
     id: z.uuid(),
-    token: z.string().min(1)
+    token: z
+        .string()
+        .trim()
+        .min(1),
 });
 
-type InputData = z.infer<typeof inputSchema>;
+const unsubscribeDataSchema = z.object({
+    email: z
+        .string()
+        .trim()
+        .pipe(z.email()),
 
-interface NotificationSignupConfirmationData {
-    workshopTitel: string;
-    vorname: string;
-    nachname: string;
-    email: string;
-}
+    nachname: z
+        .string()
+        .trim()
+        .min(1),
 
-export type ConfirmationResult =
+    vorname: z
+        .string()
+        .trim()
+        .min(1),
+
+    workshopTitel: z
+        .string()
+        .trim()
+        .min(1),
+});
+
+type UnsubscribeNotificationSignupInput =
+    z.output<typeof inputSchema>;
+
+type NotificationSignupUnsubscribeData =
+    z.output<typeof unsubscribeDataSchema>;
+
+type NotificationSignupDatabaseRow =
+    Record<string, unknown>;
+
+export type UnsubscribeNotificationSignupResult =
     | {
-          status: "unsubscribed";
-          data: NotificationSignupConfirmationData | null;
-      }
-    | {
-          status: "already-unsubscribed";
-          data: NotificationSignupConfirmationData | null;
+          data: NotificationSignupUnsubscribeData;
+          status:
+              | "unsubscribed"
+              | "already-unsubscribed";
       }
     | {
           status: "invalid-or-expired";
       };
 
-export async function unsubscribeNotificationSignup(props: InputData): Promise<ConfirmationResult | null> {
-
-    const validationResult = inputSchema.safeParse(props);
+export async function unsubscribeNotificationSignup(
+    input: UnsubscribeNotificationSignupInput,
+): Promise<UnsubscribeNotificationSignupResult> {
+    const validationResult =
+        inputSchema.safeParse(input);
 
     if (!validationResult.success) {
         return {
-            status: "invalid-or-expired"
+            status: "invalid-or-expired",
         };
     }
 
     const { id, token } = validationResult.data;
 
-    // Noch nicht bestätigte und nicht abgelaufene Angebotsanfragen bestätigen
-    const confirmedRows = await db`
+    const unsubscribedRow =
+        await unsubscribeNotificationSignupInDatabase(
+            id,
+            token,
+        );
+
+    if (unsubscribedRow) {
+        const data =
+            unsubscribeDataSchema.parse(
+                unsubscribedRow,
+            );
+
+        return {
+            data,
+            status: "unsubscribed",
+        };
+    }
+
+    const existingRow =
+        await getExistingNotificationSignup(
+            id,
+            token,
+        );
+
+    if (existingRow?.unsubscribedAt) {
+        const data =
+            unsubscribeDataSchema.parse(
+                existingRow,
+            );
+
+        return {
+            data,
+            status: "already-unsubscribed",
+        };
+    }
+
+    return {
+        status: "invalid-or-expired",
+    };
+}
+
+async function unsubscribeNotificationSignupInDatabase(
+    id: string,
+    token: string,
+): Promise<NotificationSignupDatabaseRow | null> {
+    const [unsubscribedRow] = await db`
         UPDATE workshop_benachrichtigung
         SET unsubscribed_at = NOW()
         WHERE id = ${id}
-            AND unsubscribe_token = ${token}
-            AND unsubscribed_at IS NULL
-        RETURNING 
-            id,
+          AND unsubscribe_token = ${token}
+          AND unsubscribed_at IS NULL
+        RETURNING
             workshop_titel AS "workshopTitel",
             vorname,
             nachname,
             email,
-            unsubscribe_token AS "unsubscribeToken"
+            unsubscribed_at AS "unsubscribedAt"
     `;
 
-    if (confirmedRows.length > 0) {
+    return unsubscribedRow
+        ? unsubscribedRow as
+            NotificationSignupDatabaseRow
+        : null;
+}
 
-        return {
-            status: "unsubscribed",
-            data: confirmedRows[0] as NotificationSignupConfirmationData
-        };
-
-    }
-
-    // Prüfen, ob der Link zu einer bereits bestätigten Anfrage gehört
-    const existingRows = await db`
+async function getExistingNotificationSignup(
+    id: string,
+    token: string,
+): Promise<NotificationSignupDatabaseRow | null> {
+    const [existingRow] = await db`
         SELECT
-            id,
             workshop_titel AS "workshopTitel",
             vorname,
             nachname,
             email,
-            unsubscribed_at
+            unsubscribed_at AS "unsubscribedAt"
         FROM workshop_benachrichtigung
         WHERE id = ${id}
           AND unsubscribe_token = ${token}
         LIMIT 1
     `;
 
-    if (existingRows.length > 0 && existingRows[0]?.unsubscribed_at) {
-        return {
-            status: "already-unsubscribed",
-            data: existingRows[0] as NotificationSignupConfirmationData,
-        };
-    }
-
-    return {
-        status: "invalid-or-expired"
-    };
-
-};
+    return existingRow
+        ? existingRow as
+            NotificationSignupDatabaseRow
+        : null;
+}

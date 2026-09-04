@@ -1,4 +1,4 @@
- /* eslint-disable react-hooks/refs */
+/* eslint-disable react-hooks/refs */
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,7 +8,7 @@ import { useRef } from "react";
 import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
 
 import { createBooking } from "@/app/actions/create-booking";
-import { type BookingFormData, bookingFormSchema, type CreateBookingData } from "@/schemas/booking.schema";
+import { type BookingFormData, BookingFormInput, bookingFormSchema, type CreateBookingData } from "@/schemas/booking.schema";
 import { WorkshopFormProps } from "@/types/workshop-props";
 
 import AppointmentSelectionSection from "../shared/sections/appointment-selection-section";
@@ -22,8 +22,8 @@ import ParticipantsSection from "../shared/sections/participants-section";
 import SummarySection from "../shared/sections/summary-section";
 import TurnstileWidgetSection from "../shared/sections/turnstile-widget-section";
 import SubmitFooter from "../shared/submit-footer";
+import { getBookingFormDefaultValues } from "./booking-form-default-values";
 import { bookingErrorMessage, bookingSuccessMessage } from "./booking-form-status-messages";
-
 
 export default function BookingForm({ 
     workshop, 
@@ -32,96 +32,75 @@ export default function BookingForm({
     onError 
 }: WorkshopFormProps) {
 
-    const methods = useForm<BookingFormData>({
+    const methods = useForm<
+        BookingFormInput,
+        null,
+        BookingFormData
+    >({
+        defaultValues: getBookingFormDefaultValues(),
         resolver: zodResolver(bookingFormSchema),
-        defaultValues: {
-            termin: null,
-            teilnehmerzahl: 1,
-            adresse: {
-                firma: "",
-                strasse: "",
-                plz: "",
-                ort: "",
-            },
-            webseite: "",
-            ansprechpartner: {
-                anrede: "Keine Angabe",
-                vorname: "",
-                nachname: "",
-                email: "",
-                telefon: "",
-            },
-            teilnehmer: [
-                {
-                    vorname: "",
-                    nachname: "",
-                    email: "",
-                },
-            ],
-            abweichendeRechnungsadresse: false,
-            gutscheinCode: "",
-            nachricht: "",
-            turnstile: {
-                token: "",
-            },
-        },
     });
 
-    const { handleSubmit } = methods;
+    const { handleSubmit, setValue } = methods;
 
     // Datenschutzerklärung & Sicherheitsabfrage (Turnstile)
     const turnstileRef = useRef<TurnstileRef>(null);
 
     const resetTurnstile = () => {
         turnstileRef.current?.reset();
-        methods.setValue("turnstile.token", "");
+        setValue("turnstile.token", "");
     };
 
-    const onSubmit: SubmitHandler<BookingFormData> = async (data) => {
-        
-        const bookingData: CreateBookingData = {
-            workshop: {
-                id: workshop.id,
+    function handleBookingError(
+        bookingData: CreateBookingData,
+    ): void {
+        onError(
+            bookingErrorMessage({
                 titel: workshop.titel,
-            },
-            ...data,
-        };
+                vorname:
+                    bookingData.ansprechpartner.vorname,
+            }),
+        );
+
+        resetTurnstile();
+    }
+
+    const handleBookingSubmit: SubmitHandler<BookingFormData> = async (formData) => {
+        
+        const bookingData = createBookingData(
+            workshop,
+            formData,
+        );
 
         try {
             
             const result = await createBooking(bookingData);
 
-            if (result.bookingId) {
-
-                console.log(result.error)
-
-                //alert(result.error ?? "Buchung erfolgreich! Ihre Buchungsreferenz lautet: " + result.bookingId);
-
-                const shortReference = result.bookingId.split("-")[0];
-
-                onSuccess(bookingSuccessMessage({
-                    titel: workshop.titel,
-                    ref: String(shortReference),
-                    vorname: bookingData.ansprechpartner.vorname,
-                    email: bookingData.ansprechpartner.email,
-                    teilnehmerzahl: bookingData.teilnehmer.length,
-                    datumVon: String(bookingData.termin?.datumVon),
-                    datumBis: String(bookingData.termin?.datumBis),
-                }));
-
-                onClose?.();
-
+            if (!result.bookingId) {
+                handleBookingError(bookingData);
+                return;
             }
+
+            const bookingReference =
+                getShortBookingReference(result.bookingId);
+
+            onSuccess(bookingSuccessMessage({
+                titel: workshop.titel,
+                ref: bookingReference,
+                vorname: bookingData.ansprechpartner.vorname,
+                email: bookingData.ansprechpartner.email,
+                teilnehmerzahl: bookingData.teilnehmer.length,
+                datumVon: String(bookingData.termin?.datumVon),
+                datumBis: String(bookingData.termin?.datumBis),
+            }));
+
+            onClose?.();
+            
         } catch (error) {
             
             console.error("Fehler beim Absenden der Buchung:", error);
 
-            onError(bookingErrorMessage({
-                titel: workshop.titel,
-                vorname: bookingData.ansprechpartner.vorname,
-            }));
-
-            resetTurnstile();
+            handleBookingError(bookingData);
 
         }
        
@@ -130,7 +109,7 @@ export default function BookingForm({
     return (
         <>
             <FormProvider {...methods}>
-                <form onSubmit={handleSubmit(onSubmit)} className="px-9 pb-9" noValidate>
+                <form onSubmit={handleSubmit(handleBookingSubmit)} className="px-9 pb-9" noValidate>
 
                     {/* 01 Termin */}
                     <AppointmentSelectionSection num="01" termine={workshop.termine} />
@@ -186,4 +165,23 @@ export default function BookingForm({
             </FormProvider>
         </>
     );
+}
+
+function createBookingData(
+    workshop: WorkshopFormProps["workshop"],
+    formData: BookingFormData,
+): CreateBookingData {
+    return {
+        ...formData,
+        workshop: {
+            id: workshop.id,
+            titel: workshop.titel,
+        },
+    };
+}
+
+function getShortBookingReference(
+    bookingId: string,
+): string {
+    return bookingId.split("-")[0];
 }

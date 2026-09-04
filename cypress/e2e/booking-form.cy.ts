@@ -75,7 +75,17 @@ describe('Booking-Formular', () => {
                 cy.acceptConsent();
                 cy.contains('button[type="submit"]', 'Verbindlich buchen').click();
 
-                cy.get('[name="rechnungsadresse.firma"]').parent().should('contain.text', 'Bitte geben Sie den Firmennamen ein.');
+                //cy.get('[name="rechnungsadresse.firma"]').parent().should('contain.text', 'Bitte geben Sie den Firmennamen ein.');
+
+                cy.get(
+                    '[name="rechnungsadresse.firma"]',
+                )
+                    .closest(".col-span-3")
+                    .find('[role="alert"]')
+                    .should(
+                        "have.text",
+                        "Bitte geben Sie den Firmennamen ein.",
+                    );
             });
         });
 

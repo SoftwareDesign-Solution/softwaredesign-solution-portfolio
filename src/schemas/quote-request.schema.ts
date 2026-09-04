@@ -1,26 +1,168 @@
 import { z } from "zod";
 
-import { addressSchema, optionalAddressSchema } from "./shared/address.schema";
+import {
+    addressSchema,
+    optionalAddressSchema,
+} from "./shared/address.schema";
 import { contactPersonSchema } from "./shared/contact-person.schema";
 import { terminSchema } from "./shared/termin.schema";
 import { turnstileSchema } from "./shared/turnstile-schema";
 import { workshopSchema } from "./shared/workshop.schema";
 
-
 type BillingAddressData = {
-    abweichendeRechnungsadresse?: boolean;
+    abweichendeRechnungsadresse: boolean;
     rechnungsadresse?: unknown;
 };
 
+const consentSchema = z
+    .boolean()
+    .refine((value) => value, {
+        message:
+            "Bitte bestätigen Sie die Datenschutzerklärung.",
+    });
+
+const participantCountSchema = z
+    .number()
+    .int("Die Teilnehmeranzahl muss eine ganze Zahl sein.")
+    .positive(
+        "Bitte geben Sie die Teilnehmeranzahl an.",
+    );
+
+const salutationSchema = z
+    .string()
+    .trim()
+    .min(1, {
+        message: "Bitte geben Sie eine Anrede ein.",
+    });
+
+const confirmationLinkSchema = z.url({
+    message:
+        "Bitte geben Sie einen gültigen Bestätigungslink ein.",
+});
+
+const quoteRequestFields = {
+    abweichendeRechnungsadresse: z.boolean(),
+
+    adresse: addressSchema,
+
+    ansprechpartner: contactPersonSchema,
+
+    nachricht: z
+        .string()
+        .trim()
+        .optional(),
+
+    rechnungsadresse: optionalAddressSchema
+        .partial()
+        .optional(),
+
+    teilnehmerzahl: participantCountSchema,
+
+    termin: terminSchema.nullable(),
+
+    webseite: z
+        .string()
+        .trim()
+        .optional(),
+};
+
+const verificationFields = {
+    consent: consentSchema,
+    turnstile: turnstileSchema,
+};
+
+export const quoteRequestBaseSchema = z.object({
+    workshop: workshopSchema,
+    ...quoteRequestFields,
+});
+
+export const quoteRequestConfirmedSchema =
+    quoteRequestBaseSchema.extend({
+        rechnungsadresse: optionalAddressSchema
+            .partial()
+            .nullable()
+            .optional(),
+    });
+
+export function createQuoteRequestFormSchema(
+    hasTermine: boolean,
+) {
+    return z
+        .object({
+            ...quoteRequestFields,
+            ...verificationFields,
+        })
+        .superRefine((data, ctx) => {
+            validateBillingAddress(data, ctx);
+            validateAppointmentSelection(
+                data,
+                ctx,
+                hasTermine,
+            );
+        });
+}
+
+export const createQuoteRequestSchema = z
+    .object({
+        workshop: workshopSchema,
+        ...quoteRequestFields,
+        ...verificationFields,
+    })
+    .superRefine(validateBillingAddress);
+
+export const sendQuoteRequestOptInEmailSchema =
+    quoteRequestBaseSchema
+        .omit({
+            nachricht: true,
+            webseite: true,
+        })
+        .extend({
+            confirmationLink:
+                confirmationLinkSchema,
+
+            salutation:
+                salutationSchema,
+        });
+
+export const sendQuoteRequestEmailSchema =
+    quoteRequestConfirmedSchema;
+
+export type QuoteRequestFormInput = z.input<
+    ReturnType<typeof createQuoteRequestFormSchema>
+>;
+
+export type QuoteRequestFormData = z.output<
+    ReturnType<typeof createQuoteRequestFormSchema>
+>;
+
+export type CreateQuoteRequestData = z.output<
+    typeof createQuoteRequestSchema
+>;
+
+export type SendQuoteRequestOptInEmailData =
+    z.output<
+        typeof sendQuoteRequestOptInEmailSchema
+    >;
+
+export type SendQuoteRequestEmailData = z.output<
+    typeof sendQuoteRequestEmailSchema
+>;
+
+export type QuoteRequestConfirmedData = z.output<
+    typeof quoteRequestConfirmedSchema
+>;
+
 function validateBillingAddress(
     data: BillingAddressData,
-    ctx: z.RefinementCtx
-) {
+    ctx: z.RefinementCtx,
+): void {
     if (!data.abweichendeRechnungsadresse) {
         return;
     }
 
-    const result = addressSchema.safeParse(data.rechnungsadresse);
+    const result = addressSchema.safeParse(
+        data.rechnungsadresse,
+    );
 
     if (result.success) {
         return;
@@ -29,141 +171,28 @@ function validateBillingAddress(
     for (const issue of result.error.issues) {
         ctx.addIssue({
             ...issue,
-            path: ["rechnungsadresse", ...issue.path],
+            path: [
+                "rechnungsadresse",
+                ...issue.path,
+            ],
         });
     }
 }
 
+function validateAppointmentSelection(
+    data: {
+        termin: z.output<typeof terminSchema> | null;
+    },
+    ctx: z.RefinementCtx,
+    hasTermine: boolean,
+): void {
+    if (!hasTermine || data.termin !== null) {
+        return;
+    }
 
-// Base schema for quote request
-export const quoteRequestBaseSchema = z.object({
-
-    // Workshop
-    workshop: workshopSchema,
-
-    /*
-    // Termin
-    termin: terminSchema
-        .nullable()
-        .refine((termin): boolean => termin !== null, "Bitte wählen Sie einen Termin aus"),
-    */
-
-    termin: terminSchema.nullable(),
-
-    // Teilnehmeranzahl
-    teilnehmerzahl: z.number().min(1, "Bitte geben Sie die Teilnehmeranzahl an"),
-
-    // Adresse
-    adresse: addressSchema,
-
-    // Webseite
-    webseite: z.string().trim().optional(),
-
-    // Ansprechpartner
-    ansprechpartner: contactPersonSchema,
-
-    // Rechnungsadresse
-    abweichendeRechnungsadresse: z.boolean().optional(),
-    rechnungsadresse: optionalAddressSchema.partial().optional(),
-
-    // Weiteres
-    nachricht: z.string().trim().optional(),
-
-});
-
-
-export const quoteRequestConfirmedSchema = quoteRequestBaseSchema;
-
-/*
-// Form data schema for quote request
-export const quoteRequestFormSchema = quoteRequestBaseSchema
-    .omit({
-        workshop: true
-    }).extend({
-
-        // Consent
-        consent: z.literal(true, { message: "Bitte bestätigen Sie die Datenschutzerklärung." }),
-
-        // Turnstile token
-        turnstile: turnstileSchema,
-
-    })
-    .superRefine(validateBillingAddress);
-*/
-
-// Form data schema for quote request
-//
-// `hasTermine` steuert, ob ein Termin verpflichtend ausgewählt werden muss:
-// Ist der Workshop aktuell ohne Termine, kann das Angebot auch ohne
-// Termin-Auswahl angefordert werden (Termin wird dann später abgestimmt).
-// Sobald Termine verfügbar sind, bleibt die Auswahl Pflicht.
-export function createQuoteRequestFormSchema(hasTermine: boolean) {
-    return quoteRequestBaseSchema
-        .omit({
-            workshop: true
-        }).extend({
-
-            // Consent
-            consent: z.literal(true, { message: "Bitte bestätigen Sie die Datenschutzerklärung." }),
-
-            // Turnstile token
-            turnstile: turnstileSchema,
-
-        })
-        .superRefine((data, ctx) => {
-
-            validateBillingAddress(data, ctx);
-
-            if (hasTermine && data.termin === null) {
-                ctx.addIssue({
-                    code: "custom",
-                    path: ["termin"],
-                    message: "Bitte wählen Sie einen Termin aus",
-                });
-            }
-
-        });
+    ctx.addIssue({
+        code: "custom",
+        message: "Bitte wählen Sie einen Termin aus.",
+        path: ["termin"],
+    });
 }
-
-// Standard-Export für Typinferenz und Stellen ohne Kenntnis der Termin-Verfügbarkeit
-// (Struktur ist in beiden Fällen identisch, nur die Pflicht-Prüfung unterscheidet sich zur Laufzeit).
-export const quoteRequestFormSchema = createQuoteRequestFormSchema(true);
-
-
-// Server Action data schema for quote request
-export const createQuoteRequestSchema = quoteRequestBaseSchema
-    .extend({
-
-        // Consent
-        consent: z.literal(true, { message: "Bitte bestätigen Sie die Datenschutzerklärung." }),
-
-        // Turnstile token
-        turnstile: turnstileSchema,
-
-    })
-    .superRefine(validateBillingAddress);
-
-
-// E-Mail data schema for quote request
-export const sendQuoteRequestOptInEmailSchema = quoteRequestBaseSchema.omit({
-    webseite: true,
-    nachricht: true,
-}).extend({
-
-    // Anrede
-    salutation: z.string().trim().min(1, { message: "Bitte geben Sie eine Anrede ein." }),
-
-    // Bestätigungslink
-    confirmationLink: z.url({ message: "Bitte geben Sie einen gültigen Bestätigungslink ein." }),
-
-});
-
-export const sendQuoteRequestEmailSchema = quoteRequestBaseSchema;
-
-
-// TypeScript types for the schemas
-export type QuoteRequestFormData = z.infer<typeof quoteRequestFormSchema>;
-export type CreateQuoteRequestData = z.infer<typeof createQuoteRequestSchema>;
-export type SendQuoteRequestOptInEmailData = z.infer<typeof sendQuoteRequestOptInEmailSchema>;
-export type SendQuoteRequestEmailData = z.infer<typeof sendQuoteRequestEmailSchema>;
-export type QuoteRequestConfirmedData = z.infer<typeof quoteRequestConfirmedSchema>;

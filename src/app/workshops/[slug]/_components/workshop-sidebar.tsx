@@ -9,10 +9,10 @@ import { formatPrice } from "@/utils/format-price";
 
 export default function WorkshopSidebar(workshop: Workshop) {
 
+    const { openBookingModal, openNotificationSignupModal, openQuoteRequestModal } = useModal();
+
     const nettoPrice = Number(workshop.preis);
     const bruttoPrice = nettoPrice * 1.19; // Assuming a 19% VAT rate
-
-    const { openBookingModal, openNotificationSignupModal, openQuoteRequestModal } = useModal();
 
     return (
         <aside className="self-start sticky top-24">

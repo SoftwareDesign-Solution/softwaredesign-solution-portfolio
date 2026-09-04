@@ -8,6 +8,8 @@ import WorkshopDetails from "./_components/workshop-details";
 import WorkshopHeader from "./_components/workshop-header";
 import WorkshopSidebar from "./_components/workshop-sidebar";
 
+export const dynamic = "force-dynamic";
+
 interface WorkshopDetailsPageProps {
     params: Promise<{
         slug: string;

@@ -4,53 +4,90 @@ import { addressSchema } from "./shared/address.schema";
 import { contactPersonSchema } from "./shared/contact-person.schema";
 import { turnstileSchema } from "./shared/turnstile-schema";
 
+const MAX_MESSAGE_LENGTH = 4_000;
+const MIN_MESSAGE_LENGTH = 20;
 
-// Base schema for contact request
-const contactRequestBaseSchema = z.object({
+const websiteSchema = z
+    .string()
+    .trim()
+    .optional();
 
-    // Unternehmensdaten
+const messageSchema = z
+    .string()
+    .trim()
+    .min(
+        MIN_MESSAGE_LENGTH,
+        `Die Beschreibung muss mindestens ${MIN_MESSAGE_LENGTH} Zeichen enthalten.`,
+    )
+    .max(
+        MAX_MESSAGE_LENGTH,
+        `Die Beschreibung darf maximal ${MAX_MESSAGE_LENGTH} Zeichen lang sein.`,
+    );
+
+const sourceSchema = z
+    .string()
+    .trim()
+    .optional();
+
+const dataProcessingConsentSchema = z
+    .boolean()
+    .refine((value) => value, {
+        message:
+            "Bitte stimmen Sie der Verarbeitung Ihrer Daten zu.",
+    });
+
+const contactRequestFields = {
     adresse: addressSchema,
-    webseite: z.string().optional(),
-    bereitsKunde: z.boolean().optional(),
 
-    // Persönliche Daten
-    ansprechpartner: contactPersonSchema,
+    ansprechpartner:
+        contactPersonSchema,
 
-    // Beschreibung
-    nachricht: z.string().min(1, "Bitte geben Sie eine Beschreibung an.").max(4000, "Die Beschreibung darf maximal 4000 Zeichen lang sein."),
+    bereitsKunde:
+        z.boolean(),
 
-    source: z.string().optional(),
+    nachricht:
+        messageSchema,
 
+    source:
+        sourceSchema,
+
+    webseite:
+        websiteSchema,
+};
+
+const verificationFields = {
+    acceptDataProcessing:
+        dataProcessingConsentSchema,
+
+    turnstile:
+        turnstileSchema,
+};
+
+const contactRequestBaseSchema = z.object({
+    ...contactRequestFields,
 });
 
-
-// Form data schema for contact request
-export const contactRequestFormSchema = contactRequestBaseSchema.extend({
-
-    acceptDataProcessing: z.boolean().refine((value) => value === true, "Bitte stimmen Sie der Verarbeitung Ihrer Daten zu."),
-
-    // Turnstile token
-    turnstile: turnstileSchema,
-
+export const contactRequestFormSchema = z.object({
+    ...contactRequestFields,
+    ...verificationFields,
 });
 
-
-// Server Action data schema for contact request
-export const sendContactRequestSchema = contactRequestBaseSchema.extend({
-
-    acceptDataProcessing: z.boolean().refine((value) => value === true, "Bitte stimmen Sie der Verarbeitung Ihrer Daten zu."),
-
-    // Turnstile token
-    turnstile: turnstileSchema,
-
+export const sendContactRequestSchema = z.object({
+    ...contactRequestFields,
+    ...verificationFields,
 });
 
+export const sendContactRequestEmailSchema =
+    contactRequestBaseSchema;
 
-// E-Mail data schema for contact request
-export const sendContactRequestEmailSchema = contactRequestBaseSchema;
+export type ContactRequestFormData = z.output<
+    typeof contactRequestFormSchema
+>;
 
+export type SendContactRequestData = z.output<
+    typeof sendContactRequestSchema
+>;
 
-// TypeScript types for the schemas
-export type ContactRequestFormData = z.infer<typeof contactRequestFormSchema>;
-export type SendContactRequestData = z.infer<typeof sendContactRequestSchema>;
-export type SendContactRequestEmailData = z.infer<typeof sendContactRequestEmailSchema>;
+export type SendContactRequestEmailData = z.output<
+    typeof sendContactRequestEmailSchema
+>;
