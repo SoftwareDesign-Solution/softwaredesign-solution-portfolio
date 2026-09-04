@@ -1,11 +1,20 @@
+/**
+ * @file schwerpunkte-section.tsx
+ * @description "Schwerpunkte"-Sektion der Startseite: Kachel-Übersicht der fachlichen Schwerpunkte.
+ * @module app/_components/sections/schwerpunkte-section
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import SectionHeader from "../section-header";
 
+/** Ein fachlicher Schwerpunkt (Titel, Beschreibung, Liste zugehöriger Skills). */
 type FocusArea = {
   title: string;
   description: string;
   skills: string[];
 }
 
+// Statische Liste der fachlichen Schwerpunkte; keine DB-/API-Anbindung nötig, da redaktioneller Inhalt
 const FOCUS_AREAS: FocusArea[] = [
   {
     title: ".NET-Entwicklung",
@@ -33,6 +42,11 @@ const FOCUS_AREAS: FocusArea[] = [
   },
 ];
 
+/**
+ * "Schwerpunkte"-Sektion der Startseite: Kachel-Übersicht der fachlichen Schwerpunkte aus {@link FOCUS_AREAS}.
+ *
+ * @returns Die Schwerpunkte-Sektion
+ */
 export default function SchwerpunkteSection() {
     return (
         <section id="schwerpunkte" className="scroll-mt-18 px-6 py-16 md:px-12 md:py-28">

@@ -1,3 +1,10 @@
+/**
+ * @file workshop-card.tsx
+ * @description Karte für einen einzelnen Workshop in der Workshop-Übersicht der Startseite.
+ * @module app/_components/sections/workshop-card/workshop-card
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import Link from "next/link";
 
 import { type Workshop } from "@/types/workshop";
@@ -7,12 +14,23 @@ import { formatPrice } from "@/utils/format-price";
 import WorkshopCardActions from "./workshop-card-actions";
 import WorkshopCardAppointments from "./workshop-card-appointments";
 
+/** Props für {@link WorkshopCard}. */
 interface WorkshopCardProps {
     workshop: Workshop;
+    /** 1-basierte Position der Karte in der Liste, für die "01 / 06"-Anzeige. */
     position?: number;
+    /** Gesamtanzahl der angezeigten Workshops, für die "01 / 06"-Anzeige. */
     total?: number;
 }
 
+/**
+ * Karte für einen einzelnen Workshop in der Workshop-Übersicht: zeigt Kurzinfos,
+ * die nächsten Termine und Buttons für Benachrichtigung/Angebotsanfrage. Die
+ * gesamte Karte ist per Overlay-Link klickbar und führt zur Detailseite.
+ *
+ * @param props - Siehe {@link WorkshopCardProps}
+ * @returns Die Workshop-Karte
+ */
 export default function WorkshopCard({
     workshop,
     position,
@@ -120,10 +138,17 @@ export default function WorkshopCard({
     );
 }
 
+/** Props für {@link WorkshopBadge}. */
 interface WorkshopBadgeProps {
     children: React.ReactNode;
 }
 
+/**
+ * Kleines, dezentes Info-Badge im Kartenkopf (z.B. Dauer, Sprache).
+ *
+ * @param props - Siehe {@link WorkshopBadgeProps}
+ * @returns Das Badge
+ */
 function WorkshopBadge({
     children,
 }: WorkshopBadgeProps) {

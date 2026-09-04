@@ -1,3 +1,16 @@
+/**
+ * @file text-field.tsx
+ * @description Einheitliches Text-Eingabefeld für Formulare.
+ * @module components/forms/shared/text-field
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
+/**
+ * Einheitliches Text-Eingabefeld für Formulare.
+ *
+ * @param props - Native `<input>`-Attribute plus `className`
+ * @returns Das Eingabefeld
+ */
 export default function TextField({ className, ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
     return (
         <input

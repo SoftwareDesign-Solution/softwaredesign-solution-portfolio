@@ -1,3 +1,14 @@
+/**
+ * @file create-quote-request.ts
+ * @description Server Action zum Anlegen einer unverbindlichen Angebotsanfrage.
+ * Validiert und verarbeitet die vom Angebots-Formular ({@link QuoteRequestForm})
+ * übermittelten Daten serverseitig, bevor sie in der Datenbank gespeichert und die
+ * Double-Opt-In-E-Mail versendet wird. Anders als bei der Buchung ist ein Termin
+ * hier nur Pflicht, wenn der Workshop überhaupt Termine anbietet.
+ * @module app/actions/create-quote-request
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 "use server";
 
 import { db } from "@/lib/db";
@@ -11,8 +22,13 @@ import {
 import { sendQuoteRequestOptInEmail } from "@/services/emails/send-quote-request-optin-email";
 import { generateSecureToken } from "@/utils/generate-secure-token";
 
-const CONFIRMATION_EXPIRATION_DAYS = 3;
+// Gültigkeitsdauer des Bestätigungslinks in der Opt-In-E-Mail
+//const CONFIRMATION_EXPIRATION_DAYS = 3;
 
+/**
+ * Projektion von Workshop + optionalem Termin. `terminId`/`datumVon`/`datumBis`
+ * sind `null`, wenn die Anfrage ohne festen Termin gestellt wurde.
+ */
 interface WorkshopAppointmentData {
     datumBis: string | Date | null;
     datumVon: string | Date | null;
@@ -22,6 +38,7 @@ interface WorkshopAppointmentData {
     workshopTitel: string;
 }
 
+/** Parameter für {@link insertQuoteRequest}. */
 interface InsertQuoteRequestOptions {
     confirmationToken: string;
     ipAddress: string | null;
@@ -31,6 +48,7 @@ interface InsertQuoteRequestOptions {
         WorkshopAppointmentData;
 }
 
+/** Parameter für {@link sendQuoteRequestEmailSafely}. */
 interface SendQuoteRequestEmailOptions {
     confirmationToken: string;
     quoteRequestData: CreateQuoteRequestData;
@@ -39,20 +57,44 @@ interface SendQuoteRequestEmailOptions {
         WorkshopAppointmentData;
 }
 
+/** Rückgabe von {@link sendQuoteRequestEmailSafely}. */
 interface SendQuoteRequestEmailResult {
     emailId?: string;
     sent: boolean;
 }
 
+/** Ergebnis von {@link createQuoteRequest}. */
 export interface CreateQuoteRequestResult {
+    /** Ob die Opt-In-E-Mail erfolgreich versendet werden konnte. */
     confirmationEmailSent: boolean;
+    /** Resend-ID der versendeten E-Mail, falls erfolgreich. */
     emailId?: string;
+    /** ID der angelegten Angebotsanfrage. */
     quoteRequestId: string;
 }
 
+/**
+ * Server Action für das Angebotsanfrage-Formular: validiert die Eingaben, prüft
+ * Turnstile, lädt Workshop/Termin serverseitig neu (Preis/Verfügbarkeit dürfen
+ * nicht vom Client kommen), speichert die Anfrage mit Bestätigungs-Token und
+ * versendet die Double-Opt-In-E-Mail.
+ *
+ * @param data - Die vom Client übermittelten und gegen {@link createQuoteRequestSchema}
+ *               zu validierenden Anfragedaten (Workshop, optional Termin, Teilnehmerzahl,
+ *               Adressen, Turnstile-Token)
+ * @returns Ein {@link CreateQuoteRequestResult} mit der angelegten `quoteRequestId`
+ *          sowie dem Status des E-Mail-Versands
+ * @throws Error bei ungültigen Eingaben, fehlgeschlagener Turnstile-Prüfung,
+ *         fehlender Terminauswahl trotz verfügbarer Termine, nicht verfügbarem
+ *         Workshop/Termin, einem Fehler beim Speichern in der DB oder beim
+ *         Versand der Opt-In-E-Mail
+ */
 export async function createQuoteRequest(
     data: CreateQuoteRequestData,
 ): Promise<CreateQuoteRequestResult> {
+
+    // Server-seitige Zod-Validierung — nie nur auf Client-Validierung verlassen,
+    //    da die Server Action theoretisch auch direkt (ohne UI) aufrufbar ist
     const validationResult =
         createQuoteRequestSchema.safeParse(data);
 
@@ -70,6 +112,7 @@ export async function createQuoteRequest(
     const quoteRequestData =
         validationResult.data;
 
+    // Bot-/Spam-Schutz: ohne gültiges Turnstile-Token keine Verarbeitung
     const isHuman = await verifyTurnstileToken(
         quoteRequestData.turnstile.token,
     );
@@ -129,6 +172,14 @@ export async function createQuoteRequest(
     };
 }
 
+/**
+ * Erzwingt serverseitig eine Terminauswahl, aber nur wenn der Workshop
+ * tatsächlich buchbare Termine hat — spiegelt die clientseitige Prüfung aus
+ * {@link createQuoteRequestFormSchema}, da diese nicht erneut ausgewertet wird.
+ *
+ * @param quoteRequestData - Die validierten Anfragedaten
+ * @throws Error, falls Termine verfügbar sind, aber keiner ausgewählt wurde
+ */
 async function validateAppointmentRequirement(
     quoteRequestData: CreateQuoteRequestData,
 ): Promise<void> {
@@ -157,6 +208,14 @@ async function validateAppointmentRequirement(
     }
 }
 
+/**
+ * Lädt Workshop (und, falls ausgewählt, Termin) frisch aus der DB und prüft
+ * dabei direkt die Verfügbarkeit. Ohne Terminauswahl wird nur der Workshop
+ * geladen (Termin-Felder bleiben `null`).
+ *
+ * @param quoteRequestData - Die validierten Anfragedaten (Workshop, ggf. Termin)
+ * @returns Die kombinierten Workshop-/Termin-Daten, oder `null` falls nicht verfügbar
+ */
 async function getWorkshopAppointment(
     quoteRequestData: CreateQuoteRequestData,
 ): Promise<WorkshopAppointmentData | null> {
@@ -211,6 +270,15 @@ async function getWorkshopAppointment(
         : null;
 }
 
+/**
+ * Berechnet den Gesamtpreis serverseitig aus dem tatsächlichen DB-Preis —
+ * niemals einen vom Client übermittelten Preis vertrauen.
+ *
+ * @param price - Der Preis pro Teilnehmer aus der DB (netto)
+ * @param participantCount - Anzahl der Teilnehmer
+ * @returns Der berechnete Gesamtpreis
+ * @throws Error, falls für den Workshop kein gültiger numerischer Preis hinterlegt ist
+ */
 function calculateTotalPrice(
     price: number | string | null,
     participantCount: number,
@@ -226,6 +294,14 @@ function calculateTotalPrice(
     return numericPrice * participantCount;
 }
 
+/**
+ * Speichert die Angebotsanfrage inkl. optionaler Rechnungsadresse und
+ * Bestätigungs-Token in der DB.
+ *
+ * @param options - Siehe {@link InsertQuoteRequestOptions}
+ * @returns Die ID der angelegten Angebotsanfrage
+ * @throws Error, falls das Speichern fehlschlägt
+ */
 async function insertQuoteRequest({
     confirmationToken,
     ipAddress,
@@ -233,6 +309,8 @@ async function insertQuoteRequest({
     totalPrice,
     workshopAppointment,
 }: InsertQuoteRequestOptions): Promise<string> {
+
+    // Rechnungsadresse nur übernehmen, wenn sie explizit als abweichend markiert wurde
     const billingAddress =
         quoteRequestData.abweichendeRechnungsadresse
             ? quoteRequestData.rechnungsadresse
@@ -331,6 +409,13 @@ async function insertQuoteRequest({
     }
 }
 
+/**
+ * Versendet die Double-Opt-In-E-Mail und fängt dabei jeden Fehler ab, statt ihn
+ * zu werfen — die Anfrage selbst wurde bereits gespeichert und soll dadurch nicht scheitern.
+ *
+ * @param options - Siehe {@link SendQuoteRequestEmailOptions}
+ * @returns Ein {@link SendQuoteRequestEmailResult} mit Erfolgsstatus und ggf. der Resend-ID
+ */
 async function sendQuoteRequestEmailSafely({
     confirmationToken,
     quoteRequestData,
@@ -338,6 +423,8 @@ async function sendQuoteRequestEmailSafely({
     workshopAppointment,
 }: SendQuoteRequestEmailOptions): Promise<SendQuoteRequestEmailResult> {
     try {
+
+        // Absolute URL nötig, da der Link per E-Mail versendet wird (kein relativer Request-Kontext)
         const baseUrl = getBaseUrl();
 
         const emailData =
@@ -394,6 +481,13 @@ async function sendQuoteRequestEmailSafely({
     }
 }
 
+/**
+ * Baut die formelle Anrede für die Opt-In-E-Mail passend zur gewählten Anrede
+ * des Ansprechpartners.
+ *
+ * @param contactPerson - Der Ansprechpartner der Anfrage (Anrede, Vor-/Nachname)
+ * @returns Die formelle Anrede, z.B. "Sehr geehrte Frau Mustermann,"
+ */
 function createFormalSalutation(
     contactPerson:
         CreateQuoteRequestData["ansprechpartner"],
@@ -410,6 +504,12 @@ function createFormalSalutation(
     }
 }
 
+/**
+ * Liest die Basis-URL der Anwendung aus der Umgebungsvariable, ohne trailing Slash.
+ *
+ * @returns Die konfigurierte Basis-URL
+ * @throws Error, falls `NEXT_PUBLIC_BASE_URL` nicht gesetzt ist
+ */
 function getBaseUrl(): string {
     const baseUrl =
         process.env.NEXT_PUBLIC_BASE_URL;
@@ -423,6 +523,12 @@ function getBaseUrl(): string {
     return baseUrl.replace(/\/$/, "");
 }
 
+/**
+ * Ermittelt die Client-IP-Adresse und fängt dabei jeden Fehler ab — die Anfrage
+ * soll auch ohne bekannte IP-Adresse gespeichert werden können.
+ *
+ * @returns Die Client-IP-Adresse oder `null`, falls nicht ermittelbar
+ */
 async function getClientIpSafely():
     Promise<string | null> {
     try {

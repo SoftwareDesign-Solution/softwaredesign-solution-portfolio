@@ -1,9 +1,18 @@
+/**
+ * @file unsubscribe-notification-signup.ts
+ * @description Server Action zur Abmeldung von Workshop-Benachrichtigungen
+ * über ID + Abmelde-Token aus dem E-Mail-Link.
+ * @module app/actions/unsubscribe-notification-signup
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 "use server";
 
 import { z } from "zod";
 
 import { db } from "@/lib/db";
 
+/** Erwartet Anmelde-ID und Abmelde-Token aus dem Query-Parameter des Abmeldelinks. */
 const inputSchema = z.object({
     id: z.uuid(),
     token: z
@@ -12,6 +21,7 @@ const inputSchema = z.object({
         .min(1),
 });
 
+/** Daten der Benachrichtigungs-Anmeldung, die auf der Abmelde-Ergebnisseite angezeigt werden. */
 const unsubscribeDataSchema = z.object({
     email: z
         .string()
@@ -40,9 +50,11 @@ type UnsubscribeNotificationSignupInput =
 type NotificationSignupUnsubscribeData =
     z.output<typeof unsubscribeDataSchema>;
 
+/** Lose typisierte Roh-Zeile aus der DB, bevor sie gegen ein Zod-Schema geparst wird. */
 type NotificationSignupDatabaseRow =
     Record<string, unknown>;
 
+/** Ergebnis des Abmeldevorgangs für die Anzeige auf der Bestätigungsseite. */
 export type UnsubscribeNotificationSignupResult =
     | {
           data: NotificationSignupUnsubscribeData;
@@ -54,6 +66,15 @@ export type UnsubscribeNotificationSignupResult =
           status: "invalid-or-expired";
       };
 
+/**
+ * Meldet eine Workshop-Benachrichtigung anhand von ID und Abmelde-Token ab.
+ * Erkennt drei Fälle: erfolgreich abgemeldet, bereits zuvor abgemeldet,
+ * oder Link ungültig/ID+Token passen nicht zusammen.
+ *
+ * @param input - ID und Token aus dem Query-Parameter des E-Mail-Links
+ * @returns Ein {@link UnsubscribeNotificationSignupResult} mit dem erkannten Status
+ *          und ggf. den Anmeldedaten
+ */
 export async function unsubscribeNotificationSignup(
     input: UnsubscribeNotificationSignupInput,
 ): Promise<UnsubscribeNotificationSignupResult> {
@@ -109,6 +130,14 @@ export async function unsubscribeNotificationSignup(
     };
 }
 
+/**
+ * Meldet die Anmeldung in der DB ab — aber nur, wenn sie noch nicht abgemeldet ist
+ * (sonst betrifft das UPDATE keine Zeile).
+ *
+ * @param id - ID der Benachrichtigungs-Anmeldung
+ * @param token - Der zugehörige Abmelde-Token
+ * @returns Die aktualisierte Zeile bei Erfolg, sonst `null`
+ */
 async function unsubscribeNotificationSignupInDatabase(
     id: string,
     token: string,
@@ -133,6 +162,14 @@ async function unsubscribeNotificationSignupInDatabase(
         : null;
 }
 
+/**
+ * Lädt die Anmeldung unabhängig vom Abmeldestatus, um zwischen
+ * "bereits abgemeldet" und "ungültig" unterscheiden zu können.
+ *
+ * @param id - ID der Benachrichtigungs-Anmeldung
+ * @param token - Der zugehörige Abmelde-Token
+ * @returns Die gefundene Zeile oder `null`, falls ID/Token nicht zusammenpassen
+ */
 async function getExistingNotificationSignup(
     id: string,
     token: string,

@@ -1,3 +1,11 @@
+/**
+ * @file send-contact-request.ts
+ * @description Server Action für das allgemeine Kontaktformular (/anfrage-Seite):
+ * validiert die Eingaben, prüft Turnstile und benachrichtigt das Team per E-Mail.
+ * @module app/actions/send-contact-request
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 "use server";
 
 import { verifyTurnstileToken } from "@/lib/turnstile";
@@ -8,6 +16,7 @@ import {
 } from "@/schemas/contact-request.schema";
 import { sendContactRequestEmail } from "@/services/emails/send-contact-request-email";
 
+/** Ergebnis von {@link sendContactRequest}: entweder Erfolg oder eine für den Nutzer verständliche Fehlermeldung. */
 export type SendContactRequestResult =
     | {
           success: true;
@@ -17,9 +26,21 @@ export type SendContactRequestResult =
           error: string;
       };
 
+/**
+ * Server Action für das Kontaktformular: validiert die Eingaben, prüft die
+ * Turnstile-Sicherheitsabfrage und benachrichtigt das Team per E-Mail.
+ *
+ * @param data - Die vom Client übermittelten und gegen {@link sendContactRequestSchema}
+ *               zu validierenden Kontaktdaten (Firma, Ansprechpartner, Nachricht, Turnstile-Token)
+ * @returns Ein {@link SendContactRequestResult}: `{ success: true }` bei Erfolg,
+ *          sonst `{ success: false, error }` mit einer für den Nutzer verständlichen Meldung
+ */
 export async function sendContactRequest(
     data: SendContactRequestData,
 ): Promise<SendContactRequestResult> {
+
+    // Server-seitige Zod-Validierung — nie nur auf Client-Validierung verlassen,
+    // da die Server Action theoretisch auch direkt (ohne UI) aufrufbar ist
     const validationResult =
         sendContactRequestSchema.safeParse(data);
 
@@ -39,6 +60,7 @@ export async function sendContactRequest(
     const contactRequestData =
         validationResult.data;
 
+    // Bot-/Spam-Schutz: ohne gültiges Turnstile-Token keine Verarbeitung
     const isHuman = await verifyTurnstileToken(
         contactRequestData.turnstile.token,
     );

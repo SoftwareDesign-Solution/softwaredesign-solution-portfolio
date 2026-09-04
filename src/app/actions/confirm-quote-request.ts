@@ -1,3 +1,11 @@
+/**
+ * @file confirm-quote-request.ts
+ * @description Server Action zur Bestätigung einer Angebotsanfrage (Double-Opt-In)
+ * über ID + Bestätigungs-Token aus dem E-Mail-Link.
+ * @module app/actions/confirm-quote-request
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 "use server";
 
 import { z } from "zod";
@@ -10,6 +18,7 @@ import {
 } from "@/schemas/quote-request.schema";
 import { sendQuoteRequestConfirmationEmail } from "@/services/emails/send-quote-request-confirmation-email";
 
+/** Erwartet Anfrage-ID und Bestätigungs-Token aus dem Query-Parameter des Opt-In-Links. */
 const inputSchema = z.object({
     id: z.uuid(),
     token: z
@@ -22,9 +31,11 @@ type ConfirmQuoteRequestInput = z.output<
     typeof inputSchema
 >;
 
+/** Lose typisierte Roh-Zeile aus der DB, bevor sie gegen ein Zod-Schema geparst wird. */
 type QuoteRequestDatabaseRow =
     Record<string, unknown>;
 
+/** Ergebnis des Bestätigungsvorgangs für die Anzeige auf der Bestätigungsseite. */
 export type ConfirmQuoteRequestResult =
     | {
           data: QuoteRequestConfirmedData;
@@ -36,6 +47,16 @@ export type ConfirmQuoteRequestResult =
           status: "invalid-or-expired";
       };
 
+/**
+ * Bestätigt eine Angebotsanfrage (Double-Opt-In) anhand von ID und
+ * Bestätigungs-Token und benachrichtigt anschließend das Team per E-Mail.
+ * Erkennt drei Fälle: erfolgreich bestätigt, bereits zuvor bestätigt,
+ * oder Link ungültig/abgelaufen.
+ *
+ * @param input - ID und Token aus dem Query-Parameter des E-Mail-Links
+ * @returns Ein {@link ConfirmQuoteRequestResult} mit dem erkannten Status
+ *          und ggf. den Anfragedaten
+ */
 export async function confirmQuoteRequest(
     input: ConfirmQuoteRequestInput,
 ): Promise<ConfirmQuoteRequestResult> {
@@ -93,6 +114,16 @@ export async function confirmQuoteRequest(
     };
 }
 
+/**
+ * Bestätigt die Angebotsanfrage in der DB — aber nur, wenn sie noch nicht
+ * bestätigt und die Gültigkeit noch nicht abgelaufen ist (sonst betrifft das
+ * UPDATE keine Zeile). Baut dabei Workshop/Termin/Adressen/Ansprechpartner
+ * als verschachteltes JSON zusammen, passend zu {@link QuoteRequestConfirmedData}.
+ *
+ * @param id - ID der Angebotsanfrage
+ * @param token - Der zugehörige Bestätigungs-Token
+ * @returns Die aktualisierte Zeile bei Erfolg, sonst `null`
+ */
 async function confirmQuoteRequestInDatabase(
     id: string,
     token: string,
@@ -177,6 +208,14 @@ async function confirmQuoteRequestInDatabase(
         : null;
 }
 
+/**
+ * Lädt die Angebotsanfrage unabhängig vom Bestätigungsstatus, um zwischen
+ * "bereits bestätigt" und "ungültig/abgelaufen" unterscheiden zu können.
+ *
+ * @param id - ID der Angebotsanfrage
+ * @param token - Der zugehörige Bestätigungs-Token
+ * @returns Die gefundene Zeile oder `null`, falls ID/Token nicht zusammenpassen
+ */
 async function getExistingQuoteRequest(
     id: string,
     token: string,
@@ -259,6 +298,13 @@ async function getExistingQuoteRequest(
         : null;
 }
 
+/**
+ * Versendet die interne Benachrichtigungs-E-Mail und fängt dabei jeden Fehler ab,
+ * statt ihn zu werfen — die Bestätigung selbst wurde bereits in der DB gespeichert
+ * und soll dadurch nicht scheitern.
+ *
+ * @param data - Die bestätigten Angebotsanfrage-Daten
+ */
 async function sendConfirmationEmailSafely(
     data: QuoteRequestConfirmedData,
 ): Promise<void> {

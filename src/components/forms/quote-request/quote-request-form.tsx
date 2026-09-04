@@ -1,3 +1,11 @@
+/**
+ * @file quote-request-form.tsx
+ * @description Mehrstufiges Formular zur Anforderung eines unverbindlichen
+ * Angebots für einen Workshop, auch ohne festen Termin möglich.
+ * @module components/forms/quote-request/quote-request-form
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 /* eslint-disable react-hooks/refs */
 "use client";
 
@@ -24,6 +32,16 @@ import SubmitFooter from "../shared/submit-footer";
 import { getQuoteRequestFormDefaultValues } from "./quote-request-form-default-values";
 import { quoteRequestErrorMessage, quoteRequestSuccessMessage } from "./quote-request-form-status-messages";
 
+/**
+ * Mehrstufiges Formular zur Anforderung eines unverbindlichen Angebots für einen
+ * Workshop. Ruft bei erfolgreichem Absenden die Server Action {@link createQuoteRequest}
+ * auf (Double-Opt-In per E-Mail) und zeigt das Erfolgs-/Fehler-Status-Modal an.
+ * Die Termin-Pflicht im Validierungsschema hängt davon ab, ob der Workshop
+ * überhaupt Termine hat (`hasAppointments`).
+ *
+ * @param props - Siehe {@link WorkshopFormProps}
+ * @returns Das Angebotsanfrage-Formular
+ */
 export default function QuoteRequestForm({ 
     workshop, 
     onClose, 
@@ -47,11 +65,19 @@ export default function QuoteRequestForm({
     // Datenschutzerklärung & Sicherheitsabfrage (Turnstile)
     const turnstileRef = useRef<TurnstileRef>(null);
 
+    // Nach einem fehlgeschlagenen Versuch muss die Sicherheitsabfrage neu gelöst werden,
+    // da das zuvor erzeugte Token bereits verbraucht sein könnte
     const resetTurnstile = () => {
         turnstileRef.current?.reset();
         setValue("turnstile.token", "");
     };
 
+    /**
+     * Zeigt das Fehler-Status-Modal an und setzt Turnstile zurück, damit ein
+     * erneuter Versuch möglich ist.
+     *
+     * @param data - Die zuletzt abgesendeten Anfragedaten
+     */
     function handleQuoteRequestError(
         data: CreateQuoteRequestData,
     ): void {
@@ -65,6 +91,13 @@ export default function QuoteRequestForm({
         resetTurnstile();
     }
 
+    /**
+     * react-hook-form Submit-Handler: reichert die Formulardaten um die
+     * Workshop-Referenz an, ruft die Server Action auf und zeigt je nach
+     * Ergebnis das Erfolgs- oder Fehler-Modal.
+     *
+     * @param formData - Die validierten Formulardaten
+     */
     const handleQuoteRequestSubmit: SubmitHandler<
         QuoteRequestFormData
     > = async (formData) => {
@@ -165,6 +198,14 @@ export default function QuoteRequestForm({
     );
 };
 
+/**
+ * Reichert die Formulardaten um die Workshop-Referenz an, die die Server Action
+ * zusätzlich zu den Formularfeldern benötigt.
+ *
+ * @param workshop - Der Workshop, für den das Angebot angefragt wird
+ * @param formData - Die validierten Formulardaten
+ * @returns Die vollständigen Daten für die Server Action {@link createQuoteRequest}
+ */
 function createQuoteRequestData(
     workshop: WorkshopFormProps["workshop"],
     formData: QuoteRequestFormData,

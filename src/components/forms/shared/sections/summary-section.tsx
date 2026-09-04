@@ -1,3 +1,10 @@
+/**
+ * @file summary-section.tsx
+ * @description Live-Preisberechnung am Ende des Buchungs-/Angebots-Formulars.
+ * @module components/forms/shared/sections/summary-section
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import { useFormContext, useWatch } from "react-hook-form";
 
 import { Workshop } from "@/types/workshop";
@@ -5,8 +12,9 @@ import { formatDateRange } from "@/utils/format-date-range";
 import { formatDay } from "@/utils/format-day";
 import { formatPrice } from "@/utils/format-price";
 
-
+/** Props für {@link SummarySection}. */
 interface SummarySectionProps {
+    /** Überschrift der Zusammenfassungs-Box (z.B. "Ihre Buchung" oder "Ihre Anfrage"). */
     title: string;
     workshop: Workshop;
 
@@ -20,6 +28,15 @@ interface SummarySectionProps {
 
 };
 
+/**
+ * Live-Preisberechnung am Ende des Buchungs-/Angebots-Formulars: liest ausgewählten
+ * Termin und Teilnehmerzahl aus dem Formularkontext und berechnet Netto-, USt.- und
+ * Bruttobetrag. Rein clientseitige Vorschau — der maßgebliche Preis wird serverseitig
+ * in der jeweiligen Server Action (z.B. {@link createBooking}) neu berechnet.
+ *
+ * @param props - Siehe {@link SummarySectionProps}
+ * @returns Die Zusammenfassungs-Box
+ */
 export default function SummarySection({ title, workshop, noTerminLabel = "Kein Termin ausgewählt" }: SummarySectionProps) {
 
     const { 
@@ -36,6 +53,7 @@ export default function SummarySection({ title, workshop, noTerminLabel = "Kein 
         name: "teilnehmerzahl",
     });
 
+    // Teilnehmerzahl auf den gültigen Bereich begrenzen, auch bevor das Formularfeld validiert wurde
     const participantCountLabel = Math.min(Math.max(Number(participantCount) || 1, 1), 20);
     const selectedDateLabel = selectedDate ? formatDateRange(selectedDate.datumVon, selectedDate.datumBis) : noTerminLabel;
     const subtotal = Number(workshop.preis) * participantCountLabel;

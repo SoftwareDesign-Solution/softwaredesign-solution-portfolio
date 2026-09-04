@@ -1,3 +1,11 @@
+/**
+ * @file request-submit-section.tsx
+ * @description Formular-Abschnitt des Kontaktformulars für Herkunftsquelle,
+ * Datenschutz-Zustimmung, Turnstile und Submit-Button.
+ * @module components/forms/contact-request/sections/request-submit-section
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import Link from "next/link";
 import { type TurnstileRef } from "nextjs-turnstile";
 import { type RefObject } from "react";
@@ -11,6 +19,7 @@ import Label from "../../shared/label";
 import TurnstileWidgetSection from "../../shared/sections/turnstile-widget-section";
 import SelectField from "../../shared/select-field";
 
+// Statische Optionen für "Wie sind Sie auf mich aufmerksam geworden?"
 const sourceOptions = [
     {
         label: "Nicht angegeben",
@@ -34,10 +43,19 @@ const sourceOptions = [
     },
 ];
 
+/** Props für {@link RequestSubmitSection}. */
 interface RequestSubmitSectionProps {
+    /** Ref auf das Turnstile-Widget, damit das Formular es nach dem Absenden zurücksetzen kann. */
     turnstileRef: RefObject<TurnstileRef | null>;
 }
 
+/**
+ * Abschließender Formular-Abschnitt des Kontaktformulars: Herkunftsquelle,
+ * Datenschutz-Zustimmung, Turnstile-Sicherheitsabfrage und Submit-Button.
+ *
+ * @param props - Siehe {@link RequestSubmitSectionProps}
+ * @returns Den Formular-Abschnitt
+ */
 export default function RequestSubmitSection({
     turnstileRef,
 }: RequestSubmitSectionProps) {

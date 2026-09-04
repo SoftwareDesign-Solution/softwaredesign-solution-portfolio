@@ -1,5 +1,17 @@
+/**
+ * @file page.tsx
+ * @description Seite /agb: statischer Rechtstext (Allgemeine Geschäftsbedingungen) für Workshops/Beratung.
+ * @module app/agb/page
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import Link from "next/link";
 
+/**
+ * Seite /agb: statischer Rechtstext (Allgemeine Geschäftsbedingungen) für Workshops/Beratung.
+ *
+ * @returns Die AGB-Seite
+ */
 export default function AGBPage() {
     return (
         <article>

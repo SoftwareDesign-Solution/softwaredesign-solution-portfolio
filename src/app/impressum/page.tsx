@@ -1,5 +1,17 @@
+/**
+ * @file page.tsx
+ * @description Seite /impressum: statischer Rechtstext (Anbieterkennzeichnung gemäß § 5 DDG).
+ * @module app/impressum/page
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import Link from "next/link";
 
+/**
+ * Seite /impressum: statischer Rechtstext (Anbieterkennzeichnung gemäß § 5 DDG).
+ *
+ * @returns Die Impressum-Seite
+ */
 export default function ImpressumPage() {
     return (
         <article>

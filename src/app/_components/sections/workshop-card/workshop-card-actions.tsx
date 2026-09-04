@@ -1,12 +1,28 @@
+/**
+ * @file workshop-card-actions.tsx
+ * @description Aktions-Buttons einer Workshop-Karte: Benachrichtigung anfordern
+ * und Angebot anfordern. Öffnet die jeweiligen Modals über den globalen Modal-Kontext.
+ * @module app/_components/sections/workshop-card/workshop-card-actions
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 "use client";
 
 import { useModal } from "@/providers/modal-provider";
 import { type Workshop } from "@/types/workshop";
 
+/** Props für {@link WorkshopCardActions}. */
 interface WorkshopCardActionsProps {
     workshop: Workshop;
 }
 
+/**
+ * Zeigt die beiden sekundären Aktionen einer Workshop-Karte: Benachrichtigung
+ * bei neuen Terminen und Angebot anfordern (Letzteres auch ohne festen Termin möglich).
+ *
+ * @param props - Siehe {@link WorkshopCardActionsProps}
+ * @returns Die beiden Aktions-Buttons
+ */
 export default function WorkshopCardActions({
     workshop,
 }: WorkshopCardActionsProps) {
@@ -48,6 +64,7 @@ export default function WorkshopCardActions({
     );
 }
 
+/** Glocken-Icon für die Benachrichtigungs-Aktion. */
 function NotificationIcon() {
     return (
         <svg
@@ -67,6 +84,7 @@ function NotificationIcon() {
     );
 }
 
+/** Dokument-Icon für die Angebots-Aktion. */
 function QuoteIcon() {
     return (
         <svg

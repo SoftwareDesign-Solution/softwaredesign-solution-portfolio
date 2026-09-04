@@ -1,5 +1,17 @@
+/**
+ * @file page.tsx
+ * @description Seite /anfrage: Einleitungstext plus das allgemeine Kontaktformular.
+ * @module app/anfrage/page
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import ContactRequestForm from "@/components/forms/contact-request/contact-request-form";
 
+/**
+ * Seite /anfrage: Einleitungstext plus das allgemeine {@link ContactRequestForm}.
+ *
+ * @returns Die Anfrage-Seite
+ */
 export default function AnfragePage() {
     return (
         <article>

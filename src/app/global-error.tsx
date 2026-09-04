@@ -1,3 +1,10 @@
+/**
+ * @file global-error.tsx
+ * @description Next.js `global-error.tsx`-Boundary für Fehler im Root-Layout selbst.
+ * @module app/global-error
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 "use client";
 
 import Link from "next/link";
@@ -6,8 +13,10 @@ import "./globals.css";
 
 //import { useEffect } from "react";
 
+/** Props für {@link GlobalError}, wie von Next.js an die `global-error.tsx`-Boundary übergeben. */
 interface GlobalErrorProps {
   error: Error & { digest?: string };
+  /** Von Next.js bereitgestellt: rendert die Anwendung erneut, ohne einen vollständigen Reload. */
   reset: () => void;
 }
 
@@ -16,6 +25,9 @@ interface GlobalErrorProps {
  * z.B. wenn ein Provider im Layout crasht). Da das Root-Layout dann nicht mehr aktiv
  * ist, muss diese Komponente <html>/<body> selbst rendern und darf sich NICHT auf
  * Provider aus dem Layout verlassen (kein ActionStatusProvider/ModalProvider etc.).
+ *
+ * @param props - Siehe {@link GlobalErrorProps}
+ * @returns Die eigenständige Fehlerseite inkl. <html>/<body>
  */
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
 

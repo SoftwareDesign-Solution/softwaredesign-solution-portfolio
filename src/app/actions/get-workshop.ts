@@ -1,8 +1,24 @@
+/**
+ * @file get-workshop.ts
+ * @description Server Action zum Laden eines einzelnen Workshops für die Detailseite.
+ * @module app/actions/get-workshop
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import { db } from "@/lib/db";
 import { Workshop } from "@/types/workshop";
 
+/**
+ * Lädt einen einzelnen aktiven Workshop anhand seines Slugs inklusive Trainer
+ * und allen aktiven Terminen (aufsteigend nach Datum sortiert).
+ *
+ * @param slug - Der eindeutige URL-Slug des Workshops
+ * @returns Den Workshop oder `null`, falls kein aktiver Workshop mit diesem Slug existiert
+ */
 export async function getWorkshop(slug: string): Promise<Workshop | null> {
     
+    // Termine werden als JSON-Array direkt in der DB aggregiert, um N+1-Queries zu vermeiden;
+    // COALESCE liefert '[]' statt eines Arrays mit einem "leeren" Termin-Objekt, falls keine Termine existieren
     const workshops = await db.query(`
         SELECT
             w.id,

@@ -1,11 +1,25 @@
+/**
+ * @file consent-section.tsx
+ * @description Pflicht-Checkbox zur Datenschutz-Zustimmung, registriert unter dem Feldnamen `consent`.
+ * @module components/forms/shared/sections/consent-section
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import { ReactNode } from "react";
 import { useFormContext } from "react-hook-form";
 
-
+/** Props für {@link ConsentSection}. */
 interface ConsentSectionProps {
+    /** Der eigentliche Zustimmungstext (z.B. mit Link zur Datenschutzerklärung). */
     children: ReactNode;
 }
 
+/**
+ * Pflicht-Checkbox zur Datenschutz-Zustimmung, registriert unter dem Feldnamen `consent`.
+ *
+ * @param props - Siehe {@link ConsentSectionProps}
+ * @returns Die Zustimmungs-Checkbox
+ */
 export default function ConsentSection({ children }: ConsentSectionProps) {
 
     const { 

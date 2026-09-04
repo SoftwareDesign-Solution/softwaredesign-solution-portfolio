@@ -1,3 +1,11 @@
+/**
+ * @file request-description-section.tsx
+ * @description Formular-Abschnitt des Kontaktformulars für die freie Nachricht
+ * inkl. Live-Zeichenzähler.
+ * @module components/forms/contact-request/sections/request-description-section
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import {
     useFormContext,
     useWatch,
@@ -5,8 +13,15 @@ import {
 
 import { type ContactRequestFormData } from "@/schemas/contact-request.schema";
 
+// Muss mit MAX_MESSAGE_LENGTH aus contact-request.schema.ts übereinstimmen
 const MAX_MESSAGE_LENGTH = 4_000;
 
+/**
+ * Formular-Abschnitt des Kontaktformulars für die freie Nachricht, inklusive
+ * Live-Zeichenzähler und Mindestlängen-Hinweis.
+ *
+ * @returns Den Formular-Abschnitt
+ */
 export default function RequestDescriptionSection() {
     const {
         control,

@@ -1,3 +1,11 @@
+/**
+ * @file extras-section.tsx
+ * @description Formular-Abschnitt für optionale Zusatzangaben: Gutscheincode
+ * (optional) und Anmerkungen.
+ * @module components/forms/shared/sections/extras-section
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import { useFormContext } from "react-hook-form";
 
 import Button from "@/components/ui/button";
@@ -7,12 +15,20 @@ import Label from "../label";
 import SectionHeading from "../section-heading";
 import TextField from "../text-field";
 
-
+/** Props für {@link ExtrasSection}. */
 interface ExtrasSectionProps {
+    /** Abschnittsnummer für die {@link SectionHeading}-Anzeige. */
     num: string;
+    /** Zeigt zusätzlich ein Gutscheincode-Feld an (nur bei der Buchung relevant). */
     showVoucherCode?: boolean;
 }
 
+/**
+ * Formular-Abschnitt für optionale Zusatzangaben: Gutscheincode (optional) und Anmerkungen.
+ *
+ * @param props - Siehe {@link ExtrasSectionProps}
+ * @returns Den Formular-Abschnitt
+ */
 export default function ExtrasSection({ 
     num, 
     showVoucherCode = false

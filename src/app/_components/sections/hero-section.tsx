@@ -1,5 +1,17 @@
+/**
+ * @file hero-section.tsx
+ * @description Hero-Sektion der Startseite ("Über mich"): Einstiegs-Headline, Kurztext und CTA.
+ * @module app/_components/sections/hero-section
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import Link from "next/link";
 
+/**
+ * Hero-Sektion der Startseite ("Über mich"): Einstiegs-Headline, Kurztext und CTA-Button zur Anfrageseite.
+ *
+ * @returns Die Hero-Sektion
+ */
 export default function HeroSection() {
     return (
         <section id="ueber-mich" className="pt-18 px-12 pb-24 grid grid-cols-1 md:grid-cols-[6fr_5fr] gap-18 items-center">

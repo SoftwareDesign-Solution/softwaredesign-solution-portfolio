@@ -1,10 +1,23 @@
+/**
+ * @file workshop-header.tsx
+ * @description Kopfbereich der Workshop-Detailseite: Breadcrumbs, Titel,
+ * Kurzbeschreibung und Eckdaten (Dauer/Format/Sprache).
+ * @module app/workshops/[slug]/_components/workshop-header
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import { Workshop } from "@/types/workshop";
 import { formatDay } from "@/utils/format-day";
 
 import Breadcrumbs from "./breadcrumbs";
 import StatItem from "./stat-item";
 
-
+/**
+ * Kopfbereich der Workshop-Detailseite: Breadcrumbs, Titel, Kurzbeschreibung und Eckdaten (Dauer/Format/Sprache).
+ *
+ * @param workshop - Der anzuzeigende Workshop
+ * @returns Den Kopfbereich
+ */
 export default function WorkshopHeader(workshop: Workshop) {
     return (
         <section className="py-10 md:pt-16 px-6 md:px-12 pb-12">

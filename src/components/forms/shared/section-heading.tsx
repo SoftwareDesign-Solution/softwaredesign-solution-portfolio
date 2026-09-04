@@ -1,11 +1,24 @@
+/**
+ * @file section-heading.tsx
+ * @description Nummerierte Abschnittsüberschrift innerhalb eines mehrstufigen Formulars.
+ * @module components/forms/shared/section-heading
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
+/** Props für {@link SectionHeading}. */
 interface SectionHeadingProps {
   num: string;
   title: string;
   subtitle?: string;
 }
 
+/**
+ * Nummerierte Abschnittsüberschrift innerhalb eines mehrstufigen Formulars.
+ *
+ * @param props - Siehe {@link SectionHeadingProps}
+ * @returns Die Abschnittsüberschrift
+ */
 export default function SectionHeading({ num, title, subtitle }: SectionHeadingProps) {
-
   return (
     <div className="mb-4 flex flex-wrap items-baseline gap-3.5 gap-y-1">
       <div className="flex items-baseline gap-3.5">

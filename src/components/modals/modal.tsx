@@ -1,7 +1,16 @@
+/**
+ * @file modal.tsx
+ * @description Generisches Basis-Modal (Portal in `document.body`), das von allen
+ * konkreten Modals (Buchung, Angebotsanfrage, Benachrichtigung, Erfolgs-/Fehler-Status)
+ * verwendet wird.
+ * @module components/modals/modal
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 
-
+/** Props für {@link Modal}. */
 interface ModalProps {
   open: boolean;
   onClose?: () => void;
@@ -16,6 +25,15 @@ interface ModalProps {
   children: React.ReactNode;
 }
 
+/**
+ * Generisches Basis-Modal (Portal in `document.body`), das von allen konkreten Modals
+ * (Buchung, Angebotsanfrage, Benachrichtigung, Erfolgs-/Fehler-Status) verwendet wird.
+ * Schließt sich per Escape-Taste oder Klick auf den Hintergrund und sperrt in der Zeit
+ * das Scrollen des restlichen Dokuments.
+ *
+ * @param props - Siehe {@link ModalProps}
+ * @returns Das Modal (via Portal), oder `null` wenn `open` `false` ist
+ */
 export default function Modal({ 
     open, 
     onClose, 
@@ -55,6 +73,7 @@ export default function Modal({
     const isSmall = size === "sm";
     const alignClass = align === "center" ? "items-center" : align === "end" ? "items-end" : "items-start";
 
+    // Render the modal via a portal to document.body
     return createPortal(
         <div
             className={`fixed inset-0 z-[${zIndex}] flex justify-center overflow-y-auto bg-neutral-900/55 px-6 py-10 backdrop-blur-xs ${alignClass}`}

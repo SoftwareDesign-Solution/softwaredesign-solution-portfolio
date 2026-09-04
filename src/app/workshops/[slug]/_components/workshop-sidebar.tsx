@@ -1,3 +1,11 @@
+/**
+ * @file workshop-sidebar.tsx
+ * @description Sticky Sidebar auf der Workshop-Detailseite: Preis, nächste Termine
+ * und Aktions-Buttons (Buchung, Angebot, Inhouse-Anfrage, Benachrichtigung).
+ * @module app/workshops/[slug]/_components/workshop-sidebar
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 "use client";
 
 import TerminRow from "@/components/termin-row";
@@ -6,13 +14,22 @@ import { useModal } from "@/providers/modal-provider";
 import { Workshop } from "@/types/workshop";
 import { formatPrice } from "@/utils/format-price";
 
-
+/**
+ * Sticky Sidebar auf der Workshop-Detailseite: zeigt Preis (netto/brutto), die
+ * nächsten Termine und öffnet über den {@link useModal}-Kontext die Modals für
+ * Buchung, Angebotsanfrage und Benachrichtigungs-Anmeldung. Nur der Buchungs-Button
+ * ist deaktiviert, solange keine Termine verfügbar sind — ein Angebot lässt sich
+ * auch ohne festen Termin anfordern.
+ *
+ * @param workshop - Der anzuzeigende Workshop
+ * @returns Die Sidebar
+ */
 export default function WorkshopSidebar(workshop: Workshop) {
 
     const { openBookingModal, openNotificationSignupModal, openQuoteRequestModal } = useModal();
 
     const nettoPrice = Number(workshop.preis);
-    const bruttoPrice = nettoPrice * 1.19; // Assuming a 19% VAT rate
+    const bruttoPrice = nettoPrice * 1.19; // Annahme: 19% USt.
 
     return (
         <aside className="self-start sticky top-24">

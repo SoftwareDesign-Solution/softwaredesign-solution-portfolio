@@ -1,10 +1,19 @@
+/**
+ * @file leistungen-section.tsx
+ * @description "Leistungen"-Sektion der Startseite: Kachel-Übersicht der angebotenen Leistungen.
+ * @module app/_components/sections/leistungen-section
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import SectionHeader from "../section-header";
 
+/** Ein angebotenes Leistungspaket (Titel + Kurzbeschreibung) in der Leistungen-Sektion. */
 type Service = {
   title: string;
   description: string;
 }
 
+// Statische Liste der angebotenen Leistungen; keine DB-/API-Anbindung nötig, da redaktioneller Inhalt
 const SERVICES: Service[] = [
     {
         title: "Beratung & Konzeption",
@@ -27,6 +36,11 @@ const SERVICES: Service[] = [
     }
 ];
 
+/**
+ * "Leistungen"-Sektion der Startseite: Kachel-Übersicht der angebotenen Leistungen aus {@link SERVICES}.
+ *
+ * @returns Die Leistungen-Sektion
+ */
 export default function LeistungenSection() {
     return (
         <section id="leistungen" className="py-16 px-6 md:py-28 md:px-12 bg-surface scroll-mt-18">

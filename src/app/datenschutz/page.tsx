@@ -1,5 +1,17 @@
+/**
+ * @file page.tsx
+ * @description Seite /datenschutz: statischer Rechtstext (Datenschutzerklärung gemäß DSGVO).
+ * @module app/datenschutz/page
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import Link from "next/link";
 
+/**
+ * Seite /datenschutz: statischer Rechtstext (Datenschutzerklärung gemäß DSGVO).
+ *
+ * @returns Die Datenschutz-Seite
+ */
 export default function DatenschutzPage() {
     return (
         <article>

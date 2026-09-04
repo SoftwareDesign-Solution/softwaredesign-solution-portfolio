@@ -1,5 +1,14 @@
+/**
+ * @file notification-signup-form-status-messages.tsx
+ * @description Erfolgs-/Fehler-Inhalte für das {@link ActionStatusModal} nach der
+ * Workshop-Benachrichtigungs-Anmeldung.
+ * @module components/forms/notification-signup/notification-signup-form-status-messages
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import { ActionStatusContent } from "@/types/action-status-content";
 
+/** Props für {@link notificationSignupSuccessMessage}. */
 interface notificationSignupSuccessMessageProps {
     workshopTitle: string;
     vorname: string;
@@ -9,6 +18,12 @@ interface notificationSignupSuccessMessageProps {
     status: string;
 }
 
+/**
+ * Erfolgs-Inhalt für das Status-Modal: weist auf die noch ausstehende Double-Opt-In-Bestätigung per E-Mail hin.
+ *
+ * @param props - Siehe {@link notificationSignupSuccessMessageProps}
+ * @returns Der {@link ActionStatusContent} für das Erfolgs-Modal
+ */
 export function notificationSignupSuccessMessage(props: notificationSignupSuccessMessageProps): ActionStatusContent {
     return {
         variant: "success",
@@ -27,10 +42,17 @@ export function notificationSignupSuccessMessage(props: notificationSignupSucces
     };
 };
 
+/** Props für {@link notificationSignupErrorMessage}. */
 interface notificationSignupErrorMessageProps {
     vorname: string;
 }
 
+/**
+ * Fehler-Inhalt für das Status-Modal, wenn die Benachrichtigungs-Anmeldung nicht gespeichert werden konnte.
+ *
+ * @param props - Siehe {@link notificationSignupErrorMessageProps}
+ * @returns Der {@link ActionStatusContent} für das Fehler-Modal
+ */
 export function notificationSignupErrorMessage(props: notificationSignupErrorMessageProps): ActionStatusContent {
     return {
         variant: "error",

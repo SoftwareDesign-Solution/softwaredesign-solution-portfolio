@@ -1,5 +1,14 @@
+/**
+ * @file format-termin-status.ts
+ * @description Liefert die visuelle Konfiguration (Farben, Label) für die Anzeige
+ * eines Workshop-Termin-Status in Karten, Sidebar und Formularen.
+ * @module utils/format-termin-status
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import { TerminStatus } from "@/types/termin";
 
+/** Visuelle Konfiguration für einen Termin-Status. */
 interface TerminStatusConfig {
   label: string;
   dotColor: string;
@@ -10,6 +19,7 @@ interface TerminStatusConfig {
   dimmed?: boolean;
 }
  
+// Statische Zuordnung von Status zu Darstellung; keine DB-/API-Anbindung nötig
 const TERMIN_STATUS_CONFIG: Record<TerminStatus, TerminStatusConfig> = {
   ausgebucht: {
     label: "Ausgebucht",
@@ -35,6 +45,12 @@ const TERMIN_STATUS_CONFIG: Record<TerminStatus, TerminStatusConfig> = {
   },
 };
  
+/**
+ * Liefert die visuelle Konfiguration (Farben, Label) für einen Termin-Status.
+ *
+ * @param status - Der Verfügbarkeitsstatus eines Termins
+ * @returns Die zugehörige {@link TerminStatusConfig}
+ */
 export function formatTerminStatus(status: TerminStatus): TerminStatusConfig {
   return TERMIN_STATUS_CONFIG[status];
 }

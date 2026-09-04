@@ -1,3 +1,11 @@
+/**
+ * @file page.tsx
+ * @description Seite /offer-requests/[id]/confirm: bestätigt serverseitig die
+ * Angebotsanfrage (Double-Opt-In) und zeigt eine Zusammenfassung an.
+ * @module app/(confirmation)/offer-requests/[id]/confirm/page
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import { confirmQuoteRequest } from "@/app/actions/confirm-quote-request";
 import {
     formatDateRange,
@@ -7,15 +15,26 @@ import {
 import ConfirmationDetails from "../../../_components/confirmation-details";
 import ConfirmationStatus from "../../../_components/confirmation-status";
 
+/** Props für {@link OfferRequestConfirmationPage}. */
 interface OfferRequestConfirmationPageProps {
     params: Promise<{
+        /** ID der Angebotsanfrage aus der URL. */
         id: string;
     }>;
     searchParams: Promise<{
+        /** Bestätigungs-Token aus dem Query-Parameter des E-Mail-Links. */
         token?: string;
     }>;
 }
 
+/**
+ * Bestätigt serverseitig die Angebotsanfrage (Double-Opt-In) über
+ * {@link confirmQuoteRequest} und zeigt eine Zusammenfassung an. Die
+ * Rechnungsadresse hat Vorrang vor der regulären Adresse, falls abweichend angegeben.
+ *
+ * @param props - Siehe {@link OfferRequestConfirmationPageProps}
+ * @returns Die Bestätigungsseite (Erfolg oder "nicht gefunden")
+ */
 export default async function OfferRequestConfirmationPage({
     params,
     searchParams,
@@ -97,7 +116,9 @@ export default async function OfferRequestConfirmationPage({
     );
 }
 
+/** Props für {@link OfferRequestDescription}. */
 interface OfferRequestDescriptionProps {
+    /** Angefragter Termin, oder `null`/`undefined`, falls die Anfrage ohne festen Termin gestellt wurde. */
     termin?: {
         datumBis: string;
         datumVon: string;
@@ -105,6 +126,13 @@ interface OfferRequestDescriptionProps {
     workshopTitle: string;
 }
 
+/**
+ * Beschreibungstext der Bestätigungsseite: nennt Workshop und, falls vorhanden,
+ * den angefragten Termin. "am" bei eintägigem Workshop, sonst "vom ... bis ...".
+ *
+ * @param props - Siehe {@link OfferRequestDescriptionProps}
+ * @returns Den Beschreibungstext
+ */
 function OfferRequestDescription({
     termin,
     workshopTitle,
@@ -135,6 +163,11 @@ function OfferRequestDescription({
     );
 }
 
+/**
+ * Fallback-Ansicht für ungültige, abgelaufene oder fehlende Bestätigungslinks.
+ *
+ * @returns Die "nicht gefunden"-Ansicht
+ */
 function InvalidOfferRequestConfirmation() {
     return (
         <ConfirmationStatus

@@ -1,3 +1,13 @@
+/**
+ * @file create-booking.ts
+ * @description Server Action zum Anlegen einer verbindlichen Workshop-Buchung.
+ * Validiert und verarbeitet die vom Buchungsformular ({@link BookingForm}) übermittelten
+ * Daten serverseitig, bevor sie in der Datenbank gespeichert und die Buchungsbestätigung
+ * per E-Mail versendet wird.
+ * @module app/actions/create-booking
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 "use server";
 
 import { db } from "@/lib/db";
@@ -10,6 +20,7 @@ import {
 } from "@/schemas/booking.schema";
 import { sendBookingConfirmationEmail } from "@/services/emails/send-booking-confirmation-email";
 
+/** Projektion von Workshop + Termin, wie sie für eine Buchung benötigt wird. */
 interface BookableWorkshopAppointment {
     datumBis: string | Date;
     datumVon: string | Date;
@@ -19,6 +30,7 @@ interface BookableWorkshopAppointment {
     workshopTitel: string;
 }
 
+/** Parameter für {@link insertBooking}. */
 interface InsertBookingOptions {
     bookingData: CreateBookingData;
     ipAddress: string | null;
@@ -27,6 +39,7 @@ interface InsertBookingOptions {
         BookableWorkshopAppointment;
 }
 
+/** Parameter für {@link sendBookingEmailSafely}. */
 interface SendBookingEmailOptions {
     bookingData: CreateBookingData;
     bookingId: string;
@@ -35,20 +48,56 @@ interface SendBookingEmailOptions {
         BookableWorkshopAppointment;
 }
 
+/** Rückgabe von {@link sendBookingEmailSafely}. */
 interface SendBookingEmailResult {
     emailId?: string;
     sent: boolean;
 }
 
+/** Ergebnis von {@link createBooking}. */
 export interface CreateBookingResult {
+    /** ID der angelegten Buchung. */
     bookingId: string;
+    /** Ob die Buchungsbestätigungs-E-Mail erfolgreich versendet werden konnte. */
     confirmationEmailSent: boolean;
+    /** Resend-ID der versendeten E-Mail, falls erfolgreich. */
     emailId?: string;
 }
 
+/**
+ * Server Action für das Buchungsformular: validiert die Eingaben, prüft Turnstile,
+ * lädt Workshop/Termin serverseitig neu (Preis/Verfügbarkeit dürfen nicht vom Client
+ * kommen), speichert die Buchung und versendet die Buchungsbestätigung per E-Mail.
+ *
+ * Ein Fehler beim E-Mail-Versand führt NICHT zu einem geworfenen Error, da die
+ * Buchung zu diesem Zeitpunkt bereits gespeichert ist — stattdessen wird
+ * `confirmationEmailSent: false` mit einer Fehlermeldung zurückgegeben.
+ *
+ * @param data - Die vom Client übermittelten und gegen {@link createBookingSchema}
+ *               zu validierenden Buchungsdaten (Workshop, Termin, Teilnehmer, Adressen,
+ *               Zustimmung, Turnstile-Token)
+ * @returns Ein {@link CreateBookingResult} mit der angelegten `bookingId` sowie dem
+ *          Status des E-Mail-Versands (`confirmationEmailSent`, ggf. `emailId`)
+ * @throws Error bei ungültigen Eingaben, fehlgeschlagener Turnstile-Prüfung,
+ *         inkonsistenter Teilnehmerzahl, nicht verfügbarem Workshop/Termin
+ *         oder einem Fehler beim Speichern in der DB
+ *
+ * @example
+ * ```ts
+ * const result = await createBooking({
+ *   workshop: { id: 1, titel: "Clean Code Workshop" },
+ *   termin: { id: 12, datumVon: "2026-09-01", datumBis: "2026-09-02" },
+ *   teilnehmerzahl: 2,
+ *   // ...weitere Formularfelder
+ * });
+ * ```
+ */
 export async function createBooking(
     data: CreateBookingData,
 ): Promise<CreateBookingResult> {
+
+    // Server-seitige Zod-Validierung — nie nur auf Client-Validierung verlassen,
+    //    da die Server Action theoretisch auch direkt (ohne UI) aufrufbar ist
     const validationResult =
         createBookingSchema.safeParse(data);
 
@@ -65,6 +114,7 @@ export async function createBooking(
 
     const bookingData = validationResult.data;
 
+    // Bot-/Spam-Schutz: ohne gültiges Turnstile-Token keine Verarbeitung
     const isHuman = await verifyTurnstileToken(
         bookingData.turnstile.token,
     );
@@ -118,6 +168,13 @@ export async function createBooking(
     };
 }
 
+/**
+ * Prüft, dass die Anzahl der erfassten Teilnehmer mit der angegebenen
+ * Teilnehmerzahl übereinstimmt (Konsistenzprüfung gegen manipulierte Client-Daten).
+ *
+ * @param bookingData - Die validierten Buchungsdaten
+ * @throws Error, falls Teilnehmerzahl und Anzahl der Teilnehmer-Datensätze abweichen
+ */
 function validateParticipantCount(
     bookingData: CreateBookingData,
 ): void {
@@ -131,6 +188,15 @@ function validateParticipantCount(
     }
 }
 
+/**
+ * Lädt Workshop und Termin frisch aus der DB und prüft dabei direkt die
+ * Buchbarkeit (aktiv, nicht ausgebucht). Preis und Verfügbarkeit kommen so
+ * niemals ungeprüft vom Client.
+ *
+ * @param workshopId - ID des gebuchten Workshops
+ * @param appointmentId - ID des ausgewählten Termins
+ * @returns Die kombinierten Workshop-/Termin-Daten, oder `null` falls nicht buchbar
+ */
 async function getBookableWorkshopAppointment(
     workshopId: number,
     appointmentId: number,
@@ -162,6 +228,15 @@ async function getBookableWorkshopAppointment(
         BookableWorkshopAppointment;
 }
 
+/**
+ * Berechnet den Gesamtpreis serverseitig aus dem tatsächlichen DB-Preis —
+ * niemals einen vom Client übermittelten Preis vertrauen.
+ *
+ * @param price - Der Preis pro Teilnehmer aus der DB (netto)
+ * @param participantCount - Anzahl der Teilnehmer
+ * @returns Der berechnete Gesamtpreis
+ * @throws Error, falls für den Workshop kein gültiger numerischer Preis hinterlegt ist
+ */
 function calculateTotalPrice(
     price: number | string | null,
     participantCount: number,
@@ -177,12 +252,21 @@ function calculateTotalPrice(
     return numericPrice * participantCount;
 }
 
+/**
+ * Speichert die Buchung inkl. Teilnehmerliste und optionaler Rechnungsadresse in der DB.
+ *
+ * @param options - Siehe {@link InsertBookingOptions}
+ * @returns Die ID der angelegten Buchung
+ * @throws Error, falls das Speichern fehlschlägt
+ */
 async function insertBooking({
     bookingData,
     ipAddress,
     totalPrice,
     workshopAppointment,
 }: InsertBookingOptions): Promise<string> {
+
+    // Rechnungsadresse nur übernehmen, wenn sie explizit als abweichend markiert wurde
     const billingAddress =
         bookingData.abweichendeRechnungsadresse
             ? bookingData.rechnungsadresse
@@ -273,6 +357,13 @@ async function insertBooking({
     }
 }
 
+/**
+ * Versendet die Buchungsbestätigung und fängt dabei jeden Fehler ab, statt ihn zu werfen —
+ * die Buchung selbst wurde bereits gespeichert und soll dadurch nicht scheitern.
+ *
+ * @param options - Siehe {@link SendBookingEmailOptions}
+ * @returns Ein {@link SendBookingEmailResult} mit Erfolgsstatus und ggf. der Resend-ID
+ */
 async function sendBookingEmailSafely({
     bookingData,
     totalPrice,
@@ -329,6 +420,12 @@ async function sendBookingEmailSafely({
     }
 }
 
+/**
+ * Baut die persönliche Anrede für die Buchungsbestätigungs-E-Mail.
+ *
+ * @param firstName - Vorname des Ansprechpartners
+ * @returns Die Anrede, z.B. "Hallo Manuel"
+ */
 function createBookingSalutation(
     firstName: string,
 ): string {

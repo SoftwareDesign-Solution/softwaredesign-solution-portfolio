@@ -1,3 +1,12 @@
+/**
+ * @file create-notification-signup.ts
+ * @description Server Action zur Anmeldung für Workshop-Benachrichtigungen
+ * (Double-Opt-In). Validiert die Eingaben, speichert die Anmeldung mit
+ * Bestätigungs-/Abmelde-Token und versendet die Opt-In-E-Mail.
+ * @module app/actions/create-notification-signup
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 "use server";
 
 import { db } from "@/lib/db";
@@ -11,13 +20,16 @@ import {
 import { sendNotificationSignupOptInEmail } from "@/services/emails/send-notification-signup-optin-email";
 import { generateSecureToken } from "@/utils/generate-secure-token";
 
+// Gültigkeitsdauer des Bestätigungslinks in der Opt-In-E-Mail
 const CONFIRMATION_EXPIRATION_DAYS = 3;
 
+/** Minimal-Projektion eines Workshops, wie sie für die Anmeldung benötigt wird. */
 interface ActiveWorkshop {
     id: number;
     titel: string;
 }
 
+/** Parameter für {@link insertNotificationSignup}. */
 interface InsertNotificationSignupOptions {
     confirmationToken: string;
     ipAddress: string | null;
@@ -27,6 +39,7 @@ interface InsertNotificationSignupOptions {
     workshop: ActiveWorkshop;
 }
 
+/** Parameter für {@link sendOptInEmailSafely}. */
 interface SendOptInEmailOptions {
     confirmationToken: string;
     notificationSignupData:
@@ -35,14 +48,36 @@ interface SendOptInEmailOptions {
     workshop: ActiveWorkshop;
 }
 
+/** Ergebnis von {@link createNotificationSignup}. */
 export interface CreateNotificationSignupResult {
+    /** Ob die Opt-In-Bestätigungs-E-Mail erfolgreich versendet werden konnte. */
     confirmationEmailSent: boolean;
+    /** ID des angelegten Anmeldedatensatzes. */
     notificationSignupId: string;
 }
 
+/**
+ * Server Action für die Workshop-Benachrichtigungs-Anmeldung (Double-Opt-In).
+ * Validiert die Eingaben, prüft Turnstile, speichert die Anmeldung mit
+ * Bestätigungs-/Abmelde-Token und versendet die Opt-In-E-Mail.
+ *
+ * Ein Fehler beim E-Mail-Versand führt NICHT zu einem geworfenen Error, da der
+ * Anmeldedatensatz zu diesem Zeitpunkt bereits gespeichert ist — stattdessen
+ * wird `confirmationEmailSent: false` zurückgegeben.
+ *
+ * @param data - Die vom Client übermittelten und gegen {@link createNotificationSignupSchema}
+ *               zu validierenden Anmeldedaten (Workshop, Name, E-Mail, Turnstile-Token)
+ * @returns Ein {@link CreateNotificationSignupResult} mit der angelegten `notificationSignupId`
+ *          und dem Status des E-Mail-Versands
+ * @throws Error bei ungültigen Eingaben, fehlgeschlagener Turnstile-Prüfung,
+ *         nicht verfügbarem Workshop oder einem Fehler beim Speichern in der DB
+ */
 export async function createNotificationSignup(
     data: CreateNotificationSignupData,
 ): Promise<CreateNotificationSignupResult> {
+
+    // Server-seitige Zod-Validierung — nie nur auf Client-Validierung verlassen,
+    //    da die Server Action theoretisch auch direkt (ohne UI) aufrufbar ist
     const validationResult =
         createNotificationSignupSchema.safeParse(
             data,
@@ -62,6 +97,7 @@ export async function createNotificationSignup(
     const notificationSignupData =
         validationResult.data;
 
+    // Bot-/Spam-Schutz: ohne gültiges Turnstile-Token keine Verarbeitung
     const isHuman = await verifyTurnstileToken(
         notificationSignupData.turnstile.token,
     );
@@ -109,6 +145,12 @@ export async function createNotificationSignup(
     };
 }
 
+/**
+ * Lädt einen Workshop anhand seiner ID, aber nur wenn er aktiv ist.
+ *
+ * @param workshopId - Die ID des zu prüfenden Workshops
+ * @returns Der Workshop (ID, Titel) oder `null`, falls inaktiv/nicht vorhanden
+ */
 async function getActiveWorkshop(
     workshopId: number,
 ): Promise<ActiveWorkshop | null> {
@@ -127,6 +169,13 @@ async function getActiveWorkshop(
         : null;
 }
 
+/**
+ * Speichert die Anmeldung in der Datenbank inkl. Bestätigungs- und Abmelde-Token.
+ *
+ * @param options - Siehe {@link InsertNotificationSignupOptions}
+ * @returns Die ID des angelegten Anmeldedatensatzes
+ * @throws Error, falls das Speichern fehlschlägt
+ */
 async function insertNotificationSignup({
     confirmationToken,
     ipAddress,
@@ -183,6 +232,13 @@ async function insertNotificationSignup({
     }
 }
 
+/**
+ * Versendet die Opt-In-E-Mail und fängt dabei jeden Fehler ab, statt ihn zu werfen —
+ * die Anmeldung selbst wurde bereits gespeichert und soll dadurch nicht scheitern.
+ *
+ * @param options - Siehe {@link SendOptInEmailOptions}
+ * @returns `true`, wenn die E-Mail erfolgreich versendet werden konnte, sonst `false`
+ */
 async function sendOptInEmailSafely({
     confirmationToken,
     notificationSignupData,
@@ -190,6 +246,8 @@ async function sendOptInEmailSafely({
     workshop,
 }: SendOptInEmailOptions): Promise<boolean> {
     try {
+
+        // Absolute URL nötig, da der Link per E-Mail versendet wird (kein relativer Request-Kontext)
         const baseUrl = getBaseUrl();
 
         const emailData =
@@ -225,6 +283,12 @@ async function sendOptInEmailSafely({
     }
 }
 
+/**
+ * Liest die Basis-URL der Anwendung aus der Umgebungsvariable, ohne trailing Slash.
+ *
+ * @returns Die konfigurierte Basis-URL
+ * @throws Error, falls `NEXT_PUBLIC_BASE_URL` nicht gesetzt ist
+ */
 function getBaseUrl(): string {
     const baseUrl =
         process.env.NEXT_PUBLIC_BASE_URL;
@@ -238,6 +302,12 @@ function getBaseUrl(): string {
     return baseUrl.replace(/\/$/, "");
 }
 
+/**
+ * Ermittelt die Client-IP-Adresse und fängt dabei jeden Fehler ab — die Anmeldung
+ * soll auch ohne bekannte IP-Adresse gespeichert werden können.
+ *
+ * @returns Die Client-IP-Adresse oder `null`, falls nicht ermittelbar
+ */
 async function getClientIpSafely():
     Promise<string | null> {
     try {

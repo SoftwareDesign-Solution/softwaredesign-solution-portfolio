@@ -1,15 +1,34 @@
+/**
+ * @file workshop-card-appointments.tsx
+ * @description Termin-Liste innerhalb einer Workshop-Karte, inkl. "keine Termine"-
+ * Hinweis und Zusammenfassung weiterer Termine.
+ * @module app/_components/sections/workshop-card/workshop-card-appointments
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import TerminRow from "@/components/termin-row";
 import { type Termin } from "@/types/termin";
 
+// Mehr Termine werden nicht direkt in der Karte angezeigt, sondern als "+ N weitere" zusammengefasst
 const MAX_VISIBLE_APPOINTMENTS = 3;
 
+/** Props für {@link WorkshopCardAppointments}. */
 interface WorkshopCardAppointmentsProps {
     termine: Termin[];
 }
 
+/**
+ * Zeigt die ersten {@link MAX_VISIBLE_APPOINTMENTS} Termine eines Workshops in der Karte
+ * an; weitere Termine werden zusammengefasst, fehlende Termine als Hinweis dargestellt.
+ *
+ * @param props - Siehe {@link WorkshopCardAppointmentsProps}
+ * @returns Die Termin-Liste der Karte
+ */
 export default function WorkshopCardAppointments({
     termine,
 }: WorkshopCardAppointmentsProps) {
+
+    // Nur die ersten MAX_VISIBLE_APPOINTMENTS Termine anzeigen, den Rest zusammenfassen
     const visibleTermine = termine.slice(
         0,
         MAX_VISIBLE_APPOINTMENTS,

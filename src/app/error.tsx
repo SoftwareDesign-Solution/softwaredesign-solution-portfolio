@@ -1,13 +1,31 @@
+/**
+ * @file error.tsx
+ * @description Next.js `error.tsx`-Boundary für Laufzeitfehler innerhalb der App
+ * (außerhalb des Root-Layouts).
+ * @module app/error
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 "use client";
 
 import Link from "next/link";
 //import { useEffect } from "react";
 
+/** Props für {@link Error}, wie von Next.js an jede `error.tsx`-Boundary übergeben. */
 interface ErrorPageProps {
   error: Error & { digest?: string };
+  /** Von Next.js bereitgestellt: rendert das betroffene Segment erneut, ohne die ganze Seite neu zu laden. */
   reset: () => void;
 }
 
+/**
+ * Next.js `error.tsx`-Boundary für Laufzeitfehler innerhalb der App. Bietet
+ * "Erneut versuchen" sowie einen Link zur Startseite bzw. Anfrageseite und zeigt,
+ * falls vorhanden, die Fehler-`digest`-ID zur Nachverfolgung an.
+ *
+ * @param props - Siehe {@link ErrorPageProps}
+ * @returns Die Fehlerseite
+ */
 export default function Error({ error, reset }: ErrorPageProps) {
 
   /*

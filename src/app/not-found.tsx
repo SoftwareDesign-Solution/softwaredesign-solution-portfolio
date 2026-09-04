@@ -1,5 +1,18 @@
+/**
+ * @file not-found.tsx
+ * @description Globale Next.js `not-found.tsx`-Seite (404) mit Links zurück zur
+ * Startseite und den wichtigsten Sektionen.
+ * @module app/not-found
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import Link from "next/link";
 
+/**
+ * Globale Next.js `not-found.tsx`-Seite (404) mit Links zurück zur Startseite und den wichtigsten Sektionen.
+ *
+ * @returns Die 404-Seite
+ */
 export default function NotFound() {
   return (
     <div className="px-12 pt-30 pb-35 text-center">

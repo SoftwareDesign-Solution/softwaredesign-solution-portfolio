@@ -1,3 +1,10 @@
+/**
+ * @file address-fields.tsx
+ * @description Wiederverwendbares Adress-Feldset (Firma, Straße, PLZ, Ort) für react-hook-form.
+ * @module components/forms/shared/address-fields
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import { useFormContext, useFormState } from "react-hook-form";
 
 import type { AddressFormData } from "@/schemas/shared/address.schema";
@@ -6,20 +13,31 @@ import ErrorMessage from "./error-message";
 import Label from "./label";
 import TextField from "./text-field";
 
-
+/** Welcher Adress-Objektpfad im Formular befüllt wird. */
 type AddressFieldName =
     | "adresse"
     | "rechnungsadresse"; 
 
+/** Minimal-Shape, das react-hook-form für den generischen Zugriff auf `name` benötigt. */
 type FormWithAddresses = {
     adresse?: AddressFormData;
     rechnungsadresse?: AddressFormData;
 };
 
+/** Props für {@link AddressFields}. */
 type AddressFieldsProps = {
+    /** Formularfeld-Präfix, unter dem die Adressfelder registriert werden (z.B. "adresse" oder "rechnungsadresse"). */
     name: AddressFieldName;
 };
 
+/**
+ * Wiederverwendbares Adress-Feldset (Firma, Straße, PLZ, Ort) für react-hook-form.
+ * Liest über `useFormContext` das umgebende Formular aus, daher muss ein
+ * `FormProvider` (z.B. via react-hook-forms `<FormProvider>`) im Baum vorhanden sein.
+ *
+ * @param props - Siehe {@link AddressFieldsProps}
+ * @returns Das Adress-Feldset
+ */
 export default function AddressFields({
     name,
 }: AddressFieldsProps) {

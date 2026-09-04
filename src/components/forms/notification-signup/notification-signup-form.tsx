@@ -1,4 +1,11 @@
- /* eslint-disable react-hooks/refs */
+/**
+ * @file notification-signup-form.tsx
+ * @description Kompaktes Formular für die Anmeldung zu Workshop-Benachrichtigungen (Double-Opt-In).
+ * @module components/forms/notification-signup/notification-signup-form
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
+/* eslint-disable react-hooks/refs */
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,7 +25,14 @@ import TextField from "../shared/text-field";
 import { getNotificationSignupFormDefaultValues } from "./notification-signup-form-default-values";
 import { notificationSignupErrorMessage, notificationSignupSuccessMessage } from "./notification-signup-form-status-messages";
 
-
+/**
+ * Kompaktes Formular für die Anmeldung zu Workshop-Benachrichtigungen (Double-Opt-In).
+ * Ruft bei erfolgreichem Absenden die Server Action {@link createNotificationSignup}
+ * auf und zeigt das Erfolgs-/Fehler-Status-Modal an.
+ *
+ * @param props - Siehe {@link WorkshopFormProps}
+ * @returns Das Benachrichtigungs-Formular
+ */
 export default function NotificationSignupForm({ 
     workshop, 
     onClose, 
@@ -44,12 +58,19 @@ export default function NotificationSignupForm({
         setValue 
     } = methods;
 
-
+    // Nach einem fehlgeschlagenen Versuch muss die Sicherheitsabfrage neu gelöst werden,
+    // da das zuvor erzeugte Token bereits verbraucht sein könnte
     const resetTurnstile = () => {
         turnstileRef.current?.reset();
         setValue("turnstile.token", "");
     };
     
+    /**
+     * Zeigt das Fehler-Status-Modal an und setzt Turnstile zurück, damit ein
+     * erneuter Versuch möglich ist.
+     *
+     * @param data - Die zuletzt abgesendeten Anmeldedaten
+     */
     function handleNotificationSignupError(
         data: CreateNotificationSignupData,
     ): void {
@@ -60,6 +81,13 @@ export default function NotificationSignupForm({
         resetTurnstile();
     }
 
+    /**
+     * react-hook-form Submit-Handler: reichert die Formulardaten um die
+     * Workshop-Referenz an, ruft die Server Action auf und zeigt je nach
+     * Ergebnis das Erfolgs- oder Fehler-Modal.
+     *
+     * @param data - Die validierten Formulardaten
+     */
     const handleNotificationSignupSubmit: SubmitHandler<NotificationSignupFormData> = async (data) => {
         
         const notificationSignupData: CreateNotificationSignupData = createNotificationSignupData(workshop, data);
@@ -169,6 +197,14 @@ export default function NotificationSignupForm({
     );
 };
 
+/**
+ * Reichert die Formulardaten um die Workshop-Referenz an, die die Server Action
+ * zusätzlich zu den Formularfeldern benötigt.
+ *
+ * @param workshop - Der Workshop, für den die Anmeldung gilt
+ * @param formData - Die validierten Formulardaten
+ * @returns Die vollständigen Daten für die Server Action {@link createNotificationSignup}
+ */
 function createNotificationSignupData(
     workshop: WorkshopFormProps["workshop"],
     formData: NotificationSignupFormData,
@@ -182,6 +218,13 @@ function createNotificationSignupData(
     };
 }
 
+/**
+ * Kürzt die Anmelde-ID auf den ersten UUID-Abschnitt, für eine kurze,
+ * vorzeigbare Referenz im Erfolgs-Modal.
+ *
+ * @param notificationSignupId - Die vollständige UUID der Anmeldung
+ * @returns Der erste Abschnitt der UUID (vor dem ersten Bindestrich)
+ */
 function getShortNotificationSignupReference(
     notificationSignupId: string,
 ): string {

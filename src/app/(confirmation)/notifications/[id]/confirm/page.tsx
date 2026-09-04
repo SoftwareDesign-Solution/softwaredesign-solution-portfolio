@@ -1,17 +1,35 @@
+/**
+ * @file page.tsx
+ * @description Seite /notifications/[id]/confirm: bestätigt serverseitig die
+ * Workshop-Benachrichtigungs-Anmeldung (Double-Opt-In) und zeigt das Ergebnis an.
+ * @module app/(confirmation)/notifications/[id]/confirm/page
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import { confirmNotificationSignup } from "@/app/actions/confirm-notification-signup";
 
 import ConfirmationDetails from "../../../_components/confirmation-details";
 import ConfirmationStatus from "../../../_components/confirmation-status";
 
+/** Props für {@link NotificationConfirmationPage}. */
 interface NotificationConfirmationPageProps {
     params: Promise<{
+        /** ID der Benachrichtigungs-Anmeldung aus der URL. */
         id: string;
     }>;
     searchParams: Promise<{
+        /** Bestätigungs-Token aus dem Query-Parameter des E-Mail-Links. */
         token?: string;
     }>;
 }
 
+/**
+ * Bestätigt serverseitig die Workshop-Benachrichtigungs-Anmeldung (Double-Opt-In)
+ * über {@link confirmNotificationSignup} und zeigt das Ergebnis an.
+ *
+ * @param props - Siehe {@link NotificationConfirmationPageProps}
+ * @returns Die Bestätigungsseite (Erfolg oder "nicht gefunden")
+ */
 export default async function NotificationConfirmationPage({
     params,
     searchParams,
@@ -78,6 +96,11 @@ export default async function NotificationConfirmationPage({
     );
 }
 
+/**
+ * Fallback-Ansicht für ungültige, abgelaufene oder fehlende Bestätigungslinks.
+ *
+ * @returns Die "nicht gefunden"-Ansicht
+ */
 function InvalidNotificationConfirmation() {
     return (
         <ConfirmationStatus

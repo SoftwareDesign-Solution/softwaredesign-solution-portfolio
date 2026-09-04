@@ -1,5 +1,17 @@
+/**
+ * @file not-found.tsx
+ * @description Segment-spezifische 404-Seite für /workshops/[slug], wenn kein Workshop mit dem Slug existiert.
+ * @module app/workshops/[slug]/not-found
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import Link from "next/link";
 
+/**
+ * Segment-spezifische 404-Seite für /workshops/[slug], wenn kein Workshop mit dem Slug existiert.
+ *
+ * @returns Die Workshop-404-Seite
+ */
 export default function WorkshopNotFound() {
   return (
     <div className="px-12 pt-25 pb-30 text-center">

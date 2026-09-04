@@ -1,3 +1,12 @@
+/**
+ * @file booking.schema.ts
+ * @description Zod-Schemas für die verbindliche Workshop-Buchung: Formulareingaben,
+ * Server-Action-Eingaben sowie die Daten für die Buchungsbestätigungs-E-Mail.
+ * Rechnungsadress-Validierung wird über {@link billingAddressSchema} beigemischt.
+ * @module schemas/booking
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import { z } from "zod";
 
 import {
@@ -10,6 +19,7 @@ import { terminSchema } from "./shared/termin.schema";
 import { turnstileSchema } from "./shared/turnstile-schema";
 import { workshopSchema } from "./shared/workshop.schema";
 
+/** Zustimmung zur Datenschutzerklärung: muss `true` sein, sonst Validierungsfehler. */
 const consentSchema = z
     .boolean()
     .refine((value) => value, {
@@ -17,6 +27,7 @@ const consentSchema = z
             "Bitte bestätigen Sie die Datenschutzerklärung.",
     });
 
+/** Termin-Auswahl: `null` (nichts ausgewählt) wird als Validierungsfehler abgelehnt. */
 const bookingAppointmentSchema = terminSchema
     .nullable()
     .transform((termin, ctx) => {
@@ -33,6 +44,7 @@ const bookingAppointmentSchema = terminSchema
         return termin;
     });
 
+/** Teilnehmeranzahl: positive Ganzzahl. */
 const participantCountSchema = z
     .number()
     .int(
@@ -42,12 +54,14 @@ const participantCountSchema = z
         "Bitte geben Sie die Teilnehmeranzahl an.",
     );
 
+/** Gesamtpreis der Buchung: darf nicht negativ sein. */
 const totalPriceSchema = z
     .number()
     .nonnegative(
         "Der Gesamtpreis darf nicht negativ sein.",
     );
 
+/** Kernfelder der Buchung, unabhängig von Formular/Server-Action/E-Mail-Kontext */
 const bookingFields = {
     adresse: addressSchema,
 
@@ -83,6 +97,10 @@ const bookingFields = {
         .optional(),
 };
 
+/**
+ * Sicherheitsfelder, die nur bei der eigentlichen Formular-/Server-Action-Validierung
+ * benötigt werden, nicht aber beim Versand der Bestätigungs-E-Mail
+ */
 const verificationFields = {
     consent:
         consentSchema,
@@ -116,21 +134,28 @@ const bookingConfirmationEmailBaseSchema =
             .optional(),
     });
 
+/**
+ * Validierung der Formulareingaben im Frontend (ohne `workshop`, kommt aus dem
+ * Seitenkontext), inkl. bedingter Rechnungsadress-Prüfung über {@link billingAddressSchema}.
+ */
 export const bookingFormSchema =
     bookingFormBaseSchema.and(
         billingAddressSchema,
     );
 
+/** Validierung der Daten, die die Server Action beim Anlegen der Buchung erhält. */
 export const createBookingSchema =
     createBookingBaseSchema.and(
         billingAddressSchema,
     );
 
+/** Validierung der Daten für den Versand der Buchungsbestätigungs-E-Mail (inkl. berechnetem Gesamtpreis). */
 export const sendBookingConfirmationEmailSchema =
     bookingConfirmationEmailBaseSchema.and(
         billingAddressSchema,
     );
 
+// TypeScript-Typen, aus den obigen Schemas abgeleitet
 export type BookingFormInput = z.input<
     typeof bookingFormSchema
 >;

@@ -1,3 +1,10 @@
+/**
+ * @file participant-stepper-section.tsx
+ * @description Numerisches Eingabefeld mit +/- Buttons zur Auswahl der Teilnehmeranzahl (1–20).
+ * @module components/forms/shared/sections/participant-stepper-section
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 "use client";
 
 import { useFormContext } from "react-hook-form";
@@ -7,15 +14,24 @@ import Button from "@/components/ui/button";
 import SectionHeading from "../section-heading";
 import TextField from "../text-field";
 
-
+/** Minimal-Shape, das react-hook-form für den Zugriff auf `teilnehmerzahl` benötigt. */
 type TeilnehmerzahlFormData = {
+    /** Abschnittsnummer für die {@link SectionHeading}-Anzeige. */
     teilnehmerzahl?: number;
 };
 
+/** Props für {@link ParticipantStepperSection}. */
 interface ParticipantStepperSectionProps {
+    /** Abschnittsnummer für die {@link SectionHeading}-Anzeige. */
     num: string;
 }
 
+/**
+ * Numerisches Eingabefeld mit +/- Buttons zur Auswahl der Teilnehmeranzahl (1–20).
+ *
+ * @param props - Siehe {@link ParticipantStepperSectionProps}
+ * @returns Den Formular-Abschnitt
+ */
 export default function ParticipantStepperSection({
     num
 }: ParticipantStepperSectionProps) {
@@ -27,22 +43,23 @@ export default function ParticipantStepperSection({
         setValue,
     } = useFormContext<TeilnehmerzahlFormData>();
 
+    // Erhöht/verringert die Teilnehmerzahl um delta, dabei stets zwischen 1 und 20 begrenzt
     const stepParticipants = (delta: number) => {
-    const current = Math.min(
-        Math.max(getValues("teilnehmerzahl") || 1, 1),
-        20,
-    );
+        const current = Math.min(
+            Math.max(getValues("teilnehmerzahl") || 1, 1),
+            20,
+        );
 
-    const next = Math.min(
-        Math.max(current + delta, 1),
-        20,
-    );
+        const next = Math.min(
+            Math.max(current + delta, 1),
+            20,
+        );
 
-    setValue("teilnehmerzahl", next, {
-        shouldValidate: true,
-        shouldDirty: true,
-    });
-};
+        setValue("teilnehmerzahl", next, {
+            shouldValidate: true,
+            shouldDirty: true,
+        });
+    };
 
     return (
         <section className="mb-8">

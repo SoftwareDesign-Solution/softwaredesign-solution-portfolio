@@ -1,8 +1,22 @@
+/**
+ * @file get-workshops.ts
+ * @description Server Action zum Laden aller aktiven Workshops für die Startseite.
+ * @module app/actions/get-workshops
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import { db } from "@/lib/db";
 import { Workshop } from "@/types/workshop";
 
+/**
+ * Lädt alle aktiven Workshops inklusive Trainer und aktiven Terminen,
+ * sortiert nach der redaktionellen Reihenfolge und anschließend nach Titel.
+ *
+ * @returns Liste aller aktiven Workshops
+ */
 export async function getWorkshops(): Promise<Workshop[]> {
     
+    // Termine werden als JSON-Array direkt in der DB aggregiert, um N+1-Queries zu vermeiden
     const workshops = await db.query(`
         SELECT
             w.id,

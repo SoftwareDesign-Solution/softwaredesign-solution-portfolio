@@ -1,11 +1,21 @@
+/**
+ * @file button.tsx
+ * @description Zentraler, wiederverwendbarer Button für das gesamte Projekt.
+ * @module components/ui/button
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 import Link from "next/link";
 
-
+/** Visuelle Variante des Buttons. */
 type ButtonVariant = "primary" | "secondary" | "dark" | "muted" | "outline" | "dashed";
+
+/** Größe/Padding des Buttons. */
 type ButtonSize = "xs" |"sm" | "lg" | "icon";
 
+/** Props für {@link Button}. */
 interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "disabled" | "type"> {
   variant?: ButtonVariant;
   size?: ButtonSize;
@@ -21,6 +31,7 @@ interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "dis
   children: ReactNode;
 }
 
+// Tailwind-Klassen je Variante, getrennt nach normalem und deaktiviertem Zustand
 const VARIANT_STYLES: Record<ButtonVariant, { base: string; disabled: string }> = {
   primary: {
     base: "bg-primary-700 text-white hover:bg-primary-700/90",
@@ -48,6 +59,7 @@ const VARIANT_STYLES: Record<ButtonVariant, { base: string; disabled: string }> 
   },
 };
 
+// Tailwind-Klassen je Größe
 const SIZE_STYLES: Record<ButtonSize, string> = {
     xs: "px-4.5 py-3 text-[14px] font-medium",
     sm: "px-6 py-3 text-[14.5px] font-semibold",
@@ -55,6 +67,14 @@ const SIZE_STYLES: Record<ButtonSize, string> = {
     icon: "flex h-9 w-9 items-center justify-center text-lg font-semibold",
 };
 
+/**
+ * Zentraler, wiederverwendbarer Button für das gesamte Projekt (Formulare, Sidebar, Modals).
+ * Unterstützt verschiedene Varianten/Größen, einen submit-gebundenen Ladezustand
+ * (`isSubmitting`) sowie optionales Rendern als Link (`href`).
+ *
+ * @param props - Siehe {@link ButtonProps}
+ * @returns Den Button (oder Link, falls `href` gesetzt und nicht deaktiviert)
+ */
 export default function Button({
   variant = "primary",
   size = "lg",

@@ -1,3 +1,11 @@
+/**
+ * @file participants-section.tsx
+ * @description Liste der Teilnehmer-Formularfelder, deren Anzahl automatisch mit
+ * dem `teilnehmerzahl`-Feld synchronisiert wird.
+ * @module components/forms/shared/sections/participants-section
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import { useEffect } from "react";
 import { useFieldArray, useFormContext, useFormState, useWatch } from "react-hook-form";
 
@@ -7,11 +15,21 @@ import ErrorMessage from "../error-message";
 import SectionHeading from "../section-heading";
 import TextField from "../text-field";
 
-
+/** Props für {@link ParticipantsSection}. */
 interface ParticipantsSectionProps {
+    /** Abschnittsnummer für die {@link SectionHeading}-Anzeige. */
     num: string;
 }
 
+/**
+ * Liste der Teilnehmer-Formularfelder (Vorname, Nachname, E-Mail je Teilnehmer).
+ * Die Anzahl der Zeilen wird automatisch mit dem `teilnehmerzahl`-Feld synchronisiert:
+ * ändert sich dieses (z.B. über den {@link ParticipantStepperSection}), werden Zeilen
+ * über `useFieldArray` hinzugefügt oder entfernt.
+ *
+ * @param props - Siehe {@link ParticipantsSectionProps}
+ * @returns Den Formular-Abschnitt
+ */
 export default function ParticipantsSection({
     num
 }: ParticipantsSectionProps) {
@@ -37,6 +55,8 @@ export default function ParticipantsSection({
         name: "teilnehmer",
     });
 
+    // Synchronisiert die Anzahl der Teilnehmer-Zeilen mit dem teilnehmerzahl-Feld:
+    // fehlt eine Zeile, wird sie mit leeren Werten ergänzt; ist eine zu viel, wird sie entfernt
     useEffect(() => {
             
         const count = Math.min(Math.max(Number(participantCount) || 1, 1), 20);

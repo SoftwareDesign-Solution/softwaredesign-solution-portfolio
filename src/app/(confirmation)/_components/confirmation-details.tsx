@@ -1,14 +1,31 @@
+/**
+ * @file confirmation-details.tsx
+ * @description Generische Label/Wert-Detailliste für die Bestätigungsseiten
+ * (Benachrichtigungs-Anmeldung, Abmeldung, Angebotsanfrage).
+ * @module app/(confirmation)/_components/confirmation-details
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import { type ReactNode } from "react";
 
+/** Ein einzelner Label/Wert-Eintrag in der Detailliste. */
 export interface ConfirmationDetailItem {
     label: string;
     value: ReactNode;
 }
 
+/** Props für {@link ConfirmationDetails}. */
 interface ConfirmationDetailsProps {
     items: ConfirmationDetailItem[];
 }
 
+/**
+ * Zeigt eine Liste von Label/Wert-Paaren (z.B. Workshop, Termin, Firma) in einer
+ * dezenten Box, wie sie auf allen Bestätigungsseiten verwendet wird.
+ *
+ * @param props - Siehe {@link ConfirmationDetailsProps}
+ * @returns Die Detailliste
+ */
 export default function ConfirmationDetails({
     items,
 }: ConfirmationDetailsProps) {

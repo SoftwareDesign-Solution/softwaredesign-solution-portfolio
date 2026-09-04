@@ -1,3 +1,11 @@
+/**
+ * @file company-data-section.tsx
+ * @description Formular-Abschnitt des Kontaktformulars für Unternehmensdaten
+ * (Firmenadresse, Webseite, Bestandskunden-Checkbox).
+ * @module components/forms/contact-request/sections/company-data-section
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import { useFormContext } from "react-hook-form";
 
 import { type ContactRequestFormData } from "@/schemas/contact-request.schema";
@@ -6,6 +14,12 @@ import AddressFields from "../../shared/address-fields";
 import Label from "../../shared/label";
 import TextField from "../../shared/text-field";
 
+/**
+ * Formular-Abschnitt des Kontaktformulars für Unternehmensdaten (Firmenadresse,
+ * optionale Webseite, Bestandskunden-Checkbox).
+ *
+ * @returns Den Formular-Abschnitt
+ */
 export default function CompanyDataSection() {
     const { register } =
         useFormContext<ContactRequestFormData>();

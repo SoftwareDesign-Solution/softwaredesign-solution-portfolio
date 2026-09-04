@@ -1,5 +1,13 @@
-// src/app/design-system/page.tsx
+/**
+ * @file page.tsx
+ * @description Interne Styleguide-/Design-System-Seite (/design-system): zeigt
+ * Farbpalette, Typografie, Buttons, Formularelemente und Cards zur Referenz
+ * während der Entwicklung. Nicht Teil der öffentlichen Website-Navigation.
+ * @module app/design-system/page
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
 
+/** Ein Farbmuster-Eintrag im Styleguide (Name, CSS-Variable, Hex-Wert, Tailwind-Klasse). */
 interface Swatch {
   name: string;
   varName: string;
@@ -9,6 +17,7 @@ interface Swatch {
   light?: boolean;
 }
 
+// Statische Referenzdaten für den Styleguide, abgeleitet aus den Theme-CSS-Variablen
 const PRIMARY_SWATCHES: Swatch[] = [
   { name: "50", varName: "--color-primary-50", hex: "#eff4f9", className: "bg-primary-50" },
   { name: "100", varName: "--color-primary-100", hex: "#dce8f2", className: "bg-primary-100" },
@@ -52,6 +61,13 @@ const WARNING_SWATCHES: Swatch[] = [
   { name: "700", varName: "--color-warning-700", hex: "#7d5619", className: "bg-warning-700", light: true },
 ];
 
+/**
+ * Rastergrid aus Farbmustern mit Theme-Klasse (nutzt echte Tailwind-Klassen statt Inline-Styles).
+ *
+ * @param props.title - Überschrift über dem Raster
+ * @param props.swatches - Anzuzeigende Farbmuster
+ * @returns Das Farbraster
+ */
 function SwatchGrid({ title, swatches }: { title: string; swatches: Swatch[] }) {
   return (
     <div className="mb-10">
@@ -87,6 +103,13 @@ const SUCCESS_BRIGHT_SWATCHES: Swatch[] = [
   { name: "700", varName: "success-bright-700", hex: "#15803d", className: "", light: true },
 ];
 
+/**
+ * Rastergrid aus Farbmustern mit Inline-Style-Hex-Werten (für Farben, die (noch) nicht im Theme sind).
+ *
+ * @param props.title - Überschrift über dem Raster
+ * @param props.swatches - Anzuzeigende Farbmuster
+ * @returns Das Farbraster
+ */
 function InlineSwatchGrid({ title, swatches }: { title: string; swatches: Swatch[] }) {
   return (
     <div>
@@ -110,6 +133,13 @@ function InlineSwatchGrid({ title, swatches }: { title: string; swatches: Swatch
   );
 }
 
+/**
+ * Nummerierte Abschnittsüberschrift (z.B. "01 — Farbwerte") für den Styleguide.
+ *
+ * @param props.num - Die Abschnittsnummer
+ * @param props.title - Der Abschnittstitel
+ * @returns Die Abschnittsüberschrift
+ */
 function SectionHeading({ num, title }: { num: string; title: string }) {
   return (
     <div className="mb-6 flex items-baseline gap-3.5 border-b border-border pb-4">
@@ -119,6 +149,13 @@ function SectionHeading({ num, title }: { num: string; title: string }) {
   );
 }
 
+/**
+ * Interne Styleguide-/Design-System-Seite (/design-system): zeigt Farbpalette,
+ * Typografie, Buttons, Formularelemente und Cards zur Referenz während der Entwicklung.
+ * Nicht Teil der öffentlichen Website-Navigation.
+ *
+ * @returns Die Styleguide-Seite
+ */
 export default function DesignSystemPage() {
   return (
     <article className="min-h-screen bg-surface">

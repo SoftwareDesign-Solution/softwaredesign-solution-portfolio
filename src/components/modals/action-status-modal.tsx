@@ -1,19 +1,37 @@
+/**
+ * @file action-status-modal.tsx
+ * @description Generisches Erfolgs-/Fehler-Modal nach einer Formular-Aktion
+ * (Buchung, Angebotsanfrage, Kontaktanfrage, Benachrichtigung).
+ * @module components/modals/action-status-modal
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import { ActionStatusContent, ActionStatusRenderContext, ActionStatusVariant } from "@/types/action-status-content";
 
 import Button from "../ui/button";
 import Modal from "./modal";
 
-
+// Farben für den Status-Punkt und den Kicker-Text je nach Erfolg/Fehler
 const VARIANT_STYLES: Record<ActionStatusVariant, { dot: string; text: string }> = {
   success: { dot: "bg-success-500", text: "text-success-600" },
   error: { dot: "bg-error-500", text: "text-error-600" },
 };
- 
+
+/** Props für {@link ActionStatusModal}. */
 export interface ActionStatusModalProps extends ActionStatusContent {
   open: boolean;
+  /** Schließt das Modal (wird auch als `close` in den render-Kontext gereicht). */
   onClose: () => void;
 }
 
+/**
+ * Generisches Erfolgs-/Fehler-Modal, das nach dem Absenden eines Formulars über
+ * {@link useModal}.showActionStatus angezeigt wird. Der eigentliche Inhalt (Überschrift,
+ * Text, Meta-Daten) wird vom aufrufenden Formular über {@link ActionStatusContent} bestimmt.
+ *
+ * @param props - Siehe {@link ActionStatusModalProps}
+ * @returns Das Status-Modal
+ */
 export default function ActionStatusModal({
   open,
   onClose,

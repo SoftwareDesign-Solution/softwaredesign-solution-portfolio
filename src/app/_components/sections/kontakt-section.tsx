@@ -1,5 +1,17 @@
+/**
+ * @file kontakt-section.tsx
+ * @description Abschließende Call-to-Action-Sektion der Startseite, verlinkt zur Anfrageseite.
+ * @module app/_components/sections/kontakt-section
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import Link from "next/link";
 
+/**
+ * Abschließende Call-to-Action-Sektion der Startseite, verlinkt zur Anfrageseite.
+ *
+ * @returns Die Kontakt-Sektion
+ */
 export default function KontaktSection() {
     return (
         <section id="kontakt" className="scroll-mt-18 px-6 py-16 md:px-12 md:py-28">

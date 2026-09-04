@@ -1,3 +1,10 @@
+/**
+ * @file header.tsx
+ * @description Sticky Seitenkopf mit Logo, Desktop-Navigation und mobilem Hamburger-Menü.
+ * @module app/_components/header
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 'use client';
 
 import Image from "next/image";
@@ -8,6 +15,11 @@ import DesktopNavbar from "./desktop-navbar";
 import HamburgerButton from './hamburger-button';
 import MobileMenu from './mobile-menu';
 
+/**
+ * Sticky Seitenkopf mit Logo, Desktop-Navigation und mobilem Hamburger-Menü.
+ *
+ * @returns Den Seitenkopf
+ */
 export default function Header() {
 
     const [menuOpen, setMenuOpen] = useState(false);

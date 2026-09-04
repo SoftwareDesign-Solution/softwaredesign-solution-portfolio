@@ -1,3 +1,11 @@
+/**
+ * @file booking-form.tsx
+ * @description Mehrstufiges Buchungsformular für einen Workshop (Termin,
+ * Teilnehmer, Adressen, Zusammenfassung, Zustimmung, Turnstile).
+ * @module components/forms/booking/booking-form
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 /* eslint-disable react-hooks/refs */
 "use client";
 
@@ -25,6 +33,15 @@ import SubmitFooter from "../shared/submit-footer";
 import { getBookingFormDefaultValues } from "./booking-form-default-values";
 import { bookingErrorMessage, bookingSuccessMessage } from "./booking-form-status-messages";
 
+/**
+ * Mehrstufiges Buchungsformular für einen Workshop (Termin, Teilnehmer, Adressen,
+ * Zusammenfassung, Zustimmung, Turnstile). Ruft bei erfolgreichem Absenden die
+ * Server Action {@link createBooking} auf und zeigt anschließend das Erfolgs-
+ * bzw. Fehler-Status-Modal über `onSuccess`/`onError` an.
+ *
+ * @param props - Siehe {@link WorkshopFormProps}
+ * @returns Das Buchungsformular
+ */
 export default function BookingForm({ 
     workshop, 
     onClose, 
@@ -46,11 +63,19 @@ export default function BookingForm({
     // Datenschutzerklärung & Sicherheitsabfrage (Turnstile)
     const turnstileRef = useRef<TurnstileRef>(null);
 
+    // Nach einem fehlgeschlagenen Versuch muss die Sicherheitsabfrage neu gelöst werden,
+    // da das zuvor erzeugte Token bereits verbraucht sein könnte
     const resetTurnstile = () => {
         turnstileRef.current?.reset();
         setValue("turnstile.token", "");
     };
 
+    /**
+     * Zeigt das Fehler-Status-Modal an und setzt Turnstile zurück, damit ein
+     * erneuter Versuch möglich ist.
+     *
+     * @param bookingData - Die zuletzt abgesendeten Buchungsdaten
+     */
     function handleBookingError(
         bookingData: CreateBookingData,
     ): void {
@@ -65,6 +90,13 @@ export default function BookingForm({
         resetTurnstile();
     }
 
+    /**
+     * react-hook-form Submit-Handler: reichert die Formulardaten um die
+     * Workshop-Referenz an, ruft die Server Action auf und zeigt je nach
+     * Ergebnis das Erfolgs- oder Fehler-Modal.
+     *
+     * @param formData - Die validierten Formulardaten
+     */
     const handleBookingSubmit: SubmitHandler<BookingFormData> = async (formData) => {
         
         const bookingData = createBookingData(
@@ -167,6 +199,14 @@ export default function BookingForm({
     );
 }
 
+/**
+ * Reichert die Formulardaten um die Workshop-Referenz an, die die Server Action
+ * zusätzlich zu den Formularfeldern benötigt.
+ *
+ * @param workshop - Der Workshop, für den gebucht wird
+ * @param formData - Die validierten Formulardaten
+ * @returns Die vollständigen Daten für die Server Action {@link createBooking}
+ */
 function createBookingData(
     workshop: WorkshopFormProps["workshop"],
     formData: BookingFormData,
@@ -180,6 +220,13 @@ function createBookingData(
     };
 }
 
+/**
+ * Kürzt die Buchungs-ID auf den ersten UUID-Abschnitt, für eine kurze,
+ * vorzeigbare Referenz im Erfolgs-Modal.
+ *
+ * @param bookingId - Die vollständige UUID der Buchung
+ * @returns Der erste Abschnitt der UUID (vor dem ersten Bindestrich)
+ */
 function getShortBookingReference(
     bookingId: string,
 ): string {

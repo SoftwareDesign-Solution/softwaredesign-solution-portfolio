@@ -1,6 +1,22 @@
+/**
+ * @file workshop-details.tsx
+ * @description Hauptinhalt der Workshop-Detailseite: Beschreibung, Agenda,
+ * Zielgruppe/Voraussetzungen, Lernziele und Trainer-Profil.
+ * @module app/workshops/[slug]/_components/workshop-details
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import SectionHeader from "@/components/section-header";
 import { Workshop } from "@/types/workshop";
 
+/**
+ * Hauptinhalt der Workshop-Detailseite: Beschreibung, Agenda, Zielgruppe/Voraussetzungen,
+ * Lernziele und Trainer-Profil. Erwartet, dass Agenda/Zielgruppe/Voraussetzungen/Lernziele
+ * bereits befüllt sind (non-null assertions), da diese Felder in der Praxis stets gesetzt werden.
+ *
+ * @param workshop - Der anzuzeigende Workshop
+ * @returns Den Hauptinhalt der Detailseite
+ */
 export default function WorkshopDetails(workshop: Workshop) {
     return (
         <section>
@@ -10,6 +26,7 @@ export default function WorkshopDetails(workshop: Workshop) {
                 
                 <SectionHeader title="Beschreibung" size="sm">Über den Workshop</SectionHeader>
 
+                {/* HTML kommt aus einem redaktionell gepflegten Rich-Text-Feld der DB, nicht von Nutzereingaben */}
                 <div 
                     id="description" 
                     className="text-base max-w-3xl wrap-anywhere hyphens-auto text-foreground"

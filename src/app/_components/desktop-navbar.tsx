@@ -1,5 +1,17 @@
+/**
+ * @file desktop-navbar.tsx
+ * @description Horizontale Desktop-Navigationsleiste mit Anker-Links zu den Sektionen der Startseite.
+ * @module app/_components/desktop-navbar
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import Link from "next/link";
 
+/**
+ * Horizontale Navigationsleiste für Desktop-Ansichten (ab `md`), verlinkt zu den Anker-Sektionen der Startseite.
+ *
+ * @returns Die Desktop-Navigationsleiste
+ */
 export default function DesktopNavbar() {
     return (
         <nav className="hidden justify-center gap-8 text-[11px] font-medium uppercase tracking-[1.5px] md:flex">

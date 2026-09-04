@@ -1,3 +1,10 @@
+/**
+ * @file contact-person-section.tsx
+ * @description Formular-Abschnitt für die Ansprechpartner-Daten (Anrede, Name, E-Mail, Telefon).
+ * @module components/forms/shared/sections/contact-person-section
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import { useFormContext, useFormState } from "react-hook-form";
 
 import { ContactPersonFormData } from "@/schemas/shared/contact-person.schema";
@@ -8,15 +15,23 @@ import SectionHeading from "../section-heading";
 import SelectField from "../select-field";
 import TextField from "../text-field";
 
-
+/** Minimal-Shape, das react-hook-form für diese Sektion benötigt. */
 type FormWithContactPerson = {
     ansprechpartner: ContactPersonFormData;
 };
 
+/** Props für {@link ContactPersonSection}. */
 interface ContactPersonSectionProps {
+    /** Abschnittsnummer für die {@link SectionHeading}-Anzeige. */
     num: string;
 }
 
+/**
+ * Formular-Abschnitt für die Ansprechpartner-Daten (Anrede, Name, E-Mail, Telefon).
+ *
+ * @param props - Siehe {@link ContactPersonSectionProps}
+ * @returns Den Formular-Abschnitt
+ */
 export default function ContactPersonSection({
     num
 }: ContactPersonSectionProps) {

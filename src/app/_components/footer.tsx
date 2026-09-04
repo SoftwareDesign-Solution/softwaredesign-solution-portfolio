@@ -1,5 +1,17 @@
-import Link from "next/dist/client/link";
+/**
+ * @file footer.tsx
+ * @description Globale Fußzeile mit Copyright-Hinweis und Links zu den rechtlichen Seiten.
+ * @module app/_components/footer
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
 
+import Link from "next/link";
+
+/**
+ * Globale Fußzeile mit Copyright-Hinweis und Links zu den rechtlichen Seiten.
+ *
+ * @returns Die Fußzeile
+ */
 export default function Footer() {
     return (
         <footer className="pt-10 px-12 pb-12 flex justify-between items-center border-t border-gray-200 text-sm text-gray-500 flex-wrap gap-6">

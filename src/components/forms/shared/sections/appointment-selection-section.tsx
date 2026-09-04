@@ -1,3 +1,11 @@
+/**
+ * @file appointment-selection-section.tsx
+ * @description Terminauswahl als Radio-Gruppe (visuell als Kartenliste). Zeigt bei
+ * fehlenden Terminen einen Hinweis, dass die Anfrage trotzdem möglich ist.
+ * @module components/forms/shared/sections/appointment-selection-section
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 "use client";
 
 import { Controller, useFormContext, useFormState } from "react-hook-form";
@@ -9,16 +17,28 @@ import { formatTerminStatus } from "@/utils/format-termin-status";
 
 import SectionHeading from "../section-heading";
 
-
+/** Minimal-Shape, das react-hook-form für den Zugriff auf `termin` benötigt. */
 type AppointmentSelectionFormData = {
     termin?: TerminFormData;
 };
 
+/** Props für {@link AppointmentSelectionSection}. */
 interface AppointmentSelectionSectionProps {
+    /** Abschnittsnummer für die {@link SectionHeading}-Anzeige. */
     num: string;
+    /** Zur Auswahl stehende Termine des Workshops; leer/undefined, falls der Workshop (noch) keine Termine hat. */
     termine: Termin[] | undefined;
 };
 
+/**
+ * Terminauswahl als Radio-Gruppe (visuell als Kartenliste). Bereits ausgebuchte
+ * oder inaktive Termine werden zwar angezeigt, sind aber nicht auswählbar. Hat
+ * der Workshop gar keine Termine, wird stattdessen ein Hinweis angezeigt, dass
+ * die Anfrage trotzdem unverbindlich gestellt werden kann.
+ *
+ * @param props - Siehe {@link AppointmentSelectionSectionProps}
+ * @returns Den Formular-Abschnitt
+ */
 export default function AppointmentSelectionSection({
     num,
     termine 
@@ -53,6 +73,7 @@ export default function AppointmentSelectionSection({
                         {termine && termine.map((termin) => {
 
                             const checked = field.value?.id === termin.id;
+                            // Ausgebuchte oder deaktivierte Termine bleiben sichtbar, sind aber nicht auswählbar
                             const disabled = !termin.active || termin.status === "ausgebucht";
                             const status = formatTerminStatus(termin.status);
 

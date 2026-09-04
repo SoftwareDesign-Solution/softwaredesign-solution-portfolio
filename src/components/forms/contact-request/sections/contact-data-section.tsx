@@ -1,3 +1,11 @@
+/**
+ * @file contact-data-section.tsx
+ * @description Formular-Abschnitt des Kontaktformulars für die persönlichen
+ * Ansprechpartner-Daten (Anrede, Name, E-Mail).
+ * @module components/forms/contact-request/sections/contact-data-section
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import { useFormContext } from "react-hook-form";
 
 import { type ContactRequestFormData } from "@/schemas/contact-request.schema";
@@ -7,6 +15,7 @@ import Label from "../../shared/label";
 import SelectField from "../../shared/select-field";
 import TextField from "../../shared/text-field";
 
+// Statische Anrede-Optionen für das Dropdown
 const salutationOptions = [
     {
         label: "Frau",
@@ -26,6 +35,12 @@ const salutationOptions = [
     },
 ];
 
+/**
+ * Formular-Abschnitt des Kontaktformulars für die persönlichen Ansprechpartner-Daten
+ * (Anrede, Vorname, Nachname, E-Mail).
+ *
+ * @returns Den Formular-Abschnitt
+ */
 export default function ContactDataSection() {
     const {
         formState: {

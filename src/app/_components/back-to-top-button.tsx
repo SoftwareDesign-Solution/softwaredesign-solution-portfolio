@@ -1,9 +1,22 @@
+/**
+ * @file back-to-top-button.tsx
+ * @description Schwebender "Nach oben"-Button, der erst nach dem Herunterscrollen sichtbar wird.
+ * @module app/_components/back-to-top-button
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 "use client";
 
 import { useEffect, useState } from "react";
 
+// Ab dieser Scroll-Position (in px) wird der Button eingeblendet
 const SCROLL_THRESHOLD = 400;
 
+/**
+ * Zeigt einen "Nach oben"-Button, sobald über {@link SCROLL_THRESHOLD} hinaus gescrollt wurde.
+ *
+ * @returns Den schwebenden Button
+ */
 export function BackToTopButton() {
   const [visible, setVisible] = useState(false);
 
@@ -11,7 +24,7 @@ export function BackToTopButton() {
     const handleScroll = () => {
       setVisible(window.scrollY > SCROLL_THRESHOLD);
     };
-    handleScroll();
+    handleScroll(); // Initialen Zustand direkt beim Mount setzen (z.B. nach Reload mit Scroll-Position)
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);

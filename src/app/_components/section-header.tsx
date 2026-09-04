@@ -1,11 +1,27 @@
+/**
+ * @file section-header.tsx
+ * @description Wiederverwendbarer Sektions-Titel für die Startseite (Kicker + große Überschrift).
+ * @module app/_components/section-header
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 import { ReactNode } from "react";
 
 interface SectionHeaderProps {
+    /** Kleiner, farbig hervorgehobener Vorspann über der eigentlichen Überschrift. */
     title: string;
+    /** Der Haupt-Überschriftentext (als h2 gerendert). */
     children: ReactNode;
+    /** Optionales Element (z.B. Button/Link), das rechtsbündig neben der Überschrift angezeigt wird. */
     action?: ReactNode;
 };
 
+/**
+ * Wiederverwendbarer Sektions-Titel für die Startseite (Kicker + große Überschrift + optionale Aktion).
+ *
+ * @param props - Siehe {@link SectionHeaderProps}
+ * @returns Den Sektions-Titel
+ */
 export default function SectionHeader({ title, children, action }: SectionHeaderProps) {
     return (
         <div className="flex justify-between items-end mb-14">

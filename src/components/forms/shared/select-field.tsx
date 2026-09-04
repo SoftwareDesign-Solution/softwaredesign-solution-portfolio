@@ -1,7 +1,22 @@
+/**
+ * @file select-field.tsx
+ * @description Einheitliches Dropdown-Feld für Formulare.
+ * @module components/forms/shared/select-field
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
+/** Props für {@link SelectField}. */
 interface SelectFieldProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+    /** Auswahloptionen; werden als `<option>`-Elemente gerendert. */
     options?: { value: string; label: string }[];
 }
 
+/**
+ * Einheitliches Dropdown-Feld für Formulare.
+ *
+ * @param props - Siehe {@link SelectFieldProps}
+ * @returns Das Dropdown-Feld
+ */
 export default function SelectField({ className, options, ...props }: SelectFieldProps) {
     return (
         <select

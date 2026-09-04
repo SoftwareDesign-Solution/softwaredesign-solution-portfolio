@@ -1,8 +1,23 @@
+/**
+ * @file hamburger-button.tsx
+ * @description Animierter Hamburger-/Schließen-Button für das mobile Navigationsmenü.
+ * @module app/_components/hamburger-button
+ * @author Manuel Kübler <mail@softwaredesign-solution.de>
+ */
+
 interface HamburgerButtonProps {
+    /** Wird beim Klick aufgerufen, um das mobile Menü zu öffnen/schließen. */
     onClick: () => void;
+    /** Steuert die Animation der drei Linien (X-Form bei offenem Menü). */
     isOpen: boolean;
 }
 
+/**
+ * Animierter Hamburger-/Schließen-Button für das mobile Navigationsmenü (nur unterhalb `md` sichtbar).
+ *
+ * @param props - Siehe {@link HamburgerButtonProps}
+ * @returns Den Hamburger-Button
+ */
 export default function HamburgerButton({ onClick, isOpen }: HamburgerButtonProps) {
     return (
         <button
