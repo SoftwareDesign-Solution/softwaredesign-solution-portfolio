@@ -65,6 +65,15 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                             Workshops
                         </Link>
 
+                        {/* Referenzen */}
+                        <Link 
+                            href="/referenzen" 
+                            className="dt-nav-link inline-block cursor-pointer text-foreground no-underline transition-colors duration-150 hover:text-gray-600 hover:text-bold"
+                            onClick={onClose}
+                        >
+                            Referenzen
+                        </Link>
+
                         {/* Kontakt */}
                         <Link 
                             href="/#kontakt" 

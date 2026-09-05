@@ -31,6 +31,11 @@ export default function DesktopNavbar() {
                 Workshops
             </Link>
 
+            {/* Referenzen */}
+            <Link href="/referenzen" className="dt-nav-link inline-block cursor-pointer text-foreground no-underline transition-colors duration-150 hover:text-gray-600 hover:text-bold">
+                Referenzen
+            </Link>
+
             {/* Kontakt */}
             <Link href="/#kontakt" className="dt-nav-link inline-block cursor-pointer text-foreground no-underline transition-colors duration-150 hover:text-gray-600 hover:text-bold">
                 Kontakt
