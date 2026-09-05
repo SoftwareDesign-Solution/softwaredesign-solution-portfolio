@@ -7,6 +7,7 @@
 
 import Link from "next/link";
 
+import Badge from "@/components/ui/badge";
 import { type Workshop } from "@/types/workshop";
 import { formatDay } from "@/utils/format-day";
 import { formatPrice } from "@/utils/format-price";
@@ -66,6 +67,7 @@ export default function WorkshopCard({
                 </div>
 
                 <div className="inline-flex items-center gap-1.5">
+                    {/*
                     <WorkshopBadge>
                         {formatDay(workshop.dauer ?? 3)}
                     </WorkshopBadge>
@@ -73,6 +75,16 @@ export default function WorkshopCard({
                     <WorkshopBadge>
                         {workshop.sprache}
                     </WorkshopBadge>
+                    */}
+
+                    <Badge>
+                        {formatDay(workshop.dauer ?? 3)}
+                    </Badge>
+ 
+                    <Badge>
+                        {workshop.sprache}
+                    </Badge>
+                    
                 </div>
             </header>
 
