@@ -81,7 +81,7 @@ export default function BookingForm({
         const basisZwischensummeCents = Number(workshop.preis) * participantCountLabel * 100;
         const ergebnis = await checkGutschein(code, email, workshop.id, basisZwischensummeCents);
 
-        alert(JSON.stringify(ergebnis));
+        //alert(JSON.stringify(ergebnis));
         
         if (ergebnis.gueltig) {
             setDiscount({ code: ergebnis.code, discountCents: ergebnis.rabatt, discountLabel: ergebnis.rabattLabel });
