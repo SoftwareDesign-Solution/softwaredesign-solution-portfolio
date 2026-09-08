@@ -6,7 +6,10 @@
  * @author Manuel Kübler <mail@softwaredesign-solution.de>
  */
 
-import { useFormContext } from "react-hook-form";
+"use client";
+
+import { useState } from "react";
+import { useFormContext, useWatch } from "react-hook-form";
 
 import Button from "@/components/ui/button";
 
@@ -15,12 +18,19 @@ import Label from "../label";
 import SectionHeading from "../section-heading";
 import TextField from "../text-field";
 
+interface VoucherCheckResult {
+  valid: boolean;
+  message: string;
+}
+
 /** Props für {@link ExtrasSection}. */
 interface ExtrasSectionProps {
     /** Abschnittsnummer für die {@link SectionHeading}-Anzeige. */
     num: string;
     /** Zeigt zusätzlich ein Gutscheincode-Feld an (nur bei der Buchung relevant). */
     showVoucherCode?: boolean;
+
+    onRedeemVoucher?: (code: string) => Promise<VoucherCheckResult>;
 }
 
 /**
@@ -31,13 +41,31 @@ interface ExtrasSectionProps {
  */
 export default function ExtrasSection({ 
     num, 
-    showVoucherCode = false
+    showVoucherCode = false,
+    onRedeemVoucher
 }: ExtrasSectionProps) {
     
     const { 
+        control,
         register,
         formState: { errors },
     } = useFormContext();
+
+    const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+    const [message, setMessage] = useState<string | null>(null);
+
+    const code = useWatch({
+        name: "gutscheinCode",
+        control
+    });
+ 
+    const handleRedeem = async () => {
+        if (!code || !onRedeemVoucher) return;
+        setStatus("loading");
+        const result = await onRedeemVoucher(code);
+        setStatus(result.valid ? "success" : "error");
+        setMessage(result.message);
+    };
 
     return (
         <section className="mb-8">
@@ -58,18 +86,37 @@ export default function ExtrasSection({
                             <TextField
                                 placeholder="z.B. CODE2026"
                                 className="flex-1"
-                                {...register("gutscheinCode", { min: 1, required: "Bitte geben Sie den Gutscheincode an." })}
+                                {...register("gutscheinCode", {
+                                    onChange: () => {
+                                        setStatus("idle");
+                                        setMessage(null);
+                                    },
+                                })}
                             />
 
                             {/* Einlösen */}
-                            <Button type="button" variant="dark" className="px-4.5 py-2.5 text-[13.5px]">
-                                Einlösen
+                            <Button 
+                                type="button" 
+                                variant="dark" 
+                                className="px-4.5 py-2.5 text-[13.5px]"
+                                onClick={handleRedeem}
+                                disabled={status === "loading" || !code}
+                            >
+                                {status === "loading" ? "Prüfe …" : "Einlösen"}
                             </Button>
 
                         </div>
 
                         {errors.gutscheinCode && (
                             <ErrorMessage message={String(errors.gutscheinCode.message)} />
+                        )}
+
+                        {status === "error" && message && (
+                            <ErrorMessage message={message} />
+                        )}
+
+                        {status === "success" && message && (
+                            <p className="mt-2 text-[12.5px] text-success-600">{message}</p>
                         )}
 
                     </div>

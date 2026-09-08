@@ -12,9 +12,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { TurnstileRef } from "nextjs-turnstile";
-import { useRef } from "react";
-import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
+import { useRef, useState } from "react";
+import { FormProvider, SubmitHandler, useForm, useWatch } from "react-hook-form";
 
+import { checkGutschein } from "@/app/actions/check-gutschein";
 import { createBooking } from "@/app/actions/create-booking";
 import { type BookingFormData, BookingFormInput, bookingFormSchema, type CreateBookingData } from "@/schemas/booking.schema";
 import { WorkshopFormProps } from "@/types/workshop-props";
@@ -49,6 +50,12 @@ export default function BookingForm({
     onError 
 }: WorkshopFormProps) {
 
+    const [discount, setDiscount] = useState<{
+        code: string;
+        discountCents: number;
+        discountLabel: string;
+    } | null>(null);
+
     const methods = useForm<
         BookingFormInput,
         null,
@@ -58,7 +65,34 @@ export default function BookingForm({
         resolver: zodResolver(bookingFormSchema),
     });
 
-    const { handleSubmit, setValue } = methods;
+    const { control, handleSubmit, setValue } = methods;
+
+    const participantCount = useWatch({
+        control,
+        name: "teilnehmerzahl",
+    });
+
+    const email = useWatch({ control, name: "ansprechpartner.email" });
+
+    // Teilnehmerzahl auf den gültigen Bereich begrenzen, auch bevor das Formularfeld validiert wurde
+    const participantCountLabel = Math.min(Math.max(Number(participantCount) || 1, 1), 20);
+
+    const handleRedeemVoucher = async (code: string) => {
+        const basisZwischensummeCents = Number(workshop.preis) * participantCountLabel * 100;
+        const ergebnis = await checkGutschein(code, email, workshop.id, basisZwischensummeCents);
+
+        alert(JSON.stringify(ergebnis));
+        
+        if (ergebnis.gueltig) {
+            setDiscount({ code: ergebnis.code, discountCents: ergebnis.rabatt, discountLabel: ergebnis.rabattLabel });
+            return { valid: true, message: `Gutschein angewendet: ${ergebnis.rabattLabel}` };
+        }
+        
+        setDiscount(null);
+        return { valid: false, message: ergebnis.nachricht };
+    };
+
+    const rabattAmount = discount ? discount.discountCents / 100 : 0;
 
     // Datenschutzerklärung & Sicherheitsabfrage (Turnstile)
     const turnstileRef = useRef<TurnstileRef>(null);
@@ -162,10 +196,14 @@ export default function BookingForm({
                     <BillingAddressSection num="06" />
                     
                     {/* 07 Weiteres */}
-                    <ExtrasSection num="07" showVoucherCode />
+                    <ExtrasSection num="07" showVoucherCode onRedeemVoucher={handleRedeemVoucher} />
                     
                     {/* Zusammenfassung */}
-                    <SummarySection title="Zusammenfassung" workshop={workshop} />
+                    <SummarySection 
+                        title="Zusammenfassung" 
+                        workshop={workshop} 
+                        discount={discount ? { amount: rabattAmount, label: discount.discountLabel } : undefined}
+                    />
 
                     {/* Consent */}
                     <ConsentSection>

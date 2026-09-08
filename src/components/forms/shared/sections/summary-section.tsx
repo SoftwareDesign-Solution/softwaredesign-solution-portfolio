@@ -12,6 +12,11 @@ import { formatDateRange } from "@/utils/format-date-range";
 import { formatDay } from "@/utils/format-day";
 import { formatPrice } from "@/utils/format-price";
 
+interface SummarySectionDiscount {
+  amount: number;
+  label: string;
+}
+
 /** Props für {@link SummarySection}. */
 interface SummarySectionProps {
     /** Überschrift der Zusammenfassungs-Box (z.B. "Ihre Buchung" oder "Ihre Anfrage"). */
@@ -26,6 +31,7 @@ interface SummarySectionProps {
      */
     noTerminLabel?: string;
 
+    discount?: SummarySectionDiscount;
 };
 
 /**
@@ -37,7 +43,7 @@ interface SummarySectionProps {
  * @param props - Siehe {@link SummarySectionProps}
  * @returns Die Zusammenfassungs-Box
  */
-export default function SummarySection({ title, workshop, noTerminLabel = "Kein Termin ausgewählt" }: SummarySectionProps) {
+export default function SummarySection({ title, workshop, noTerminLabel = "Kein Termin ausgewählt", discount }: SummarySectionProps) {
 
     const { 
         control,
@@ -55,8 +61,10 @@ export default function SummarySection({ title, workshop, noTerminLabel = "Kein 
 
     // Teilnehmerzahl auf den gültigen Bereich begrenzen, auch bevor das Formularfeld validiert wurde
     const participantCountLabel = Math.min(Math.max(Number(participantCount) || 1, 1), 20);
+    const rabattAmount = discount ? discount.amount : 0;
     const selectedDateLabel = selectedDate ? formatDateRange(selectedDate.datumVon, selectedDate.datumBis) : noTerminLabel;
-    const subtotal = Number(workshop.preis) * participantCountLabel;
+    const discountAmount = discount?.amount ?? 0;
+    const subtotal = Math.max(Number(workshop.preis) * participantCountLabel - rabattAmount, 0);
     const vat = subtotal * 0.19;
     const total = subtotal + vat;
     
@@ -80,6 +88,13 @@ export default function SummarySection({ title, workshop, noTerminLabel = "Kein 
                 <span>Termin</span>
                 <span className="font-mono text-[13.5px]">{selectedDateLabel}</span>
             </div>
+
+            {discount && discountAmount > 0 && (
+                <div className="flex items-baseline justify-between py-1.5 text-[14px] text-success-600">
+                    <span>Gutschein · {discount.label}</span>
+                    <span className="font-mono text-[13.5px]">− {formatPrice(discountAmount)}</span>
+                </div>
+            )}
             
             {/* Zwischensumme */}
             <div className="flex items-baseline justify-between py-1.5 text-[14px] text-foreground">

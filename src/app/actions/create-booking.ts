@@ -19,6 +19,7 @@ import {
     sendBookingConfirmationEmailSchema,
 } from "@/schemas/booking.schema";
 import { sendBookingConfirmationEmail } from "@/services/emails/send-booking-confirmation-email";
+import { validiereGutschein } from "@/services/gutschein";
 
 /** Projektion von Workshop + Termin, wie sie für eine Buchung benötigt wird. */
 interface BookableWorkshopAppointment {
@@ -34,7 +35,11 @@ interface BookableWorkshopAppointment {
 interface InsertBookingOptions {
     bookingData: CreateBookingData;
     ipAddress: string | null;
-    totalPrice: number;
+    rabatt: number;
+    zwischensumme : number;
+    ust: number;
+    gesamt: number;
+    //totalPrice: number;
     workshopAppointment:
         BookableWorkshopAppointment;
 }
@@ -43,7 +48,10 @@ interface InsertBookingOptions {
 interface SendBookingEmailOptions {
     bookingData: CreateBookingData;
     bookingId: string;
-    totalPrice: number;
+    zwischensumme: number;
+    rabatt: number;
+    ust: number;
+    gesamt: number;
     workshopAppointment:
         BookableWorkshopAppointment;
 }
@@ -139,17 +147,36 @@ export async function createBooking(
         );
     }
 
-    const totalPrice = calculateTotalPrice(
+    const zwischensumme = calculateTotalPrice(
         workshopAppointment.preis,
         bookingData.teilnehmerzahl,
     );
 
+    let rabatt: number = 0.0;
+
+    // TODO: Gutscheincode prüfen
+    if (bookingData.gutscheinCode) {
+
+        const result = await validiereGutschein(bookingData.gutscheinCode, bookingData.ansprechpartner.email, bookingData.workshop.id, zwischensumme);
+        if (result.gueltig) {
+            rabatt = result.rabatt;
+        }
+    }
+
     const ipAddress = await getClientIpSafely();
+
+    // Zwischensumme, Ust, Gesamt berechnen
+    //const zwischensumme = totalPrice - rabatt;
+    const ust = (zwischensumme - rabatt) * 0.19;
+    const gesamt = (zwischensumme - rabatt) + ust;
 
     const bookingId = await insertBooking({
         bookingData,
         ipAddress,
-        totalPrice,
+        zwischensumme, // Preis x Teilnehmerzahl
+        rabatt,
+        ust, // (Zwischensumme - Rabatt) x 0,19 %
+        gesamt, // (Zwischensumme - Rabatt) + ust
         workshopAppointment,
     });
 
@@ -157,7 +184,10 @@ export async function createBooking(
         await sendBookingEmailSafely({
             bookingData,
             bookingId,
-            totalPrice,
+            zwischensumme, // Preis x Teilnehmerzahl
+            rabatt,
+            ust, // (Zwischensumme - Rabatt) x 0,19 %
+            gesamt, // (Zwischensumme - Rabatt) + ust
             workshopAppointment,
         });
 
@@ -262,7 +292,11 @@ function calculateTotalPrice(
 async function insertBooking({
     bookingData,
     ipAddress,
-    totalPrice,
+    rabatt,
+    zwischensumme,
+    ust,
+    gesamt,
+    //totalPrice,
     workshopAppointment,
 }: InsertBookingOptions): Promise<string> {
 
@@ -297,7 +331,11 @@ async function insertBooking({
                 rechnung_plz,
                 rechnung_ort,
                 notizen,
+                gutschein_code,
                 preis,
+                rabatt,
+                zwischensumme,
+                ust,
                 gesamtpreis,
                 ip_adresse
             )
@@ -331,8 +369,12 @@ async function insertBooking({
                 ${billingAddress?.plz ?? null},
                 ${billingAddress?.ort ?? null},
                 ${bookingData.nachricht ?? null},
+                ${bookingData.gutscheinCode ?? null},
                 ${workshopAppointment.preis},
-                ${totalPrice},
+                ${rabatt},
+                ${zwischensumme},
+                ${ust},
+                ${gesamt},
                 ${ipAddress}
             )
             RETURNING id
@@ -366,15 +408,22 @@ async function insertBooking({
  */
 async function sendBookingEmailSafely({
     bookingData,
-    totalPrice,
+    rabatt,
+    zwischensumme,
+    ust,
+    gesamt,
     workshopAppointment,
 }: SendBookingEmailOptions): Promise<SendBookingEmailResult> {
     try {
         const emailData =
             sendBookingConfirmationEmailSchema.parse({
                 ...bookingData,
-
-                gesamtpreis: totalPrice,
+                
+                preis: Number(workshopAppointment.preis),
+                zwischensumme,
+                rabatt,
+                ust,
+                gesamtpreis: gesamt,
 
                 salutation:
                     createBookingSalutation(

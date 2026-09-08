@@ -54,6 +54,12 @@ const participantCountSchema = z
         "Bitte geben Sie die Teilnehmeranzahl an.",
     );
 
+const rabattSchema = z
+    .number()
+    .nonnegative(
+        "Der Rabatt darf nicht positiv sein",
+    );
+
 /** Gesamtpreis der Buchung: darf nicht negativ sein. */
 const totalPriceSchema = z
     .number()
@@ -125,9 +131,30 @@ const bookingConfirmationEmailBaseSchema =
         workshop: workshopSchema,
         ...bookingFields,
 
+        rabatt: 
+            rabattSchema,
+
+        zwischensumme: z
+            .number()
+            .nonnegative(
+                "Der Gesamtpreis (brutto) darf nicht negativ sein.",
+            ),
+        
+        preis: z
+            .number()
+            .nonnegative(
+                "Der Gesamtpreis (brutto) darf nicht negativ sein.",
+            ),
+        
+        ust: z
+            .number()
+            .nonnegative(
+                "Der Umsatzsteuerbetrag darf nicht negativ sein.",
+            ),
+
         gesamtpreis:
             totalPriceSchema,
-
+        
         salutation: z
             .string()
             .trim()
