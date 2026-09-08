@@ -45,7 +45,7 @@ export default function BookingConfirmationEmail(props: SendBookingConfirmationE
                 </Text>
 
                 <Text className="m-0 font-sans text-[15px] leading-[1.6] text-foreground">
-                    vielen Dank für Ihre Buchung. Ich freue mich, Sie zum folgenden Workshop begrüßen zu dürfen — nachfolgend noch einmal alle Details im Überblick:
+                    vielen Dank für deine Buchung. Ich freue mich, dich zum folgenden Workshop begrüßen zu dürfen — nachfolgend noch einmal alle Details im Überblick:
                 </Text>
 
             </Section>
@@ -56,7 +56,32 @@ export default function BookingConfirmationEmail(props: SendBookingConfirmationE
                 <Table.Row label="Termin" value={formatDateRange(props.termin!.datumVon, props.termin!.datumBis)} />
                 <Table.Row label="Firma" value={props.abweichendeRechnungsadresse ? props.rechnungsadresse?.firma : props.adresse.firma} />
                 <Table.Row label="Rechnungsadresse" value={rechnungsAdresseString} />
-                <Table.Row label="Preis" value={formatPrice(props.gesamtpreis)} />
+                {/*props.rabatt > 0 && (
+                    <Table.Row label="Gutschein" value={`${props.gutscheinCode} (− ${formatPrice(props.rabatt)})`} />
+                )*/}
+                {/*<Table.Row label="Preis" value={formatPrice(props.gesamtpreis)} />*/}
+                {/*
+                <Table.Row label="Teilnehmer" value={props.teilnehmerzahl} />
+                <Table.Row label="Workshoppreis pro Teilnehmer" value={formatPrice(props.preis)} />
+                <Table.Row label="Zwischensumme" value={formatPrice(props.subtotal)} />
+                {props.rabatt > 0 && (
+                    <Table.Row label="Gutschein" value={`${props.gutscheinCode} (− ${formatPrice(props.rabatt)})`} />
+                )}
+                <Table.Row label="Gesamtbetrag (netto)" value={formatPrice(props.netto)} />
+                <Table.Row label="19 % Umsatzsteuer" value={formatPrice(props.ust)} />
+                <Table.Row label="Gesamtbetrag (brutto)" value={formatPrice(props.brutto)} />
+                */}
+            </Table>
+ 
+            <Table>
+                <Table.Row label="Preis pro Teilnehmer" value={formatPrice(props.preis)} emphasis="muted" />
+                <Table.Row label="Zwischensumme (netto)" value={formatPrice(props.zwischensumme)} emphasis="muted" />
+                {props.rabatt > 0 && (
+                    <Table.Row label="Gutschein" value={`${props.gutscheinCode} (− ${formatPrice(props.rabatt)})`} emphasis="success" />
+                )}
+                <Table.Row label="Gesamtbetrag (Netto)" value={formatPrice(props.zwischensumme - props.rabatt)} emphasis="muted" />
+                <Table.Row label="19% Umsatzsteuer" value={formatPrice(props.ust)} emphasis="muted" />
+                <Table.Row label="Gesamtbetrag (Brutto)" value={formatPrice(props.gesamtpreis)} emphasis="strong" />
             </Table>
 
             <ParticipantList participants={props.teilnehmer} />
@@ -64,7 +89,7 @@ export default function BookingConfirmationEmail(props: SendBookingConfirmationE
             <Section className="px-8 pt-5 pb-2">
 
                 <Text className="m-0 mb-3.5 font-sans text-[15px] leading-[1.6] text-foreground">
-                    Bei Rückfragen antworten Sie einfach auf diese E-Mail — ich melde mich zeitnah bei Ihnen.
+                    Bei Rückfragen antworte einfach auf diese E-Mail — ich melde mich zeitnah bei dir.
                 </Text>
 
                 <Text className="m-0 font-sans text-[15px] leading-[1.6] text-foreground">
@@ -79,20 +104,43 @@ export default function BookingConfirmationEmail(props: SendBookingConfirmationE
 
 BookingConfirmationEmail.PreviewProps = {
     salutation: "Hallo Manuel",
-    workshopTitel: "Beispiel-Workshop",
+    workshop: {
+        titel: "Beispiel-Workshop",
+    },
     termin: {
         datumVon: "2024-07-01",
         datumBis: "2024-07-02",
     },
-    firma: "SoftwareDesign-Solution",
+    adresse: {
+        firma: "SoftwareDesign-Solution",
+        strasse: "Steinbergstr. 2",
+        plz: "72202",
+        ort: "Nagold",
+    },
+    abweichendeRechnungsadresse: false,
     rechnungsadresse: {
         firma: "SoftwareDesign-Solution",
         strasse: "Steinbergstr. 2",
         plz: "72202",
         ort: "Nagold",
     },
-    gesamtpreis: 99.00,
+    teilnehmerzahl: 3,
+    preis: 1490.00,
+    //zwischensumme: 4470.00,
+    gutscheinCode: "CODE2026",
+    rabatt: 200.00,
+    zwischensumme: 4270.00,
+    ust: 811.30,
+    gesamtpreis: 5081.30,
     teilnehmer: [
+        {
+            vorname: "Manuel",
+            nachname: "Kübler",
+        },
+        {
+            vorname: "Manuel",
+            nachname: "Kübler",
+        },
         {
             vorname: "Manuel",
             nachname: "Kübler",

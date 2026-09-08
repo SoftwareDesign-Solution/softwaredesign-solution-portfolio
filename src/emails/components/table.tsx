@@ -4,6 +4,9 @@ import { Section, Text } from "react-email";
 
 type TableVariant = "framed" | "numbered" | "list";
 
+/** Nur für `variant="framed"` relevant — steuert das visuelle Gewicht einer Zeile. */
+type RowEmphasis = "default" | "muted" | "success" | "strong";
+
 interface TableRowProps {
   /** Kurzes Label in der linken Spalte, z. B. "workshop" (`variant="framed"`, Standard ohne `heading`). Wird sonst ignoriert. */
   label?: string;
@@ -11,6 +14,14 @@ interface TableRowProps {
   title?: string;
   /** Inhalt der Zeile – je nach `variant` der Wert, der Fließtext hinter dem Titel, oder der alleinige Zeileninhalt (`variant="list"`). */
   value: React.ReactNode;
+  /**
+   * Nur `variant="framed"`: visuelles Gewicht der Zeile.
+   * - `"default"` – Standard (fett, `foreground`), wie bisher.
+   * - `"muted"` – abgeschwächt, für Rechenschritte (z.B. Zwischensumme, Netto, USt.).
+   * - `"success"` – grün hervorgehoben, für positive Infos (z.B. Gutschein/Rabatt).
+   * - `"strong"` – größer/fetter mit getöntem Hintergrund, für das Endergebnis (z.B. Gesamtbetrag).
+   */
+  emphasis?: RowEmphasis;
   /** Wird ausschließlich von `<Table>` gesetzt – nicht manuell übergeben. */
   _index?: number;
   _isLast?: boolean;
@@ -18,7 +29,15 @@ interface TableRowProps {
   height?: number | string;
 }
 
-function TableRow({ label, title, value, _index = 0, _isLast = false, _variant = "framed" }: TableRowProps) {
+function TableRow({
+  label,
+  title,
+  value,
+  emphasis = "default",
+  _index = 0,
+  _isLast = false,
+  _variant = "framed",
+}: TableRowProps) {
   if (_variant === "numbered") {
     return (
       <tr>
@@ -70,18 +89,37 @@ function TableRow({ label, title, value, _index = 0, _isLast = false, _variant =
   }
 
   // variant === "framed"
+  const isStrong = emphasis === "strong";
+
+  const labelBgClass = isStrong ? "bg-primary-50" : "bg-surface";
+  const valueBgClass = isStrong ? "bg-primary-50" : "";
+
+  const valueTextClass =
+    emphasis === "muted"
+      ? "text-sm font-normal text-muted"
+      : emphasis === "success"
+        ? "text-sm font-semibold text-success-600"
+        : isStrong
+          ? "text-base font-bold text-foreground"
+          : "text-sm font-semibold text-foreground";
+
+  // Zusätzliche obere Trennlinie nur bei "strong" — hebt die Zeile optisch vom
+  // Rechenweg darüber ab, unabhängig von der normalen Zeilen-Border (borderClass
+  // trennt Zeilen untereinander, das hier trennt bewusst nach oben).
+  const strongTopBorderClass = isStrong ? "border-t-2 border-t-primary-200" : "";
+
   return (
     <tr>
       <td
         width={130}
         style={{ padding: "18px 16px" }}
-        className={`w-32.5 bg-surface align-top font-sans text-[11px] font-semibold uppercase tracking-[1px] text-muted ${borderClass}`}
+        className={`w-32.5 ${labelBgClass} align-top font-sans text-[11px] font-semibold uppercase tracking-[1px] text-muted ${borderClass} ${strongTopBorderClass}`}
       >
         {label}
       </td>
       <td
         style={{ padding: "18px 16px" }}
-        className={`align-top font-sans text-sm font-semibold text-foreground ${borderClass}`}
+        className={`align-top ${valueBgClass} font-sans ${valueTextClass} ${borderClass} ${strongTopBorderClass}`}
       >
         {value}
       </td>
@@ -186,6 +224,17 @@ function TableBase({ heading, variant = heading ? "numbered" : "framed", childre
  *   <Table.Row label="workshop" value={workshopTitle} />
  *   <Table.Row label="termin" value={terminDate} />
  *   {totalPrice ? <Table.Row label="gesamtpreis" value={totalPrice} /> : null}
+ * </Table>
+ * ```
+ *
+ * @example Preis-Aufschlüsselung mit abgestuftem Gewicht (Zwischensumme/USt. gedimmt,
+ * Gutschein grün, Gesamtbetrag hervorgehoben)
+ * ```tsx
+ * <Table>
+ *   <Table.Row label="Zwischensumme" value={formatPrice(zwischensumme)} emphasis="muted" />
+ *   {rabatt > 0 ? <Table.Row label="Gutschein" value={`${code} (− ${formatPrice(rabatt)})`} emphasis="success" /> : null}
+ *   <Table.Row label="19% USt." value={formatPrice(ust)} emphasis="muted" />
+ *   <Table.Row label="Gesamtbetrag" value={formatPrice(gesamt)} emphasis="strong" />
  * </Table>
  * ```
  *
