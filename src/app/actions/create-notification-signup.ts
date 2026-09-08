@@ -210,6 +210,22 @@ async function insertNotificationSignup({
                 ),
                 ${unsubscribeToken}
             )
+            -- EXCLUDED = die NEUEN Werte aus VALUES oben (nicht die alte
+            -- Zeile!) -> confirmation_token/confirmation_expires_at werden
+            -- dadurch bei jeder Reaktivierung frisch gesetzt
+            ON CONFLICT (workshop_id, email) DO UPDATE SET
+                workshop_titel = EXCLUDED.workshop_titel,
+                vorname = EXCLUDED.vorname,
+                nachname = EXCLUDED.nachname,
+                ip_adresse = EXCLUDED.ip_adresse,
+                confirmation_token = EXCLUDED.confirmation_token,
+                confirmation_expires_at = EXCLUDED.confirmation_expires_at,
+                confirmed_at = NULL,
+                unsubscribe_token = EXCLUDED.unsubscribe_token,
+                unsubscribed_at = NULL,
+                status = 'ausstehend'
+            WHERE
+                workshop_benachrichtigung.status = 'abgemeldet'
             RETURNING id
         `;
 

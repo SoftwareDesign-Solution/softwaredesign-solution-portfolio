@@ -144,7 +144,8 @@ async function unsubscribeNotificationSignupInDatabase(
 ): Promise<NotificationSignupDatabaseRow | null> {
     const [unsubscribedRow] = await db`
         UPDATE workshop_benachrichtigung
-        SET unsubscribed_at = NOW()
+            SET unsubscribed_at = NOW(),
+            status = 'abgemeldet'
         WHERE id = ${id}
           AND unsubscribe_token = ${token}
           AND unsubscribed_at IS NULL
