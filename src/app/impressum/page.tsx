@@ -5,7 +5,12 @@
  * @author Manuel Kübler <mail@softwaredesign-solution.de>
  */
 
+import { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: `Impressum - ${process.env.APP_TITLE}`
+};
 
 /**
  * Seite /impressum: statischer Rechtstext (Anbieterkennzeichnung gemäß § 5 DDG).

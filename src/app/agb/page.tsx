@@ -5,7 +5,12 @@
  * @author Manuel Kübler <mail@softwaredesign-solution.de>
  */
 
+import { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: `AGB - ${process.env.APP_TITLE}`
+};
 
 /**
  * Seite /agb: statischer Rechtstext (Allgemeine Geschäftsbedingungen) für Workshops/Beratung.

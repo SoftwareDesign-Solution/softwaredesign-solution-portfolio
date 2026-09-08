@@ -5,7 +5,13 @@
  * @author Manuel Kübler <mail@softwaredesign-solution.de>
  */
 
+import { Metadata } from "next";
+
 import ContactRequestForm from "@/components/forms/contact-request/contact-request-form";
+
+export const metadata: Metadata = {
+  title: `Anfrage - ${process.env.APP_TITLE}`
+};
 
 /**
  * Seite /anfrage: Einleitungstext plus das allgemeine {@link ContactRequestForm}.
