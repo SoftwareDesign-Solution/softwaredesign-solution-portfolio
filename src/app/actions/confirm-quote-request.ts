@@ -130,7 +130,9 @@ async function confirmQuoteRequestInDatabase(
 ): Promise<QuoteRequestDatabaseRow | null> {
     const [confirmedRow] = await db`
         UPDATE angebotsanfrage
-        SET confirmed_at = NOW()
+        SET 
+            confirmed_at = NOW(),
+            status = 'bestaetigt'
         WHERE id = ${id}
           AND confirmation_token = ${token}
           AND confirmed_at IS NULL
