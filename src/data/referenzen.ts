@@ -27,6 +27,7 @@ export const REFERENZEN: ReferenzKunde[] = [
         beschreibung:
           "Automatische Generierung von Klassen, Funktionen und Methoden für .NET-Core-Projekte auf Basis der SAP Business One Service-Layer-Metadaten.",
         stack: [".NET Core", "C#", "Service Layer", "T4 Templates"],
+        github: "https://github.com/SoftwareDesign-Solution/B1SLayer.ModelGenerator",
       },
       {
         id: "e-rechnungs-import-addon",
@@ -41,6 +42,7 @@ export const REFERENZEN: ReferenzKunde[] = [
         beschreibung:
           "Next.js-Plattform mit Neon-PostgreSQL-Datenbank, REST-API zum Workshop-Abruf und automatisiertem E-Mail-Versand über Resend.",
         stack: ["Next.js", "React", "React Hook Form", "TailwindCSS", "TypeScript", "Resend", "Neon PostgreSQL"],
+        github: "https://github.com/SoftwareDesign-Solution/softwaredesign-solution-portfolio",
       },
       {
         id: "admin-dashboard",
@@ -426,6 +428,7 @@ export const REFERENZEN: ReferenzKunde[] = [
         titel: "Buchungsplattform für Proberäume",
         beschreibung: "Webanwendung zur Buchung von Proberäumen.",
         stack: ["Laravel", "Vue.js", "TypeScript", "Bootstrap", "Laravel Sanctum"],
+        github: "https://github.com/SoftwareDesign-Solution/onlinebooking",
       },
       {
         id: "verwaltungssoftware",

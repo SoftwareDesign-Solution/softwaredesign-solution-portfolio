@@ -7,6 +7,7 @@
  */
 
 import { Metadata } from "next";
+import Link from "next/link";
 
 import type { ReferenzKunde, ReferenzProjektEintrag } from "@/types/referenz";
 
@@ -38,7 +39,19 @@ function ProjektZeile({
         <div className="mt-0.5 w-16 shrink-0 font-mono text-[11px] text-primary-700">{projekt.jahr}</div>
       )}
       <div>
-        <div className="mb-1 text-[14.5px] font-semibold text-foreground">{projekt.titel}</div>
+        <div className="mb-1 text-[14.5px] font-semibold text-foreground">
+          {projekt.titel} {" "}
+          {projekt.github && (
+            <Link
+              href={projekt.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-mono text-[11px] font-normal text-primary-700 hover:underline"
+            >
+              GitHub ↗
+            </Link>
+          )}
+        </div>
         <p className="text-[13px] leading-normal text-muted">{projekt.beschreibung}</p>
         {projekt.stack && projekt.stack.length > 0 && (
           <p className="mt-1.5 font-mono text-[11px] text-primary-700">{projekt.stack.join(" · ")}</p>

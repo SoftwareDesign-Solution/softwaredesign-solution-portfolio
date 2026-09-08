@@ -15,6 +15,8 @@ export interface ReferenzProjektEintrag {
   jahr?: string;
   /** Optional, für Projekte mit umfangreichem oder ungewöhnlichem Tech-Stack. */
   stack?: string[];
+  /** Optional, falls für dieses Projekt ein öffentliches GitHub-Repository verlinkt werden soll. */
+  github?: string;
 }
 
 /** Ein Kunde inkl. aller bei ihm umgesetzten Projekte, wie auf der Referenzen-Seite gruppiert dargestellt. */
