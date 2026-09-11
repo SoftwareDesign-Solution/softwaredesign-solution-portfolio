@@ -78,11 +78,12 @@ export default function RequestSubmitSection({
                     <span className="text-error-700">*</span>
                 </Label>
 
-                <div className="grid grid-cols-2 gap-2">
+                {/*
                 <SelectField
                     options={sourceOptions}
                     {...register("source")}
                 />
+                */}
 
                 <Controller
   control={control}
@@ -98,8 +99,6 @@ export default function RequestSubmitSection({
     />
   )}
 />
-
-</div>
 
                 {errors.source?.message && (
                     <ErrorMessage

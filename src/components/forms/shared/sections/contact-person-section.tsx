@@ -5,15 +5,36 @@
  * @author Manuel Kübler <mail@softwaredesign-solution.de>
  */
 
-import { useFormContext, useFormState } from "react-hook-form";
+import { Controller, useFormContext, useFormState } from "react-hook-form";
 
 import { ContactPersonFormData } from "@/schemas/shared/contact-person.schema";
 
 import ErrorMessage from "../error-message";
 import Label from "../label";
 import SectionHeading from "../section-heading";
+import { Select } from "../select";
 import SelectField from "../select-field";
 import TextField from "../text-field";
+
+// Statische Anrede-Optionen für das Dropdown
+const salutationOptions = [
+    {
+        label: "Frau",
+        value: "Frau",
+    },
+    {
+        label: "Herr",
+        value: "Herr",
+    },
+    {
+        label: "Divers",
+        value: "Divers",
+    },
+    {
+        label: "Keine Angabe",
+        value: "Keine Angabe",
+    },
+];
 
 /** Minimal-Shape, das react-hook-form für diese Sektion benötigt. */
 type FormWithContactPerson = {
@@ -57,6 +78,7 @@ export default function ContactPersonSection({
                     <Label>Anrede</Label>
 
                     {/* Anrede */}
+                    {/*
                     <SelectField
                         options={[
                             { value: "Frau", label: "Frau" },
@@ -65,6 +87,22 @@ export default function ContactPersonSection({
                             { value: "Keine Angabe", label: "Keine Angabe" },
                         ]}
                         {...register("ansprechpartner.anrede", { required: "Bitte wählen Sie eine Anrede aus." })}
+                    />
+                    */}
+
+                    <Controller
+                        control={control}
+                        name="ansprechpartner.anrede"
+                        render={({ field, fieldState }) => (
+                        <Select
+                            options={salutationOptions}
+                            value={field.value ?? null}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                            disabled={field.disabled}
+                            error={!!fieldState.error}
+                        />
+                        )}
                     />
                     
                     {/* ErrorMessage.tsx */}

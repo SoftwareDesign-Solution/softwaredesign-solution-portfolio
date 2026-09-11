@@ -6,12 +6,13 @@
  * @author Manuel Kübler <mail@softwaredesign-solution.de>
  */
 
-import { useFormContext } from "react-hook-form";
+import { Controller, useFormContext } from "react-hook-form";
 
 import { type ContactRequestFormData } from "@/schemas/contact-request.schema";
 
 import ErrorMessage from "../../shared/error-message";
 import Label from "../../shared/label";
+import { Select } from "../../shared/select";
 import SelectField from "../../shared/select-field";
 import TextField from "../../shared/text-field";
 
@@ -43,6 +44,7 @@ const salutationOptions = [
  */
 export default function ContactDataSection() {
     const {
+        control,
         formState: {
             errors,
         },
@@ -66,11 +68,28 @@ export default function ContactDataSection() {
             <div className="mb-4">
                 <Label>Anrede</Label>
 
+                {/*
                 <SelectField
                     options={salutationOptions}
                     {...register(
                         "ansprechpartner.anrede",
                     )}
+                />
+                */}
+
+                <Controller
+                  control={control}
+                  name="ansprechpartner.anrede"
+                  render={({ field, fieldState }) => (
+                    <Select
+                      options={salutationOptions}
+                      value={field.value ?? null}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      disabled={field.disabled}
+                      error={!!fieldState.error}
+                    />
+                  )}
                 />
 
                 {contactErrors?.anrede?.message && (
