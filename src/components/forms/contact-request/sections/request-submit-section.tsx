@@ -9,7 +9,7 @@
 import Link from "next/link";
 import { type TurnstileRef } from "nextjs-turnstile";
 import { type RefObject } from "react";
-import { useFormContext } from "react-hook-form";
+import { Controller, useFormContext } from "react-hook-form";
 
 import Button from "@/components/ui/button";
 import { type ContactRequestFormData } from "@/schemas/contact-request.schema";
@@ -17,6 +17,7 @@ import { type ContactRequestFormData } from "@/schemas/contact-request.schema";
 import ErrorMessage from "../../shared/error-message";
 import Label from "../../shared/label";
 import TurnstileWidgetSection from "../../shared/sections/turnstile-widget-section";
+import { Select } from "../../shared/select";
 import SelectField from "../../shared/select-field";
 
 // Statische Optionen für "Wie sind Sie auf mich aufmerksam geworden?"
@@ -60,6 +61,7 @@ export default function RequestSubmitSection({
     turnstileRef,
 }: RequestSubmitSectionProps) {
     const {
+        control,
         formState: {
             errors,
             isSubmitting,
@@ -76,10 +78,28 @@ export default function RequestSubmitSection({
                     <span className="text-error-700">*</span>
                 </Label>
 
+                <div className="grid grid-cols-2 gap-2">
                 <SelectField
                     options={sourceOptions}
                     {...register("source")}
                 />
+
+                <Controller
+  control={control}
+  name="source"
+  render={({ field, fieldState }) => (
+    <Select
+      options={sourceOptions}
+      value={field.value ?? null}
+      onChange={field.onChange}
+      onBlur={field.onBlur}
+      disabled={field.disabled}
+      error={!!fieldState.error}
+    />
+  )}
+/>
+
+</div>
 
                 {errors.source?.message && (
                     <ErrorMessage
