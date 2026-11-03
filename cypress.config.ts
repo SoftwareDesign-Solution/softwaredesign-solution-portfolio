@@ -5,7 +5,7 @@ import { TestNotificationSignup } from "./cypress/types/test-notification-signup
 import { TestQuoteRequest } from "./cypress/types/test-quote-request";
 
 export default defineConfig({
-  allowCypressEnv: false,
+  //allowCypressEnv: false,
 
   e2e: {
 
