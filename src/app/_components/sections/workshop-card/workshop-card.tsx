@@ -53,6 +53,12 @@ export default function WorkshopCard({
                 href={`/workshops/${workshop.slug}`}
             />
 
+            {workshop.tag && (
+                <span className="absolute -top-2.5 right-4 whitespace-nowrap rounded-md bg-primary-700 px-2.5 py-0.5 text-xs font-medium text-white">
+                    {workshop.tag}
+                </span>
+            )}
+
             <header className="mb-4.5 flex items-center justify-between">
                 <div className="text-sm font-medium text-muted">
                     {hasNumbering && (

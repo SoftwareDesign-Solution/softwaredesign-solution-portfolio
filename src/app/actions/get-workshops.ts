@@ -22,6 +22,7 @@ export async function getWorkshops(): Promise<Workshop[]> {
             w.id,
             w.slug,
             w.titel,
+            w.tag,
             w.kurzbeschreibung,
             w.beschreibung,
             w.dauer,

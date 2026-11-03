@@ -15,6 +15,7 @@ export type Workshop = {
     id: number;
     slug: string;
     titel: string;
+    tag?: string;
     kurzbeschreibung?: string;
     beschreibung?: string;
     /** Dauer in Tagen. */
