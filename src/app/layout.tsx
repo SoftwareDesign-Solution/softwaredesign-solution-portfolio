@@ -8,6 +8,8 @@
 
 import type { Metadata } from "next";
 
+import { Analytics } from '@vercel/analytics/next';
+
 import "./globals.css";
 
 import ModalProvider from "@/providers/modal-provider";
@@ -49,6 +51,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Footer />
 
         <BackToTopButton />
+
+        <Analytics />
         
       </body>
     </html>
