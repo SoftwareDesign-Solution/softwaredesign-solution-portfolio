@@ -34,7 +34,7 @@ export default function Header() {
     
     // header: z-20
     return (
-        <header className="sticky top-0 z-0 grid grid-cols-[auto_1fr_auto] md:grid-cols-[1fr_1fr] items-center overflow-visible bg-white px-12 py-4.5 text-[13px] tracking-[0.2px]">
+        <header className="sticky top-0 z-100 grid grid-cols-[auto_1fr_auto] md:grid-cols-[1fr_1fr] items-center overflow-visible bg-white px-12 py-4.5 text-[13px] tracking-[0.2px]">
             
             <Link href="/" className="text-foreground no-underline">
                 <Image 
