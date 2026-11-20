@@ -222,7 +222,8 @@ export function Select<TValue extends string = string>({
           onClick={() => !disabled && setOpen((isOpen) => !isOpen)}
           onKeyDown={handleButtonKeyDown}
           className={[
-            'grid w-full cursor-default grid-cols-1 rounded-md bg-white px-3 py-2.5 text-left text-foreground outline-1 -outline-offset-1 sm:text-sm/6',
+            // mobile-form: unter 768px 16px Schrift (kein iOS-Zoom) und 46px Höhe, nur in .mobile-form
+            'grid w-full cursor-default grid-cols-1 rounded-md bg-white px-3 py-2.5 text-left text-foreground outline-1 -outline-offset-1 sm:text-sm/6 mobile-form:h-11.5 mobile-form:items-center mobile-form:text-[16px]',
             error
               ? 'outline-error-500 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-error-600'
               : 'outline-border focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary-700',

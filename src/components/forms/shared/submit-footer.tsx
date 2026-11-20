@@ -21,6 +21,8 @@ type SubmitFooterProps = {
     hint: string;
     /** Beschriftung des Submit-Buttons. */
     buttonLabel: string;
+    /** Zusätzliche Klassen, z.B. `max-md:hidden`, wenn mobil die {@link MobileSubmitBar} übernimmt. */
+    className?: string;
 };
 
 /**
@@ -34,6 +36,7 @@ type SubmitFooterProps = {
 export default function SubmitFooter({
     hint,
     buttonLabel,
+    className = "",
 }: SubmitFooterProps) {
     const {
         control,
@@ -50,7 +53,7 @@ export default function SubmitFooter({
     const disabled = !consent || isSubmitting;
 
     return (
-        <div className="mt-5.5 flex items-center justify-between gap-4">
+        <div className={`mt-5.5 flex items-center justify-between gap-4 ${className}`}>
             <div className="text-[13px] leading-relaxed text-muted">
                 {hint}
             </div>

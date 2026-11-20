@@ -13,7 +13,7 @@ import ErrorMessage from "../error-message";
 import Label from "../label";
 import SectionHeading from "../section-heading";
 import { Select } from "../select";
-import SelectField from "../select-field";
+//import SelectField from "../select-field";
 import TextField from "../text-field";
 
 // Statische Anrede-Optionen für das Dropdown
@@ -72,7 +72,7 @@ export default function ContactPersonSection({
 
             <div className="grid grid-cols-12 gap-x-3.5">
 
-                <div className="col-span-6 md:col-span-3 mb-4">
+                <div className="col-span-12 md:col-span-3 mb-4">
 
                     {/* Label.tsx */}
                     <Label>Anrede</Label>

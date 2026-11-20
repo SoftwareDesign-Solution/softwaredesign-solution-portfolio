@@ -20,6 +20,7 @@ import { createBooking } from "@/app/actions/create-booking";
 import { type BookingFormData, BookingFormInput, bookingFormSchema, type CreateBookingData } from "@/schemas/booking.schema";
 import { WorkshopFormProps } from "@/types/workshop-props";
 
+import MobileSubmitBar from "../shared/mobile-submit-bar";
 import AppointmentSelectionSection from "../shared/sections/appointment-selection-section";
 import BillingAddressSection from "../shared/sections/billing-address-section";
 import CompanyAddressSection from "../shared/sections/company-address-section";
@@ -175,7 +176,9 @@ export default function BookingForm({
     return (
         <>
             <FormProvider {...methods}>
-                <form onSubmit={handleSubmit(handleBookingSubmit)} className="px-9 pb-9" noValidate>
+                <form className="mobile-form" onSubmit={handleSubmit(handleBookingSubmit)} noValidate>
+
+                    <div className="px-9 pb-9 pt-7 max-md:px-5 max-md:pb-6 max-md:pt-6">
 
                     {/* 01 Termin */}
                     <AppointmentSelectionSection num="01" termine={workshop.termine} />
@@ -229,7 +232,13 @@ export default function BookingForm({
                     <SubmitFooter
                         hint="Bitte füllen Sie alle Pflichtfelder aus und bestätigen Sie die Sicherheitsabfrage."
                         buttonLabel="Verbindlich buchen"
+                        className="max-md:hidden"
                     />
+
+                    </div>
+
+                    {/* Feste Fußleiste mit Gesamtsumme (nur mobil) — muss letztes Kind im <form> bleiben */}
+                    <MobileSubmitBar workshop={workshop} buttonLabel="Verbindlich buchen" />
 
                 </form>
             </FormProvider>

@@ -32,11 +32,11 @@ export default function ConsentSection({ children }: ConsentSectionProps) {
         <div className="mt-6 rounded-lg border border-neutral-200 bg-white px-5 py-5">
                             
             {/* Label.tsx text-[13.5px] */}
-            <label className="flex cursor-pointer items-start gap-2.5 text-[14px] leading-[1.55] text-foreground">
+            <label className="flex cursor-pointer items-start gap-2.5 text-[14px] leading-[1.55] text-foreground max-md:min-h-11 max-md:py-2.5">
                 
                 <input
                     type="checkbox"
-                    className="mt-0.5 h-4 w-4 accent-primary-700"
+                    className="mt-0.5 h-4 w-4 accent-primary-700 max-md:mt-0.75 max-md:h-4.5 max-md:w-4.5 max-md:shrink-0"
                     {...register("consent", { required: true })}
                 />
 

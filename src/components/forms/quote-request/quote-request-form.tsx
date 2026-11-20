@@ -19,6 +19,7 @@ import { createQuoteRequest } from "@/app/actions/create-quote-request";
 import { type CreateQuoteRequestData, createQuoteRequestFormSchema, type QuoteRequestFormData } from "@/schemas/quote-request.schema";
 import { WorkshopFormProps } from "@/types/workshop-props";
 
+import MobileSubmitBar from "../shared/mobile-submit-bar";
 import AppointmentSelectionSection from "../shared/sections/appointment-selection-section";
 import BillingAddressSection from "../shared/sections/billing-address-section";
 import CompanyAddressSection from "../shared/sections/company-address-section";
@@ -146,9 +147,9 @@ export default function QuoteRequestForm({
         <>
             <FormProvider {...methods}>
 
-                <form onSubmit={handleSubmit(handleQuoteRequestSubmit)} noValidate>
+                <form className="mobile-form" onSubmit={handleSubmit(handleQuoteRequestSubmit)} noValidate>
 
-                    <div className="px-9 pb-9 pt-7">
+                    <div className="px-9 pb-9 pt-7 max-md:px-5 max-md:pb-6 max-md:pt-6">
 
                         {/* 01 Termin */}
                         <AppointmentSelectionSection num="01" termine={workshop.termine} />
@@ -187,9 +188,13 @@ export default function QuoteRequestForm({
                         <SubmitFooter
                             hint="Unverbindlich anfordern · Angebot kommt per E-Mail"
                             buttonLabel="Angebot anfordern"
+                            className="max-md:hidden"
                         />
                         
                     </div>
+
+                    {/* Feste Fußleiste mit Gesamtsumme (nur mobil) — muss letztes Kind im <form> bleiben */}
+                    <MobileSubmitBar workshop={workshop} buttonLabel="Angebot anfordern" />
 
                 </form>
 

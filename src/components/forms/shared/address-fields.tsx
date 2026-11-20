@@ -50,15 +50,20 @@ export default function AddressFields({
 
     const addressErrors = errors[name];
 
-    return (
-        <div className="mt-4 grid grid-cols-3 gap-x-3.5">
-        
-            <div className="col-span-3 mb-4">
+    // Rechnungsadresse als eigener Autofill-Bereich, damit der Browser sie nicht mit der Firmenadresse vermischt
+    const autoCompleteSection = name === "rechnungsadresse" ? "billing " : "";
 
-                <Label>Firmenname (Rechnung)</Label>
+    return (
+        // mobile-form: zweispaltig mit fester PLZ-Spalte (112px), Ort nimmt den Rest
+        <div className="mt-4 grid grid-cols-3 gap-x-3.5 mobile-form:grid-cols-[112px_minmax(0,1fr)] mobile-form:gap-x-2.5">
+        
+            <div className="col-span-3 mb-4 mobile-form:col-span-2">
+
+                <Label>Firmenname</Label>
 
                 {/* Firma */}
                 <TextField
+                    autoComplete={`${autoCompleteSection}organization`}
                     {...register(`${name}.firma`, { required: "Bitte geben Sie den Firmennamen an." })}
                 />
                 
@@ -68,12 +73,13 @@ export default function AddressFields({
 
             </div>
 
-            <div className="col-span-3 mb-4">
+            <div className="col-span-3 mb-4 mobile-form:col-span-2">
 
                 <Label>Straße (inkl. Hausnummer)</Label>
 
                 {/* Straße */}
                 <TextField
+                    autoComplete={`${autoCompleteSection}street-address`}
                     {...register(`${name}.strasse`, { required: "Bitte geben Sie die Straße an." })}
                 />
 
@@ -89,6 +95,8 @@ export default function AddressFields({
 
                 {/* PLZ */}
                 <TextField
+                    inputMode="numeric"
+                    autoComplete={`${autoCompleteSection}postal-code`}
                     {...register(`${name}.plz`, { required: "Bitte geben Sie die PLZ an." })}
                 />
 
@@ -98,12 +106,13 @@ export default function AddressFields({
 
             </div>
 
-            <div className="col-span-2 mb-4">
+            <div className="col-span-2 mb-4 mobile-form:col-span-1">
                 
                 <Label>Ort</Label>
 
                 {/* Ort */}
                 <TextField
+                    autoComplete={`${autoCompleteSection}address-level2`}
                     {...register(`${name}.ort`, { required: "Bitte geben Sie den Ort an." })}
                 />
 
