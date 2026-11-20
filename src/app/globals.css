@@ -1,5 +1,18 @@
 @import "tailwindcss";
 
+/*
+ * Mobile Formular-Optimierung: greift nur unterhalb von md (768px) und nur innerhalb
+ * eines Elements mit der Klasse "mobile-form" (Buchung, Angebotsanfrage, Benachrichtigung).
+ * Bewusst ohne :where(), damit die Regeln die sm:-Klassen der Felder überschreiben.
+ * Beispiel: <TextField className="mobile-form:h-[46px]" />
+ */
+@custom-variant mobile-form {
+  @media (width < 48rem) {
+    .mobile-form & {
+      @slot;
+    }
+  }
+}
 
 @theme {
   /* Primary — Buttons, Links, Fokus-Ringe, aktive Zustände (Termin-Auswahl-Radio), Preis-Summary-Kicker */
