@@ -52,6 +52,11 @@
   --color-warning-500: #c68a2e;  /* Icons/Punkte */
   --color-warning-600: #9c6c1f;  /* Text auf hellem Grund (z.B. "Restplätze"-Label) */
   --color-warning-700: #7d5619;  /* Hover-Zustand */
+
+  /* Overlay — Lightbox der Referenz-Detailseite (Bildergalerie) */
+  --color-overlay: #0a1420f0;         /* Lightbox-Hintergrund, fast deckend, leicht blau getönt */
+  --color-on-overlay: #ffffff;        /* Text/Icons in der Lightbox */
+  --color-on-overlay-muted: #b8c2cc;  /* Bildzähler, Bildunterschrift in der Lightbox */
 }
 
 body {

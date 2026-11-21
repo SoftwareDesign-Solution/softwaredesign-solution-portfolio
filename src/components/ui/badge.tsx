@@ -1,7 +1,7 @@
 /**
- * @file Badge.tsx
+ * @file badge.tsx
  * @description Kleines, dezentes Info-Badge (z.B. Dauer, Sprache, Branche).
- * @module components/ui/Badge
+ * @module components/ui/badge
  * @author Manuel Kübler <mail@softwaredesign-solution.de>
  */
 

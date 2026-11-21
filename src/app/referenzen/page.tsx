@@ -12,7 +12,7 @@ import Link from "next/link";
 import type { ReferenzKunde, ReferenzProjektEintrag } from "@/types/referenz";
 
 import Badge from "@/components/ui/badge";
-import { REFERENZEN } from "@/data/referenzen";
+import { hatDetailseite, REFERENZEN } from "@/data/referenzen";
 
 export const metadata: Metadata = {
   title: `Referenzen - ${process.env.APP_TITLE}`
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 
 /**
  * Eine einzelne Projektzeile innerhalb einer {@link KundenKarte}: Jahr (falls
- * vorhanden), Titel, Beschreibung und Tech-Stack.
+ * vorhanden), Titel (als Link, falls `details: true`), Beschreibung und Tech-Stack.
  *
  * @param props.projekt - Das anzuzeigende Projekt
  * @param props.istErstes - Ob dies die erste Zeile der Karte ist (dann kein oberer Trennstrich)
@@ -33,6 +33,9 @@ function ProjektZeile({
   projekt: ReferenzProjektEintrag;
   istErstes: boolean;
 }) {
+  const detail = hatDetailseite(projekt);
+  const anzahlBilder = projekt.bilder?.length;
+
   return (
     <div className={`flex gap-3.5 py-3.5 ${istErstes ? "" : "border-t border-border"}`}>
       {projekt.jahr && (
@@ -40,7 +43,13 @@ function ProjektZeile({
       )}
       <div>
         <div className="mb-1 text-[14.5px] font-semibold text-foreground">
-          {projekt.titel} {" "}
+          {detail ? (
+            <Link href={`/referenzen/${projekt.slug}`} className="hover:text-primary-700 hover:underline">
+              {projekt.titel}
+            </Link>
+          ) : (
+            projekt.titel
+          )}{" "}
           {projekt.github && (
             <Link
               href={projekt.github}
@@ -55,6 +64,14 @@ function ProjektZeile({
         <p className="text-[13px] leading-normal text-muted">{projekt.beschreibung}</p>
         {projekt.stack && projekt.stack.length > 0 && (
           <p className="mt-1.5 font-mono text-[11px] text-primary-700">{projekt.stack.join(" · ")}</p>
+        )}
+        {detail && (
+          <Link
+            href={`/referenzen/${projekt.slug}`}
+            className="mt-2 inline-block font-mono text-[11px] text-primary-700 hover:underline"
+          >
+            Details &amp; Screenshots{anzahlBilder ? ` (${anzahlBilder})` : ""} →
+          </Link>
         )}
       </div>
     </div>
@@ -87,7 +104,7 @@ function KundenKarte({ kunde }: { kunde: ReferenzKunde }) {
 
         <div>
           {kunde.projekte.map((projekt, i) => (
-            <ProjektZeile key={projekt.id} projekt={projekt} istErstes={i === 0} />
+            <ProjektZeile key={projekt.slug} projekt={projekt} istErstes={i === 0} />
           ))}
         </div>
 
@@ -108,7 +125,7 @@ function KundenKarte({ kunde }: { kunde: ReferenzKunde }) {
 export default function ReferenzenPage() {
   return (
     <article className="min-h-screen">
-      <div className="mx-auto max-w-5xl px-6 py-16">
+      <div className="mx-auto max-w-6xl px-6 py-16">
         <div className="mb-12">
           <div className="mb-3 inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[1.5px] text-primary-700">
             <span className="h-2 w-2 rounded-full bg-primary-700" />
