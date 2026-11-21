@@ -19,8 +19,11 @@ import {
     createQuoteRequestSchema,
     sendQuoteRequestOptInEmailSchema,
 } from "@/schemas/quote-request.schema";
+import { agendaListSchema } from "@/schemas/shared/agenda.schema";
+import { TopicsAuswahl } from "@/schemas/shared/topics.schema";
 import { sendQuoteRequestOptInEmail } from "@/services/emails/send-quote-request-optin-email";
 import { generateSecureToken } from "@/utils/generate-secure-token";
+import { baueThemenAuswahl } from "@/utils/themen-auswahl";
 
 // Gültigkeitsdauer des Bestätigungslinks in der Opt-In-E-Mail
 //const CONFIRMATION_EXPIRATION_DAYS = 3;
@@ -30,6 +33,8 @@ import { generateSecureToken } from "@/utils/generate-secure-token";
  * sind `null`, wenn die Anfrage ohne festen Termin gestellt wurde.
  */
 interface WorkshopAppointmentData {
+    /** Roh aus der JSONB-Spalte, wird in {@link createThemenAuswahl} gegen das Agenda-Schema geprüft. */
+    agenda: unknown;
     datumBis: string | Date | null;
     datumVon: string | Date | null;
     preis: number | string | null;
@@ -43,6 +48,7 @@ interface InsertQuoteRequestOptions {
     confirmationToken: string;
     ipAddress: string | null;
     quoteRequestData: CreateQuoteRequestData;
+    themen: TopicsAuswahl | null;
     totalPrice: number;
     workshopAppointment:
         WorkshopAppointmentData;
@@ -145,6 +151,11 @@ export async function createQuoteRequest(
         quoteRequestData.teilnehmerzahl,
     );
 
+    const themen = createThemenAuswahl(
+        quoteRequestData,
+        workshopAppointment,
+    );
+
     const ipAddress = await getClientIpSafely();
     const confirmationToken = generateSecureToken();
 
@@ -153,6 +164,7 @@ export async function createQuoteRequest(
             confirmationToken,
             ipAddress,
             quoteRequestData,
+            themen,
             totalPrice,
             workshopAppointment,
         });
@@ -183,7 +195,11 @@ export async function createQuoteRequest(
 async function validateAppointmentRequirement(
     quoteRequestData: CreateQuoteRequestData,
 ): Promise<void> {
-    if (quoteRequestData.termin) {
+    // Fester Termin gewählt oder bewusst "Termin nach Absprache"
+    if (
+        quoteRequestData.termin ||
+        quoteRequestData.terminNachAbsprache
+    ) {
         return;
     }
 
@@ -225,6 +241,7 @@ async function getWorkshopAppointment(
                 w.id AS "workshopId",
                 w.titel AS "workshopTitel",
                 w.preis,
+                w.agenda,
                 t.id AS "terminId",
                 t.datum_von AS "datumVon",
                 t.datum_bis AS "datumBis"
@@ -254,6 +271,7 @@ async function getWorkshopAppointment(
             w.id AS "workshopId",
             w.titel AS "workshopTitel",
             w.preis,
+            w.agenda,
             NULL::INTEGER AS "terminId",
             NULL::DATE AS "datumVon",
             NULL::DATE AS "datumBis"
@@ -268,6 +286,55 @@ async function getWorkshopAppointment(
     return workshop
         ? workshop as WorkshopAppointmentData
         : null;
+}
+
+/**
+ * Baut die Momentaufnahme der Themenauswahl. Nur ohne festen Termin und nur,
+ * wenn der Workshop eine gültige Agenda hat; die Titel kommen aus der Datenbank,
+ * nicht aus dem Formular. Eine ungültige Agenda verhindert die Anfrage nicht:
+ * Dann werden nur die Wunschthemen gespeichert (ohne Tage), damit sie nicht verloren gehen.
+ *
+ * @param quoteRequestData - Die validierten Anfragedaten
+ * @param workshopAppointment - Workshop (inkl. Agenda) aus der Datenbank
+ * @returns Die Themenauswahl oder `null` bei festem Termin bzw. ohne Agenda
+ */
+function createThemenAuswahl(
+    quoteRequestData: CreateQuoteRequestData,
+    workshopAppointment: WorkshopAppointmentData,
+): TopicsAuswahl | null {
+    if (quoteRequestData.termin || workshopAppointment.agenda == null) {
+        return null;
+    }
+
+    const agendaResult = agendaListSchema.safeParse(
+        workshopAppointment.agenda,
+    );
+
+    if (!agendaResult.success) {
+        console.error(
+            "Workshop agenda is invalid, quote request is saved without topic selection.",
+            agendaResult.error.flatten(),
+        );
+
+        // Wunschthemen trotzdem behalten, sie sind für das Angebot wertvoll
+        const wunschthemen = quoteRequestData.wunschthemen?.trim();
+
+        return wunschthemen
+            ? { angepasst: false, gesamt: 0, gewaehlt: 0, tage: [], wunschthemen }
+            : null;
+    }
+
+    const agenda = agendaResult.data;
+
+    if (agenda.length === 0) {
+        return null;
+    }
+
+    return baueThemenAuswahl(
+        agenda,
+        quoteRequestData.themenAbgewaehlt,
+        quoteRequestData.wunschthemen,
+    );
 }
 
 /**
@@ -306,6 +373,7 @@ async function insertQuoteRequest({
     confirmationToken,
     ipAddress,
     quoteRequestData,
+    themen,
     totalPrice,
     workshopAppointment,
 }: InsertQuoteRequestOptions): Promise<string> {
@@ -343,7 +411,8 @@ async function insertQuoteRequest({
                 gesamtpreis,
                 ip_adresse,
                 confirmation_token,
-                confirmation_expires_at
+                confirmation_expires_at,
+                themen
             )
             VALUES (
                 ${workshopAppointment.workshopId},
@@ -385,7 +454,8 @@ async function insertQuoteRequest({
                 ${totalPrice},
                 ${ipAddress},
                 ${confirmationToken},
-                NOW() + INTERVAL '3 DAY'
+                NOW() + INTERVAL '3 DAY',
+                ${themen ? JSON.stringify(themen) : null}::jsonb
             )
             RETURNING id
         `;

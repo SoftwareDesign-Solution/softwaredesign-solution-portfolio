@@ -11,6 +11,7 @@ import { Workshop } from "@/types/workshop";
 //import { formatDateRange } from "@/utils/format-date-range";
 import { formatDay } from "@/utils/format-day";
 import { formatPrice } from "@/utils/format-price";
+import { type ThemenUmfang } from "@/utils/themen-auswahl";
 
 import { usePriceSummary } from "../use-price-summary";
 
@@ -36,6 +37,12 @@ interface SummarySectionProps {
     noTerminLabel?: string;
 
     discount?: SummarySectionDiscount;
+
+    /**
+     * Themenumfang bei „Termin nach Absprache“ (nur Angebotsanfrage). Zeigt die Zeile
+     * „Themen“ und kennzeichnet die Gesamtsumme als vorläufig, sobald Themen abgewählt sind.
+     */
+    themenumfang?: ThemenUmfang;
 };
 
 /**
@@ -47,7 +54,7 @@ interface SummarySectionProps {
  * @param props - Siehe {@link SummarySectionProps}
  * @returns Die Zusammenfassungs-Box
  */
-export default function SummarySection({ title, mobileTitle, workshop, noTerminLabel = "Kein Termin ausgewählt", discount }: SummarySectionProps) {
+export default function SummarySection({ title, mobileTitle, workshop, noTerminLabel = "Kein Termin ausgewählt", discount, themenumfang }: SummarySectionProps) {
 
     const {
         discountAmount,
@@ -119,6 +126,18 @@ export default function SummarySection({ title, mobileTitle, workshop, noTerminL
                 <span className={labelMobile}>Termin</span>
                 <span className={`font-mono text-[13.5px] ${valueMobile}`}>{selectedDateLabel}</span>
             </div>
+
+            {/* Themenumfang (nur Angebotsanfrage bei Termin nach Absprache) */}
+            {themenumfang && (
+                <div className={`flex items-baseline justify-between py-1.5 text-[14px] text-foreground ${rowMobile}`}>
+                    <span className={labelMobile}>Themen</span>
+                    <span className={`font-mono text-[13.5px] ${valueMobile}`}>
+                        {themenumfang.angepasst
+                            ? `${themenumfang.gewaehlt} von ${themenumfang.gesamt}`
+                            : `Standard (${themenumfang.gesamt})`}
+                    </span>
+                </div>
+            )}
 
             {discount && discountAmount > 0 && (
                 <div className={`flex items-baseline justify-between py-1.5 text-[14px] text-success-600 ${rowMobile}`}>

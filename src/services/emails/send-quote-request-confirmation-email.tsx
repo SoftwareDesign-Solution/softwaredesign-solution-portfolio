@@ -24,11 +24,16 @@ export async function sendQuoteRequestConfirmationEmail(props: SendQuoteRequestE
         ? ` (${formatDate(props.termin.datumVon)} - ${formatDate(props.termin.datumBis)})`
         : " (ohne festen Termin)";
 
+    // Angepasster Themenumfang direkt im Postfach erkennbar
+    const themenLabel = props.themen?.angepasst
+        ? ` · Themen angepasst (${props.themen.gewaehlt}/${props.themen.gesamt})`
+        : "";
+
     const response = await resend.emails.send({
         from: process.env.EMAIL_FROM_ADDRESS as string,
         to: process.env.EMAIL_TO_ADDRESS as string,
         //subject: `Neue Angebotsanfrage · ${props.workshop.titel} (${formatDate(props.termin!.datumVon)} - ${formatDate(props.termin!.datumBis)})`,
-        subject: `Neue Angebotsanfrage · ${props.workshop.titel}${terminLabel}`,
+        subject: `Neue Angebotsanfrage · ${props.workshop.titel}${terminLabel}${themenLabel}`,
         react: <QuoteRequestNotificationEmail {...props} />
     });
 

@@ -6,18 +6,19 @@
  * @author Manuel Kübler <mail@softwaredesign-solution.de>
  */
 
-/* eslint-disable react-hooks/refs */
+ 
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { TurnstileRef } from "nextjs-turnstile";
 import { useRef } from "react";
-import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
+import { FormProvider, SubmitHandler, useForm, useWatch } from "react-hook-form";
 
 import { createQuoteRequest } from "@/app/actions/create-quote-request";
 import { type CreateQuoteRequestData, createQuoteRequestFormSchema, type QuoteRequestFormData } from "@/schemas/quote-request.schema";
 import { WorkshopFormProps } from "@/types/workshop-props";
+import { zaehleThemen } from "@/utils/themen-auswahl";
 
 import MobileSubmitBar from "../shared/mobile-submit-bar";
 import AppointmentSelectionSection from "../shared/sections/appointment-selection-section";
@@ -32,6 +33,10 @@ import TurnstileWidgetSection from "../shared/sections/turnstile-widget-section"
 import SubmitFooter from "../shared/submit-footer";
 import { getQuoteRequestFormDefaultValues } from "./quote-request-form-default-values";
 import { quoteRequestErrorMessage, quoteRequestSuccessMessage } from "./quote-request-form-status-messages";
+import TopicSelectionSection from "./sections/topics-selection-section";
+
+/** Reihenfolge der nummerierten Abschnitte; „themen“ nur bei Termin nach Absprache. */
+type SectionKey = "termin" | "themen" | "teilnehmer" | "firma" | "ansprechpartner" | "rechnung" | "weiteres";
 
 /**
  * Mehrstufiges Formular zur Anforderung eines unverbindlichen Angebots für einen
@@ -52,6 +57,8 @@ export default function QuoteRequestForm({
 
     const hasAppointments = Boolean(workshop.termine && workshop.termine.length > 0);
 
+    const agenda = workshop.agenda ?? [];
+
     const methods = useForm<QuoteRequestFormData>({
         defaultValues: getQuoteRequestFormDefaultValues(),
         resolver: zodResolver(
@@ -61,7 +68,29 @@ export default function QuoteRequestForm({
         ),
     });
 
-    const { handleSubmit, setValue } = methods;
+    const { control, handleSubmit, setValue } = methods;
+
+    const [terminNachAbsprache, themenAbgewaehlt] = useWatch({
+        control,
+        name: ["terminNachAbsprache", "themenAbgewaehlt"],
+    });
+
+    // Themen nur ohne festen Termin und nur, wenn der Workshop eine Agenda hat
+    const flexibleDate = !hasAppointments || terminNachAbsprache;
+    const showTopics = flexibleDate && agenda.length > 0;
+    const themenumfang = showTopics ? zaehleThemen(agenda, themenAbgewaehlt ?? []) : undefined;
+
+    // Laufende Nummern, damit ohne Themen-Abschnitt keine Lücke entsteht (01, 02, 03 …)
+    const sections: SectionKey[] = [
+        "termin",
+        ...(showTopics ? (["themen"] as const) : []),
+        "teilnehmer",
+        "firma",
+        "ansprechpartner",
+        "rechnung",
+        "weiteres",
+    ];
+    const num = (key: SectionKey) => String(sections.indexOf(key) + 1).padStart(2, "0");
 
     // Datenschutzerklärung & Sicherheitsabfrage (Turnstile)
     const turnstileRef = useRef<TurnstileRef>(null);
@@ -152,25 +181,44 @@ export default function QuoteRequestForm({
                     <div className="px-9 pb-9 pt-7 max-md:px-5 max-md:pb-6 max-md:pt-6">
 
                         {/* 01 Termin */}
-                        <AppointmentSelectionSection num="01" termine={workshop.termine} />
+                        <AppointmentSelectionSection 
+                            num={num("termin")} 
+                            termine={workshop.termine} 
+                            allowFlexibleDate 
+                            flexibleDateDescription={
+                                agenda.length > 0
+                                    ? "Remote oder Inhouse · Themen individuell zusammenstellbar"
+                                    : undefined
+                            }
+                        />
+
+                        {/* Themen (nur bei Termin nach Absprache) */}
+                        {showTopics && (
+                            <TopicSelectionSection num={num("themen")} agenda={agenda} />
+                        )}
 
                         {/* 02 Teilnehmeranzahl */}
-                        <ParticipantStepperSection num="02" />
+                        <ParticipantStepperSection num={num("teilnehmer")} />
 
                         {/* 03 Firma & Adresse */}
-                        <CompanyAddressSection num="03" />
+                        <CompanyAddressSection num={num("firma")} />
                         
                         {/* 04 Ansprechpartner */}
-                        <ContactPersonSection num="04" />
+                        <ContactPersonSection num={num("ansprechpartner")} />
 
                         {/* 05 Rechnungsadresse */}
-                        <BillingAddressSection num="05" />
+                        <BillingAddressSection num={num("rechnung")} />
                         
                         {/* 06 Weiteres */}
-                        <ExtrasSection num="06" />
+                        <ExtrasSection num={num("weiteres")} />
                         
                         {/* Zusammenfassung */}
-                        <SummarySection title="Voraussichtliche Angebotssumme" workshop={workshop} noTerminLabel={hasAppointments ? undefined : "Nach Absprache"} />
+                        <SummarySection
+                            title="Voraussichtliche Angebotssumme"
+                            workshop={workshop}
+                            noTerminLabel={flexibleDate ? "Nach Absprache" : undefined}
+                            themenumfang={themenumfang}
+                        />
 
                         {/* Consent */}
                         <ConsentSection>
@@ -194,7 +242,11 @@ export default function QuoteRequestForm({
                     </div>
 
                     {/* Feste Fußleiste mit Gesamtsumme (nur mobil) — muss letztes Kind im <form> bleiben */}
-                    <MobileSubmitBar workshop={workshop} buttonLabel="Angebot anfordern" />
+                    <MobileSubmitBar 
+                        workshop={workshop} 
+                        buttonLabel="Angebot anfordern" 
+                        totalLabel={themenumfang?.angepasst ? "Gesamt (vorläufig)" : undefined}
+                    />
 
                 </form>
 

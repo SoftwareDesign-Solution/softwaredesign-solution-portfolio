@@ -13,7 +13,9 @@ import { type QuoteRequestFormData } from "@/schemas/quote-request.schema";
  *
  * @returns Die Default-Werte für {@link QuoteRequestFormData}
  */
-export function getQuoteRequestFormDefaultValues():
+export function getQuoteRequestFormDefaultValues(
+    hasAppointments = true,
+):
     QuoteRequestFormData {
     return {
         abweichendeRechnungsadresse: false,
@@ -34,6 +36,8 @@ export function getQuoteRequestFormDefaultValues():
         nachricht: "",
         teilnehmerzahl: 1,
         termin: null,
+        terminNachAbsprache: !hasAppointments,
+        themenAbgewaehlt: [],
         turnstile: {
             token: "",
         },

@@ -2,7 +2,8 @@
  * @file quote-request.schema.ts
  * @description Zod-Schemas für die unverbindliche Angebotsanfrage: Formulareingaben
  * (inkl. bedingter Termin-Pflicht, falls der Workshop Termine hat), Server-Action-
- * Eingaben sowie die Daten für Opt-In- und Benachrichtigungs-E-Mails.
+ * Eingaben sowie die Daten für Opt-In- und Benachrichtigungs-E-Mails. Bei „Termin nach
+ * Absprache“ kommt die Themenauswahl hinzu.
  * @module schemas/quote-request
  * @author Manuel Kübler <mail@softwaredesign-solution.de>
  */
@@ -15,6 +16,7 @@ import {
 } from "./shared/address.schema";
 import { contactPersonSchema } from "./shared/contact-person.schema";
 import { terminSchema } from "./shared/termin.schema";
+import { topicsAuswahlSchema, topicsFormFields } from "./shared/topics.schema";
 import { turnstileSchema } from "./shared/turnstile-schema";
 import { workshopSchema } from "./shared/workshop.schema";
 
@@ -92,6 +94,15 @@ const verificationFields = {
     turnstile: turnstileSchema,
 };
 
+/**
+ * Feld der Terminwahl, das nur im Formular und beim Anlegen vorkommt (nicht in der
+ * Datenbank). `true`, wenn der Kunde „Termin nach Absprache“ gewählt hat oder der
+ * Workshop keine Termine hat; dann ist `termin` `null`.
+ */
+const flexibleDateFields = {
+    terminNachAbsprache: z.boolean(),
+};
+
 /** Basisfelder einer Angebotsanfrage: Workshop, Termin, Teilnehmerzahl, Adressen. */
 export const quoteRequestBaseSchema = z.object({
     workshop: workshopSchema,
@@ -105,12 +116,18 @@ export const quoteRequestConfirmedSchema =
             .partial()
             .nullable()
             .optional(),
+
+        // Momentaufnahme der Themenauswahl, NULL bei festem Termin oder ohne Agenda
+        themen: topicsAuswahlSchema
+            .nullable()
+            .optional(),
     });
 
 /**
  * Erzeugt das Zod-Schema für die Formulareingaben im Frontend (ohne `workshop`,
  * kommt aus dem Seitenkontext). Die Termin-Pflicht ist bedingt: nur wenn der
- * Workshop überhaupt Termine anbietet, muss auch einer ausgewählt sein.
+ * Workshop überhaupt Termine anbietet, muss einer ausgewählt oder „Termin nach
+ * Absprache“ gewählt sein.
  *
  * @param hasTermine - Ob der angefragte Workshop mindestens einen Termin hat
  * @returns Ein Zod-Schema mit Termin- und Rechnungsadress-Validierung
@@ -121,6 +138,8 @@ export function createQuoteRequestFormSchema(
     return z
         .object({
             ...quoteRequestFields,
+            ...flexibleDateFields,
+            ...topicsFormFields,
             ...verificationFields,
         })
         .superRefine((data, ctx) => {
@@ -138,6 +157,8 @@ export const createQuoteRequestSchema = z
     .object({
         workshop: workshopSchema,
         ...quoteRequestFields,
+        ...flexibleDateFields,
+        ...topicsFormFields,
         ...verificationFields,
     })
     .superRefine(validateBillingAddress);
@@ -220,11 +241,12 @@ function validateBillingAddress(
 function validateAppointmentSelection(
     data: {
         termin: z.output<typeof terminSchema> | null;
+        terminNachAbsprache: boolean;
     },
     ctx: z.RefinementCtx,
     hasTermine: boolean,
 ): void {
-    if (!hasTermine || data.termin !== null) {
+    if (!hasTermine || data.termin !== null || data.terminNachAbsprache) {
         return;
     }
 

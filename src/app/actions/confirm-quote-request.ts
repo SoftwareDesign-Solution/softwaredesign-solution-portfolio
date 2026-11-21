@@ -202,6 +202,8 @@ async function confirmQuoteRequestInDatabase(
 
             notizen AS nachricht,
 
+            themen,
+
             confirmed_at AS "confirmedAt"
     `;
 
@@ -287,6 +289,8 @@ async function getExistingQuoteRequest(
             ) AS teilnehmerzahl,
 
             notizen AS nachricht,
+
+            themen,
 
             confirmed_at AS "confirmedAt"
         FROM angebotsanfrage
