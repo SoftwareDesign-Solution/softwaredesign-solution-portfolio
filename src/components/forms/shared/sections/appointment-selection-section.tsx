@@ -51,6 +51,17 @@ function cardStateClass(checked: boolean, disabled = false): string {
 }
 
 /**
+ * Schriftstärke und -farbe des Karten-Titels. Statt nur den gewählten Titel
+ * fetter zu setzen, werden die nicht gewählten etwas zurückgenommen – der
+ * Kontrast zwischen beiden Zuständen hebt die Auswahl deutlicher hervor.
+ */
+function titleStateClass(checked: boolean): string {
+    return checked
+        ? "font-bold text-primary-900"
+        : "font-medium text-foreground";
+}
+
+/**
  * Terminauswahl als Radio-Gruppe (visuell als Kartenliste). Bereits ausgebuchte
  * oder inaktive Termine werden zwar angezeigt, sind aber nicht auswählbar. Hat
  * der Workshop gar keine Termine, wird stattdessen ein Hinweis angezeigt, dass
@@ -121,7 +132,7 @@ export default function AppointmentSelectionSection({
                                     </span>
                                     
                                     <div>
-                                        <div className="text-[15px] font-semibold text-foreground">
+                                        <div className={`text-[15px] transition-colors ${titleStateClass(checked)}`}>
                                             {formatDateRange(
                                                 termin.datumVon, 
                                                 termin.datumBis
@@ -181,7 +192,7 @@ export default function AppointmentSelectionSection({
                                 </span>
 
                                 <div>
-                                    <div className="text-[15px] font-semibold text-foreground">
+                                    <div className={`text-[15px] transition-colors ${titleStateClass(terminNachAbsprache)}`}>
                                         Termin nach Absprache
                                     </div>
                                     <div className="text-[12.5px] text-muted">{flexibleDateDescription}</div>
