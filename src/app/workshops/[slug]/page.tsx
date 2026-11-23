@@ -11,6 +11,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { getWorkshop } from "@/app/actions/get-workshop";
+import { baseOpenGraph, SITE_NAME } from "@/lib/site";
 
 import WorkshopDetails from "./_components/workshop-details";
 import WorkshopHeader from "./_components/workshop-header";
@@ -40,14 +41,22 @@ export async function generateMetadata({ params }: WorkshopDetailsPageProps): Pr
 
     if (!workshop) {
         return {
-            title: "Workshop nicht gefunden - Manuel Kübler | SoftwareDesign-Solution",
+            title: `Workshop nicht gefunden | ${SITE_NAME}`,
             description: "Der angeforderte Workshop wurde nicht gefunden.",
+            robots: { index: false },
         };
     }
 
+    // Workshop-Titel zuerst: Suchende tippen "React Workshop", nicht den Markennamen
+    const title = `${workshop.titel} – Workshop | ${SITE_NAME}`;
+    const description = `${workshop.titel} mit Manuel Kübler. ${workshop.kurzbeschreibung}. Termine & Buchung.`;
+    const url = `/workshops/${workshop.slug}`;
+
     return {
-        title: `Workshop: ${workshop.titel} - Manuel Kübler | SoftwareDesign-Solution`,
-        description: `${workshop.titel} mit Manuel Kübler. ${workshop.kurzbeschreibung}. Termine & Buchung.`,
+        title,
+        description,
+        alternates: { canonical: url },
+        openGraph: { ...baseOpenGraph, title, description, url },
     };
 };
 

@@ -7,6 +7,13 @@
  * @author Manuel Kübler <mail@softwaredesign-solution.de>
  */
 
+import type { Metadata } from "next";
+
+// Interne Entwicklerseite – nicht indexieren
+export const metadata: Metadata = {
+  robots: { follow: false, index: false },
+};
+
 /** Ein Farbmuster-Eintrag im Styleguide (Name, CSS-Variable, Hex-Wert, Tailwind-Klasse). */
 interface Swatch {
   name: string;

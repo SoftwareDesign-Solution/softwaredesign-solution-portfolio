@@ -15,7 +15,9 @@ import Badge from "@/components/ui/badge";
 import { hatDetailseite, REFERENZEN } from "@/data/referenzen";
 
 export const metadata: Metadata = {
-  title: `Referenzen - ${process.env.APP_TITLE}`
+  title: `Referenzen - ${process.env.APP_TITLE}`,
+  description: "Referenzen von Manuel Kübler: SAP-Business-One-Add-Ons und Schnittstellen, Web- und App-Entwicklung sowie Inhouse-Schulungen für Unternehmen.",
+  alternates: { canonical: "/referenzen" },
 };
 
 /**

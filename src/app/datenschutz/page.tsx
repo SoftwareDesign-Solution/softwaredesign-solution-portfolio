@@ -9,7 +9,8 @@ import { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: `Datenschutzerklärung - ${process.env.APP_TITLE}`
+  title: `Datenschutzerklärung - ${process.env.APP_TITLE}`,
+  alternates: { canonical: "/datenschutz" },
 };
 
 /**

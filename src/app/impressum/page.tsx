@@ -9,7 +9,8 @@ import { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: `Impressum - ${process.env.APP_TITLE}`
+  title: `Impressum - ${process.env.APP_TITLE}`,
+  alternates: { canonical: "/impressum" },
 };
 
 /**

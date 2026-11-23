@@ -6,6 +6,10 @@
  * @author Manuel Kübler <mail@softwaredesign-solution.de>
  */
 
+import type { Metadata } from "next";
+
+import { baseOpenGraph, DEFAULT_DESCRIPTION, DEFAULT_TITLE } from "@/lib/site";
+
 import HeroSection from "./_components/sections/hero-section";
 import KontaktSection from "./_components/sections/kontakt-section";
 import LeistungenSection from "./_components/sections/leistungen-section";
@@ -14,6 +18,12 @@ import WorkshopsSection from "./_components/sections/workshops-section";
 
 // Immer dynamisch rendern, da die Workshop-Liste live aus der DB kommt (kein Static Caching)
 export const dynamic = "force-dynamic";
+
+// Titel und Beschreibung kommen aus dem Root-Layout; hier kanonische URL und og:url der Startseite
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+  openGraph: { ...baseOpenGraph, title: DEFAULT_TITLE, description: DEFAULT_DESCRIPTION, url: "/" },
+};
 
 /**
  * Startseite: reiht die einzelnen One-Pager-Sektionen (Hero, Schwerpunkte, Leistungen, Workshops, Kontakt) aneinander.

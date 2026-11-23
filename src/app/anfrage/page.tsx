@@ -10,7 +10,9 @@ import { Metadata } from "next";
 import ContactRequestForm from "@/components/forms/contact-request/contact-request-form";
 
 export const metadata: Metadata = {
-  title: `Anfrage - ${process.env.APP_TITLE}`
+  title: `Anfrage - ${process.env.APP_TITLE}`,
+  description: "Beratung, Entwicklung oder Workshop anfragen: Schildern Sie kurz Ihr Anliegen – Manuel Kübler meldet sich umgehend für ein unverbindliches Vorgespräch.",
+  alternates: { canonical: "/anfrage" },
 };
 
 /**

@@ -6,7 +6,14 @@
  * @author Manuel Kübler <mail@softwaredesign-solution.de>
  */
 
+import type { Metadata } from "next";
+
 import { type ReactNode } from "react";
+
+// Bestätigungsseiten enthalten Token-URLs und persönliche Daten – nie in den Suchindex
+export const metadata: Metadata = {
+    robots: { follow: false, index: false },
+};
 
 /** Props für {@link ConfirmationLayout}. */
 interface ConfirmationLayoutProps {

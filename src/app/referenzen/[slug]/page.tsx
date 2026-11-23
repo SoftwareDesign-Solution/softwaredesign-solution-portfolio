@@ -17,6 +17,7 @@ import {
   hatDetailseite,
 } from "@/data/referenzen";
 import { ladeBilderFuerProjekt } from "@/lib/referenz-bilder";
+import { baseOpenGraph } from "@/lib/site";
 
 import BackLink from "./_components/back-link";
 import BilderRaster from "./_components/bilder-raster";
@@ -54,9 +55,15 @@ export async function generateMetadata({ params }: ReferenzDetailPageProps): Pro
     return {};
   }
 
+  const title = `${treffer.projekt.titel} - ${process.env.APP_TITLE}`;
+  const description = treffer.projekt.beschreibung;
+  const url = `/referenzen/${treffer.projekt.slug}`;
+
   return {
-    title: `${treffer.projekt.titel} - ${process.env.APP_TITLE}`,
-    description: treffer.projekt.beschreibung,
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: { ...baseOpenGraph, title, description, url },
   };
 }
 

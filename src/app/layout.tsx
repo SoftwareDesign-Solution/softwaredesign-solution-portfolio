@@ -12,16 +12,31 @@ import { Analytics } from '@vercel/analytics/next';
 
 import "./globals.css";
 
+import { baseOpenGraph, DEFAULT_DESCRIPTION, DEFAULT_TITLE, SITE_NAME, SITE_URL } from "@/lib/site";
 import ModalProvider from "@/providers/modal-provider";
 
 import { BackToTopButton } from "./_components/back-to-top-button";
 import Footer from "./_components/footer";
 import Header from "./_components/header";
 
-// Standard-Meta-Tags (Titel/Beschreibung) für alle Seiten, sofern nicht auf Seitenebene überschrieben
+// Standard-Meta-Tags für alle Seiten, sofern nicht auf Seitenebene überschrieben.
+// Kein `alternates.canonical` und keine `openGraph.url` hier: beides würde an alle Unterseiten
+// vererbt und sie auf "/" zeigen lassen – die URL setzt jede Seite selbst.
 export const metadata: Metadata = {
-  title: "SoftwareDesign-Solution - Workshops, Beratung und Entwicklung für Front-End-Teams",
-  description: "Manuel Kübler — Workshops, Beratung und Entwicklung für Softwareentwicklung. Clean Code, Architektur, Testing — pragmatisch, im DACH-Raum.",
+  metadataBase: new URL(SITE_URL),
+  title: DEFAULT_TITLE,
+  description: DEFAULT_DESCRIPTION,
+  applicationName: SITE_NAME,
+  authors: [{ name: "Manuel Kübler", url: SITE_URL }],
+  creator: "Manuel Kübler",
+  openGraph: {
+    ...baseOpenGraph,
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
 };
 
 /**
