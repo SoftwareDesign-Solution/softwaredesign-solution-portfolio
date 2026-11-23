@@ -9,6 +9,7 @@
 import type { MetadataRoute } from "next";
 
 import { getWorkshops } from "@/app/actions/get-workshops";
+import { LEISTUNGEN } from "@/data/leistungen";
 import { getReferenzProjektIdsMitBildern } from "@/data/referenzen";
 import { SITE_URL } from "@/lib/site";
 
@@ -53,5 +54,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: `${SITE_URL}/referenzen/${slug}`,
   }));
 
-  return [...statischeSeiten, ...workshopSeiten, ...referenzSeiten];
+  const leistungsSeiten: MetadataRoute.Sitemap = LEISTUNGEN.map((leistung) => ({
+    changeFrequency: "monthly",
+    priority: 0.9,
+    url: `${SITE_URL}/leistungen/${leistung.slug}`,
+  }));
+
+  return [...statischeSeiten, ...leistungsSeiten, ...workshopSeiten, ...referenzSeiten];
 }

@@ -6,6 +6,8 @@
  * @author Manuel Kübler <mail@softwaredesign-solution.de>
  */
 
+import type { LeistungSlug } from "@/types/leistung";
+
 /** Ein einzelnes Bild auf der Projekt-Detailseite, optional einer Kategorie zugeordnet. */
 export interface ReferenzBild {
   src: string;
@@ -28,6 +30,10 @@ export interface ReferenzAbschnitt {
 /** Ein einzelnes Projekt innerhalb einer Kunden-Referenz. */
 export interface ReferenzProjektEintrag {
   slug: string;
+  /** Leistungsseiten, zu denen das Projekt fachlich gehört. */
+  leistungen?: LeistungSlug[];
+  /** Leistungsseiten, auf denen das Projekt als Beispiel gezeigt wird (Teilmenge von `leistungen`). */
+  hervorgehoben?: LeistungSlug[];
   titel: string;
   beschreibung: string;
   /** Optional, falls das einzelne Projekt datiert ist (z. B. Schulungen pro Jahrgang). */

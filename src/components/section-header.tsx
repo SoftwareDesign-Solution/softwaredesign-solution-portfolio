@@ -15,6 +15,8 @@ interface SectionHeaderProps {
   children: ReactNode;
   /** Optionales Element (z.B. Button/Link), das rechtsbündig neben der Überschrift angezeigt wird. */
   action?: ReactNode;
+  /** Optionaler Einleitungssatz direkt unter der Überschrift (z. B. im FAQ-Abschnitt). */
+  description?: ReactNode;
   /** "lg" = Homepage-Sections (Standard), "sm" = Unterabschnitte auf Detailseiten (z.B. WorkshopDetails) */
   size?: "lg" | "sm";
 }
@@ -27,7 +29,7 @@ interface SectionHeaderProps {
  * @param props - Siehe {@link SectionHeaderProps}
  * @returns Den Sektions-Titel
  */
-export default function SectionHeader({ title, children, action, size = "lg" }: SectionHeaderProps) {
+export default function SectionHeader({ title, children, action, description, size = "lg" }: SectionHeaderProps) {
   const isSmall = size === "sm";
 
   return (
@@ -53,6 +55,11 @@ export default function SectionHeader({ title, children, action, size = "lg" }: 
         >
           {children}
         </h2>
+        {description && (
+          <p className={`m-0 text-muted ${isSmall ? "mt-3 text-sm" : "mt-4 text-lg"}`}>
+            {description}
+          </p>
+        )}
       </div>
       {action && <div className="flex gap-2.5">{action}</div>}
     </div>

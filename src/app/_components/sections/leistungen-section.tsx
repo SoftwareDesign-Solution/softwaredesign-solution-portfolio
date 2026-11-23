@@ -5,12 +5,16 @@
  * @author Manuel Kübler <mail@softwaredesign-solution.de>
  */
 
+import Link from "next/link";
+
 import SectionHeader from "../section-header";
 
 /** Ein angebotenes Leistungspaket (Titel + Kurzbeschreibung) in der Leistungen-Sektion. */
 type Service = {
   title: string;
   description: string;
+  /** Pfad der zugehörigen Leistungsseite; ohne Angabe ist die Kachel nicht verlinkt. */
+  href?: string;
 }
 
 // Statische Liste der angebotenen Leistungen; keine DB-/API-Anbindung nötig, da redaktioneller Inhalt
@@ -20,19 +24,24 @@ const SERVICES: Service[] = [
         description: "Ich unterstütze Sie bei der Analyse Ihrer Anforderungen, der Definition von Zielen und der Entwicklung einer maßgeschneiderten Strategie für Ihr Projekt."
     },{
         title: "Software-Entwicklung",
-        description: "Ich entwickle maßgeschneiderte Windows-Anwendungen mit C#, DevExpress, Entity Framework, Java, Spring Boot. Dabei lege ich besonders viel Wert auf eine leichte Bedienung und Übersichtlichkeit."
+        description: "Ich entwickle maßgeschneiderte Windows-Anwendungen mit C#, DevExpress, Entity Framework, Java, Spring Boot. Dabei lege ich besonders viel Wert auf eine leichte Bedienung und Übersichtlichkeit.",
+        href: "/leistungen/dotnet-app-entwicklung",
     },{
         title: "Web-Entwicklung",
-        description: "Ich entwickle maßgeschneiderte Webanwendungen mit Laravel, Symfony, Node.js, MySQL, Vue, React und Angular. Dabei lege ich besonders viel Wert auf eine leichte Bedienung und Übersichtlichkeit."
+        description: "Ich entwickle maßgeschneiderte Webanwendungen mit Laravel, Symfony, Node.js, MySQL, Vue, React und Angular. Dabei lege ich besonders viel Wert auf eine leichte Bedienung und Übersichtlichkeit.",
+        href: "/leistungen/webentwicklung",
     },{
         title: "App-Entwicklung",
-        description: "Ich programmiere maßgeschneiderte mobile Applikationen. Apps sind häufig beliebter als Webseiten, da sie eine zielgruppenorientierte Kundenbindung ermöglichen."
+        description: "Ich programmiere maßgeschneiderte mobile Applikationen. Apps sind häufig beliebter als Webseiten, da sie eine zielgruppenorientierte Kundenbindung ermöglichen.",
+        href: "/leistungen/dotnet-app-entwicklung",
     },{
         title: "SAP Business One",
-        description: "Ihr habt euch für SAP Business One entschieden und sucht einen erfahrenen Berater/Entwickler, der eure Anforderungen umsetzt? Auch da kann ich weiterhelfen"
+        description: "Ihr habt euch für SAP Business One entschieden und sucht einen erfahrenen Berater/Entwickler, der eure Anforderungen umsetzt? Auch da kann ich weiterhelfen",
+        href: "/leistungen/sap-business-one-entwicklung",
     }, {
         title: "Workshops & Schulungen",
-        description: "Ich biete Workshops und Schulungen zu den Themen Softwareentwicklung, Webentwicklung, App-Entwicklung und SAP Business One an. Dabei lege ich besonders viel Wert auf eine praxisnahe Vermittlung von Wissen."
+        description: "Ich biete Workshops und Schulungen zu den Themen Softwareentwicklung, Webentwicklung, App-Entwicklung und SAP Business One an. Dabei lege ich besonders viel Wert auf eine praxisnahe Vermittlung von Wissen.",
+        href: "/leistungen/it-schulungen-inhouse",
     }
 ];
 
@@ -67,6 +76,17 @@ export default function LeistungenSection() {
                             </div>
                             <p className="text-sm text-muted leading-[1.55]">{service.description}</p>
                         </div>
+
+                        {/* Link zur Leistungsseite – stärkt die interne Verlinkung für SEO */}
+                        {service.href && (
+                            <Link
+                                href={service.href}
+                                className="mt-auto inline-flex items-center gap-1.5 text-sm font-semibold text-primary-700 hover:text-primary-600"
+                            >
+                                Mehr zu {service.title}
+                                <span aria-hidden="true">→</span>
+                            </Link>
+                        )}
                     </div>
                 ))}
             </div>

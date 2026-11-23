@@ -5,6 +5,7 @@
  * @author Manuel Kübler
  */
 
+import type { Leistung } from "@/types/leistung";
 import type { TerminStatus } from "@/types/termin";
 import type { Workshop } from "@/types/workshop";
 
@@ -168,6 +169,40 @@ export function buildWorkshopGraph(workshop: Workshop, heute: string = heuteInBe
     return {
         "@context": "https://schema.org",
         "@graph": [breadcrumb, course, ...events],
+    };
+}
+
+/**
+ * Graph für eine Leistungsseite: Breadcrumb und `Service` mit Anbieter und Einsatzgebiet.
+ *
+ * @param leistung - Die Leistung aus `data/leistungen.ts`
+ * @returns Das JSON-LD-Objekt mit `@graph`
+ */
+export function buildLeistungGraph(leistung: Leistung): Record<string, unknown> {
+    const url = `${SITE_URL}/leistungen/${leistung.slug}`;
+
+    return {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "BreadcrumbList",
+                itemListElement: [
+                    { "@type": "ListItem", item: SITE_URL, name: "Start", position: 1 },
+                    { "@type": "ListItem", item: `${SITE_URL}/#leistungen`, name: "Leistungen", position: 2 },
+                    { "@type": "ListItem", item: url, name: leistung.titel, position: 3 },
+                ],
+            },
+            {
+                "@id": `${url}#service`,
+                "@type": "Service",
+                areaServed: ["DE", "AT", "CH"],
+                description: leistung.metaBeschreibung,
+                name: leistung.titel,
+                provider: { "@id": ORGANIZATION_ID, "@type": "Organization", name: SITE_NAME, url: SITE_URL },
+                serviceType: leistung.serviceTyp,
+                url,
+            },
+        ],
     };
 }
 

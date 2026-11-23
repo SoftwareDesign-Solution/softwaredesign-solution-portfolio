@@ -10,6 +10,7 @@
  * analog zu den Workshop-Services.
  */
 
+import type { LeistungSlug } from "@/types/leistung";
 import type { ReferenzKunde, ReferenzProjektEintrag } from "@/types/referenz";
 
 /** Alle Kunden-Referenzen, redaktionell gepflegt und in der eingetragenen Reihenfolge angezeigt. */
@@ -23,6 +24,8 @@ export const REFERENZEN: ReferenzKunde[] = [
     projekte: [
       {
         slug: "dto-klassengenerator",
+        leistungen: ["sap-business-one-entwicklung", "dotnet-app-entwicklung"],
+        hervorgehoben: ["dotnet-app-entwicklung"],
         titel: "DTO-Klassengenerator",
         beschreibung:
           "Automatische Generierung von Klassen, Funktionen und Methoden für .NET-Core-Projekte auf Basis der SAP Business One Service-Layer-Metadaten.",
@@ -31,6 +34,8 @@ export const REFERENZEN: ReferenzKunde[] = [
       },
       {
         slug: "e-rechnungs-import-addon",
+        leistungen: ["sap-business-one-entwicklung"],
+        hervorgehoben: ["sap-business-one-entwicklung"],
         titel: "E-Rechnungs-Import Add-On",
         beschreibung:
           "SAP Business One Add-On / coresuite-Modul zum automatisierten Import von ZUGFeRD-E-Rechnungen, mit konfigurierbarem Mapping über vier Typen (DIRECT, SQL, FIXED, EXPR) — als lizenziertes Produkt erhältlich.",
@@ -38,6 +43,8 @@ export const REFERENZEN: ReferenzKunde[] = [
       },
       {
         slug: "portfolio-workshop-plattform",
+        leistungen: ["webentwicklung"],
+        hervorgehoben: ["webentwicklung"],
         details: true,
         titel: "Online-Portfolio & Workshop-Plattform",
         beschreibung:
@@ -106,6 +113,7 @@ export const REFERENZEN: ReferenzKunde[] = [
       },
       {
         slug: "admin-dashboard",
+        leistungen: ["webentwicklung"],
         titel: "Admin-Dashboard",
         beschreibung:
           "Separate Next.js-Anwendung zur Verwaltung von Workshops, Terminen und Angebotsanfragen, betrieben in einem eigenen Docker-Container.",
@@ -122,6 +130,8 @@ export const REFERENZEN: ReferenzKunde[] = [
       },
       {
         slug: "travel-planner",
+        leistungen: ["it-schulungen-inhouse"],
+        hervorgehoben: ["it-schulungen-inhouse"],
         details: true,
         titel: "Travel-Planner (Schulungsprojekt)",
         beschreibung:
@@ -156,18 +166,22 @@ export const REFERENZEN: ReferenzKunde[] = [
     projekte: [
       {
         slug: "service-layer-michelsen",
+        leistungen: ["sap-business-one-entwicklung"],
         titel: "SAP Business One Service Layer",
         beschreibung: "Installation & Konfiguration inkl. Table-/Column-Allowlist und Permissions.",
         stack: ["SAP Business One", "Service Layer", "coresuite", "C#", "SQL"],
       },
       {
         slug: "edi-schnittstelle",
+        leistungen: ["sap-business-one-entwicklung"],
+        hervorgehoben: ["sap-business-one-entwicklung"],
         titel: "EDI-Schnittstelle",
         beschreibung: "Import/Export von ORDERS, DESADV, INVOIC und IFTMIN aus SAP Business One.",
         stack: ["SAP Business One", "Service Layer", "coresuite", "C#", "SQL", "EDI"],
       },
       {
         slug: "datev-export",
+        leistungen: ["sap-business-one-entwicklung", "dotnet-app-entwicklung"],
         titel: "DATEV-Export-Tool",
         beschreibung:
           "Windows-Anwendung zur automatisierten Aufbereitung und Übertragung von DATEV-relevanten Buchungen.",
@@ -175,6 +189,8 @@ export const REFERENZEN: ReferenzKunde[] = [
       },
       {
         slug: "sepa-generator",
+        leistungen: ["sap-business-one-entwicklung", "dotnet-app-entwicklung"],
+        hervorgehoben: ["dotnet-app-entwicklung"],
         titel: "SEPA-Generator",
         beschreibung:
           "Windows-Anwendung zur automatisierten Erstellung von SEPA-Zahlungsdateien mit direkter Bank-Übertragung.",
@@ -182,12 +198,16 @@ export const REFERENZEN: ReferenzKunde[] = [
       },
       {
         slug: "mde-logistik-app",
+        leistungen: ["sap-business-one-entwicklung", "dotnet-app-entwicklung"],
+        hervorgehoben: ["sap-business-one-entwicklung", "dotnet-app-entwicklung"],
         titel: "MDE Logistik-App",
         beschreibung: "Android-App (Xamarin & MAUI) für Kommissionierung, Wareneingang und Umlagerung.",
         stack: ["SAP Business One", "Service Layer", "coresuite", "C#", "SQL", "Xamarin", "MAUI"],
       },
       {
         slug: "provisionsabrechnung",
+        leistungen: ["sap-business-one-entwicklung", "dotnet-app-entwicklung"],
+        hervorgehoben: ["dotnet-app-entwicklung"],
         titel: "Provisionsabrechnung",
         beschreibung:
           "Windows-Dienst zur automatischen Berechnung, Auswertung und Rechnungsstellung von Provisionen.",
@@ -195,6 +215,7 @@ export const REFERENZEN: ReferenzKunde[] = [
       },
       {
         slug: "auswertungen-michelsen",
+        leistungen: ["sap-business-one-entwicklung"],
         titel: "Auswertungen",
         beschreibung:
           "SQL-basierte Auswertungen und Reports in SAP Business One mit coresuite Designer, SharpShooter Reports und Crystal Reports.",
@@ -210,6 +231,7 @@ export const REFERENZEN: ReferenzKunde[] = [
       },
       {
         slug: "layout-anpassungen-michelsen",
+        leistungen: ["sap-business-one-entwicklung"],
         titel: "Layout-Anpassungen",
         beschreibung:
           "Anpassung und Erstellung von Verkaufs- und Einkaufsbelegen (coresuite Country Package, Crystal Reports).",
@@ -217,12 +239,14 @@ export const REFERENZEN: ReferenzKunde[] = [
       },
       {
         slug: "shopware-anbindung",
+        leistungen: ["sap-business-one-entwicklung"],
         titel: "Shopware-Anbindung",
         beschreibung: "Automatisierte Übertragung von Bestellungen, Artikeln und Kunden.",
         stack: ["SAP Business One", "Service Layer", "coresuite", "C#", "SQL", "Shopware"],
       },
       {
         slug: "lvs-anbindung",
+        leistungen: ["sap-business-one-entwicklung"],
         titel: "LVS-Anbindung",
         beschreibung: "Automatischer Abgleich von Lagerbeständen zwischen SAP Business One und Spediteur.",
         stack: ["SAP Business One", "Service Layer", "coresuite", "C#", "SQL"],
@@ -238,18 +262,21 @@ export const REFERENZEN: ReferenzKunde[] = [
     projekte: [
       {
         slug: "e-rechnung-wkn",
+        leistungen: ["sap-business-one-entwicklung"],
         titel: "E-Rechnung (ZUGFeRD)",
         beschreibung: "Erstellung & Konfiguration von E-Rechnungen mit coresuite Designer.",
         stack: ["SAP Business One", "coresuite", "C#", "SQL"],
       },
       {
         slug: "abrechnungsassistent",
+        leistungen: ["sap-business-one-entwicklung"],
         titel: "Abrechnungsassistent",
         beschreibung: "coresuite-Customize-Regel zur assistierten Abrechnung in SAP Business One.",
         stack: ["SAP Business One", "coresuite", "C#", "SQL"],
       },
       {
         slug: "it-man-geraeteanlage",
+        leistungen: ["sap-business-one-entwicklung"],
         titel: "IT-Man-Geräteanlage",
         beschreibung:
           "Automatisierte Übernahme seriennummergeführter Geräte aus Lieferscheinen in eine externe IT-Management-Datenbank.",
@@ -257,6 +284,7 @@ export const REFERENZEN: ReferenzKunde[] = [
       },
       {
         slug: "importvorlage-eingangsrechnungen",
+        leistungen: ["sap-business-one-entwicklung"],
         titel: "Importvorlage Eingangsrechnungen",
         beschreibung:
           "CSV-basierter Import von Eingangsrechnungen mit konfigurierbaren Vorlagen je Lieferant.",
@@ -273,6 +301,7 @@ export const REFERENZEN: ReferenzKunde[] = [
     projekte: [
       {
         slug: "service-layer-galke",
+        leistungen: ["sap-business-one-entwicklung"],
         titel: "Service Layer & Berechtigungskonzept",
         beschreibung:
           "Installation, Konfiguration und rollenbasiertes Berechtigungskonzept in SAP Business One.",
@@ -280,6 +309,8 @@ export const REFERENZEN: ReferenzKunde[] = [
       },
       {
         slug: "belegpruefung",
+        leistungen: ["sap-business-one-entwicklung"],
+        hervorgehoben: ["sap-business-one-entwicklung"],
         titel: "Belegprüfung",
         beschreibung:
           "coresuite-Customize-Regel zur automatisierten Prüfung von Belegen anhand eines SQL-basierten Regelkatalogs (CTEs).",
@@ -287,12 +318,15 @@ export const REFERENZEN: ReferenzKunde[] = [
       },
       {
         slug: "chargenrueckverfolgung",
+        leistungen: ["sap-business-one-entwicklung"],
         titel: "Chargenrückverfolgung",
         beschreibung: "Mehrstufige SQL-Abfrage zur Rückverfolgung aller Bewegungen einer Charge.",
         stack: ["SAP Business One", "coresuite", "C#", "SQL"],
       },
       {
         slug: "lagerverwaltung-umlagerung",
+        leistungen: ["sap-business-one-entwicklung", "webentwicklung"],
+        hervorgehoben: ["sap-business-one-entwicklung"],
         titel: "Lagerverwaltung (Umlagerung)",
         beschreibung:
           "Webanwendung mit Vue 3, Quasar und TypeScript zur Umlagerung chargengeführter Artikel mit Echtzeit-Anbindung an den Service Layer.",
@@ -309,6 +343,8 @@ export const REFERENZEN: ReferenzKunde[] = [
     projekte: [
       {
         slug: "postgresql-kurs",
+        leistungen: ["it-schulungen-inhouse"],
+        hervorgehoben: ["it-schulungen-inhouse"],
         titel: "PostgreSQL Grundlagen & Fortgeschrittene",
         jahr: "2025/2026",
         beschreibung: "Kursentwicklung und -durchführung inkl. Schulungsunterlagen und Aufgaben.",
@@ -316,6 +352,8 @@ export const REFERENZEN: ReferenzKunde[] = [
       },
       {
         slug: "react-fortgeschrittene",
+        leistungen: ["it-schulungen-inhouse"],
+        hervorgehoben: ["it-schulungen-inhouse"],
         titel: "React für Fortgeschrittene",
         jahr: "2024/2025",
         beschreibung: "Vertiefende Schulung zu fortgeschrittenen React-Patterns.",
@@ -323,6 +361,8 @@ export const REFERENZEN: ReferenzKunde[] = [
       },
       {
         slug: "laravel-kompaktkurs",
+        leistungen: ["it-schulungen-inhouse"],
+        hervorgehoben: ["it-schulungen-inhouse"],
         titel: "Laravel Kompaktkurs",
         jahr: "2025",
         beschreibung: "Kompaktkurs inkl. Beispielprojekt TaskFlow.",
@@ -330,6 +370,7 @@ export const REFERENZEN: ReferenzKunde[] = [
       },
       {
         slug: "aspnet-einfuehrung",
+        leistungen: ["it-schulungen-inhouse"],
         titel: "ASP.NET Einführung",
         jahr: "2025",
         beschreibung: "Einführungskurs in das ASP.NET-Core-Ökosystem.",
@@ -337,6 +378,7 @@ export const REFERENZEN: ReferenzKunde[] = [
       },
       {
         slug: "vuejs-grundkurs",
+        leistungen: ["it-schulungen-inhouse"],
         titel: "Vue.js Grundkurs",
         jahr: "2023/2024",
         beschreibung: "Grundlagenkurs für Vue.js.",
@@ -344,6 +386,7 @@ export const REFERENZEN: ReferenzKunde[] = [
       },
       {
         slug: "nx-kompaktkurs",
+        leistungen: ["it-schulungen-inhouse"],
         titel: "Nx Kompaktkurs",
         jahr: "2025",
         beschreibung: "Kompaktkurs zu Monorepo-Verwaltung mit Nx.",
@@ -351,6 +394,7 @@ export const REFERENZEN: ReferenzKunde[] = [
       },
       {
         slug: "git-grundlagenkurs",
+        leistungen: ["it-schulungen-inhouse"],
         titel: "Git Grundlagenkurs",
         jahr: "2025",
         beschreibung: "Grundlagenkurs zu Versionskontrolle und CI/CD.",
@@ -358,6 +402,7 @@ export const REFERENZEN: ReferenzKunde[] = [
       },
       {
         slug: "react-grundlagen",
+        leistungen: ["it-schulungen-inhouse"],
         titel: "React Grundlagen",
         jahr: "2022",
         beschreibung: "Grundlagenkurs für React.",
@@ -374,6 +419,8 @@ export const REFERENZEN: ReferenzKunde[] = [
     projekte: [
       {
         slug: "kalkulationsmodul",
+        leistungen: ["sap-business-one-entwicklung", "dotnet-app-entwicklung"],
+        hervorgehoben: ["dotnet-app-entwicklung"],
         titel: "Kalkulationsmodul",
         beschreibung:
           "Windows-Anwendung mit Service-Layer-Anbindung zur Kalkulation kundenspezifischer Anfragen (Stücklisten, Angebote).",
@@ -381,12 +428,14 @@ export const REFERENZEN: ReferenzKunde[] = [
       },
       {
         slug: "produktionsmodul",
+        leistungen: ["sap-business-one-entwicklung"],
         titel: "Mehrstufiges Produktionsmodul",
         beschreibung: "coresuite-Customize-Regel zur Erstellung mehrerer Produktionsaufträge.",
         stack: ["SAP Business One", "coresuite", "C#", "SQL"],
       },
       {
         slug: "produktionsetiketten",
+        leistungen: ["sap-business-one-entwicklung"],
         titel: "Produktionsetiketten",
         beschreibung: "Layout-Entwicklung für Produktionsetiketten in SAP Business One.",
         stack: ["SAP Business One", "coresuite", "Sharpshooter Reports", "C#", "SQL"],
@@ -402,6 +451,7 @@ export const REFERENZEN: ReferenzKunde[] = [
     projekte: [
       {
         slug: "customizing-schnittstellen",
+        leistungen: ["sap-business-one-entwicklung"],
         titel: "Customizing & Schnittstellen",
         beschreibung:
           "Service-Layer-Setup, Customizing von SAP Business One & beas Manufacturing sowie Import-/Export-Schnittstellen für Produktions- und Lagerdaten.",
@@ -418,6 +468,8 @@ export const REFERENZEN: ReferenzKunde[] = [
     projekte: [
       {
         slug: "lagersoftware",
+        leistungen: ["webentwicklung"],
+        hervorgehoben: ["webentwicklung"],
         titel: "Lagersoftware",
         beschreibung:
           "Portierung einer Excel-Mappe zu einer Webanwendung für Einlagerung, Auslagerung und Inventur",
@@ -434,6 +486,8 @@ export const REFERENZEN: ReferenzKunde[] = [
     projekte: [
       {
         slug: "monheim-pass",
+        leistungen: ["webentwicklung"],
+        hervorgehoben: ["webentwicklung"],
         titel: "Administrationsoberfläche Monheim Pass",
         beschreibung: "Backend mit Spring Boot, Frontend mit Vue.js, Vuetify, Jest, Cypress & Storybook.",
         stack: ["Spring Boot", "Vue.js", "Vuetify", "Jest", "Cypress", "Storybook", "TypeScript"],
@@ -449,12 +503,15 @@ export const REFERENZEN: ReferenzKunde[] = [
     projekte: [
       {
         slug: "dispo-online",
+        leistungen: ["webentwicklung"],
+        hervorgehoben: ["webentwicklung"],
         titel: "Dispo Online",
         beschreibung: "Online-Plattform (Laravel, Angular, NgRx) zur Buchung von Fahrgastzählungsaufträgen.",
         stack: ["Laravel", "Angular", "NgRx", "Bootstrap", "Laravel Sanctum"],
       },
       {
         slug: "desktop-anwendung-trendline",
+        leistungen: ["dotnet-app-entwicklung"],
         titel: "Desktop-Anwendung",
         beschreibung:
           "Auftragsbearbeitung und Datenaufbereitung für das Portal (C#, Entity Framework, DevExpress).",
@@ -471,6 +528,8 @@ export const REFERENZEN: ReferenzKunde[] = [
     projekte: [
       {
         slug: "birdvision-kundencenter",
+        leistungen: ["webentwicklung"],
+        hervorgehoben: ["webentwicklung"],
         titel: "BirdVision Kundencenter",
         beschreibung:
           "Kundenportal zur Überwachung vogelschutzrelevanter Windkraftanlagen: Windpark- und Anlagenübersicht, Anzeige der von einem externen Fleximaus-System gelieferten Sensordaten, Kamera-Livemonitor mit Bild- und Videoansicht, manuelle Nachbearbeitung erkannter Vogelarten inkl. Notizen sowie Auswertungen und Datenexport (Laravel, Vue.js).",
@@ -487,6 +546,7 @@ export const REFERENZEN: ReferenzKunde[] = [
     projekte: [
       {
         slug: "buchungsplattform-probereaeume",
+        leistungen: ["webentwicklung"],
         titel: "Buchungsplattform für Proberäume",
         beschreibung: "Webanwendung zur Buchung von Proberäumen.",
         stack: ["Laravel", "Vue.js", "TypeScript", "Bootstrap", "Laravel Sanctum"],
@@ -494,42 +554,49 @@ export const REFERENZEN: ReferenzKunde[] = [
       },
       {
         slug: "verwaltungssoftware",
+        leistungen: ["webentwicklung"],
         titel: "Verwaltungssoftware",
         beschreibung: "Individuelle Verwaltungssoftware für interne Geschäftsprozesse.",
         stack: ["Laravel", "Angular", "NgRx", "TailwindCSS", "Laravel Sanctum"],
       },
       {
         slug: "intranet-anwendung",
+        leistungen: ["webentwicklung"],
         titel: "Intranet-Anwendung",
         beschreibung: "Internes Portal zur unternehmensweiten Kommunikation und Informationsbereitstellung.",
         stack: ["Node.js", "React", "Next.js"],
       },
       {
         slug: "payment-package",
+        leistungen: ["webentwicklung"],
         titel: "Payment-Package (TIVITA GmbH, Mannheim)",
         beschreibung: "PayPal- & Payrexx-Integration für Laravel.",
         stack: ["Laravel", "PayPal", "Payrexx"],
       },
       {
         slug: "auftragsverwaltung-ella",
+        leistungen: ["webentwicklung"],
         titel: "Auftragsverwaltung (ella-Verlag, Düsseldorf)",
         beschreibung: "Laravel mit sevDesk-Anbindung.",
         stack: ["Laravel", "sevDesk"],
       },
       {
         slug: "warenwirtschaft-ballon-mueller",
+        leistungen: ["webentwicklung"],
         titel: "Warenwirtschaftssystem (Ballon-Müller Diffusion GmbH, Herznach CH)",
         beschreibung: "Laravel-basiertes Warenwirtschaftssystem.",
         stack: ["Laravel"],
       },
       {
         slug: "anfrageportal-dnds",
+        leistungen: ["webentwicklung"],
         titel: "Anfrageportal (DNDS GmbH, Bergheim)",
         beschreibung: "Bearbeitung von Reiseanfragen mit Laravel & WordPress.",
         stack: ["Laravel", "WordPress"],
       },
       {
         slug: "partnerportal-urbanoffers",
+        leistungen: ["webentwicklung"],
         titel: "Partner-Portal (UrbanOffers, Wien)",
         beschreibung: "Portal zur Verwaltung und Präsentation von Partnerangeboten.",
         stack: ["Laravel", "WordPress"],
@@ -604,4 +671,27 @@ export function findBenachbarteDetailProjekte(projektId: string): {
     vorheriges: vorheriges && { slug: vorheriges.slug, titel: vorheriges.titel },
     naechstes: naechstes && { slug: naechstes.slug, titel: naechstes.titel },
   };
+}
+
+/**
+ * Referenz-Projekte für eine Leistungsseite, in der Reihenfolge von {@link REFERENZEN}.
+ * Gezeigt werden die für diese Leistung hervorgehobenen Projekte; gibt es keine,
+ * die ersten {@link maxAnzahl} zugeordneten Projekte.
+ *
+ * @param leistung - Slug der Leistungsseite
+ * @param maxAnzahl - Höchstzahl der Projekte (Default 6)
+ * @returns Kunde und Projekt je Treffer
+ */
+export function findReferenzenFuerLeistung(
+  leistung: LeistungSlug,
+  maxAnzahl = 6,
+): { kunde: ReferenzKunde; projekt: ReferenzProjektEintrag }[] {
+  const zugeordnet = REFERENZEN.flatMap((kunde) =>
+    kunde.projekte
+      .filter((projekt) => projekt.leistungen?.includes(leistung))
+      .map((projekt) => ({ kunde, projekt })),
+  );
+  const hervorgehoben = zugeordnet.filter(({ projekt }) => projekt.hervorgehoben?.includes(leistung));
+
+  return (hervorgehoben.length > 0 ? hervorgehoben : zugeordnet).slice(0, maxAnzahl);
 }
