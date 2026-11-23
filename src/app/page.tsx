@@ -8,7 +8,9 @@
 
 import type { Metadata } from "next";
 
+import JsonLd from "@/components/json-ld";
 import { baseOpenGraph, DEFAULT_DESCRIPTION, DEFAULT_TITLE } from "@/lib/site";
+import { buildSiteGraph } from "@/lib/structured-data";
 
 import HeroSection from "./_components/sections/hero-section";
 import KontaktSection from "./_components/sections/kontakt-section";
@@ -33,6 +35,9 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <article>
+
+      {/* Strukturierte Daten: Person, Organisation und Website */}
+      <JsonLd data={buildSiteGraph()} />
 
       <HeroSection />
 

@@ -11,7 +11,9 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { getWorkshop } from "@/app/actions/get-workshop";
+import JsonLd from "@/components/json-ld";
 import { baseOpenGraph, SITE_NAME } from "@/lib/site";
+import { buildWorkshopGraph } from "@/lib/structured-data";
 
 import WorkshopDetails from "./_components/workshop-details";
 import WorkshopHeader from "./_components/workshop-header";
@@ -82,7 +84,10 @@ export default async function WorkshopDetailsPage({ params }: WorkshopDetailsPag
     {
         return (
             <article>
-                
+
+                {/* Strukturierte Daten: Breadcrumb, Kurs und Online-Termine als Events */}
+                <JsonLd data={buildWorkshopGraph(workshop)} />
+
                 {/* Workshop Header */}
                 <WorkshopHeader {...workshop} />
 
